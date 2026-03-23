@@ -1,0 +1,4 @@
+schemaVersion: 1
+dependencies:
+  - source: "github.com/this-org-should-not-exist/this-repo-should-not-exist"
+    path: "references/nonexistent"

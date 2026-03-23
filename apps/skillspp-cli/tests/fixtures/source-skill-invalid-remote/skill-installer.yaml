@@ -1,0 +1,4 @@
+schemaVersion: 1
+dependencies:
+  - source: "https://raw.githubusercontent.com/external/external-skills/main/NOT_FOUND.md"
+    path: "references/remote.md"

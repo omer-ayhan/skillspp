@@ -1,0 +1,4 @@
+interface:
+  display_name: "Installer Invalid Repo Fixture"
+  short_description: "Installer invalid repo fixture"
+  default_prompt: "Run invalid repo fixture"

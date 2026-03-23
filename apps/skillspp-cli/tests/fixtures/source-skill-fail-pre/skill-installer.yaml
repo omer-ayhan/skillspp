@@ -1,0 +1,6 @@
+schemaVersion: 1
+pre-install:
+  - mkdir -p references
+  - printf "before-failure\n" > references/hook-order.log
+  - "false"
+  - printf "should-not-run\n" >> references/hook-order.log

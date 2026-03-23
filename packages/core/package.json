@@ -1,0 +1,95 @@
+{
+  "name": "@skillspp/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./lockfile": {
+      "types": "./dist/runtime/lockfile.d.ts",
+      "default": "./dist/runtime/lockfile.js"
+    },
+    "./telemetry": {
+      "types": "./dist/runtime/telemetry.d.ts",
+      "default": "./dist/runtime/telemetry.js"
+    },
+    "./policy": {
+      "types": "./dist/runtime/policy.d.ts",
+      "default": "./dist/runtime/policy.js"
+    },
+    "./agents": {
+      "types": "./dist/runtime/agents.d.ts",
+      "default": "./dist/runtime/agents.js"
+    },
+    "./source-parser": {
+      "types": "./dist/sources/source-parser.d.ts",
+      "default": "./dist/sources/source-parser.js"
+    },
+    "./source-resolution": {
+      "types": "./dist/sources/source-resolution.d.ts",
+      "default": "./dist/sources/source-resolution.js"
+    },
+    "./skills": {
+      "types": "./dist/sources/skills.d.ts",
+      "default": "./dist/sources/skills.js"
+    },
+    "./commands": {
+      "types": "./dist/contracts/commands.d.ts",
+      "default": "./dist/contracts/commands.js"
+    },
+    "./results": {
+      "types": "./dist/contracts/results.d.ts",
+      "default": "./dist/contracts/results.js"
+    },
+    "./errors": {
+      "types": "./dist/contracts/errors/core-error.d.ts",
+      "default": "./dist/contracts/errors/core-error.js"
+    },
+    "./events": {
+      "types": "./dist/contracts/events/lifecycle-event.d.ts",
+      "default": "./dist/contracts/events/lifecycle-event.js"
+    },
+    "./contracts/*": {
+      "types": "./dist/contracts/*.d.ts",
+      "default": "./dist/contracts/*.js"
+    },
+    "./sources/*": {
+      "types": "./dist/sources/*.d.ts",
+      "default": "./dist/sources/*.js"
+    },
+    "./runtime/*": {
+      "types": "./dist/runtime/*.d.ts",
+      "default": "./dist/runtime/*.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test:unit": "vitest run --config vitest.config.ts -t '@unit'",
+    "test:integration": "vitest run --config vitest.config.ts -t '@integration'",
+    "test:contract": "vitest run --config vitest.config.ts -t '@contract'",
+    "test:e2e": "vitest run --config vitest.config.ts -t '@e2e'",
+    "test:ci": "vitest run --config vitest.config.ts --coverage",
+    "test": "corepack pnpm run test:ci",
+    "lint": "eslint src tests --max-warnings 0"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "yaml": "^2.8.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^3.2.4",
+    "esbuild": "^0.25.10",
+    "pnpm": "10.18.3",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

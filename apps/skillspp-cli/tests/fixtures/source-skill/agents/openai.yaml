@@ -1,0 +1,4 @@
+interface:
+  display_name: "Installer Test Skill"
+  short_description: "Installer integration fixture"
+  default_prompt: "Run installer fixture"

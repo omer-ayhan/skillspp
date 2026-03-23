@@ -1,0 +1,10 @@
+schemaVersion: 1
+dependencies:
+  - "tests/fixtures/source-assets/local-dependency.md"
+  - source: "https://raw.githubusercontent.com/vercel-labs/skills/main/README.md"
+    path: "references/remote-dependency.md"
+pre-install:
+  - mkdir -p references
+  - printf "pre\n" > references/hook-order.log
+post-install:
+  - printf "post\n" >> references/hook-order.log

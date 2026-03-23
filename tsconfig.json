@@ -1,0 +1,10 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/core" },
+    { "path": "packages/platform-node" },
+    { "path": "packages/test-kit" },
+    { "path": "apps/skillspp-cli" },
+    { "path": "apps/skillspp-mcp" }
+  ]
+}

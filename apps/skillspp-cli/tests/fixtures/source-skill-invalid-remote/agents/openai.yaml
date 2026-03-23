@@ -1,0 +1,4 @@
+interface:
+  display_name: "Installer Invalid Remote Skill"
+  short_description: "Installer invalid remote fixture"
+  default_prompt: "Run invalid remote fixture"

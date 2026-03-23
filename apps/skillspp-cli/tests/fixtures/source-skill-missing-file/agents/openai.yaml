@@ -1,0 +1,4 @@
+interface:
+  display_name: "Installer Missing File Skill"
+  short_description: "Installer missing file fixture"
+  default_prompt: "Run missing file fixture"
