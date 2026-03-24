@@ -3,9 +3,21 @@
 <p align="center">A Skills CLI you always wanted</p>
 
 <p align="center">
-  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.9-blue?style=flat-square" />
-  <img alt="pnpm" src="https://img.shields.io/badge/pnpm-10.18.3-orange?style=flat-square" />
-  <img alt="Turbo" src="https://img.shields.io/badge/Turbo-monorepo-black?style=flat-square" />
+  <a href="https://npmjs.org/package/skillspp">
+    <img alt="NPM version" src="https://img.shields.io/npm/v/skillspp.svg?style=flat-square" />
+  </a>
+  <a href="https://github.com/omer-ayhan/skillspp/blob/main/LICENSE">
+    <img alt="License" src="https://img.shields.io/npm/l/skillspp.svg?style=flat-square" />
+  </a>
+  <a href="https://www.npmjs.com/package/skillspp">
+    <img alt="Node Version" src="https://img.shields.io/node/v/skillspp.svg" />
+  </a>
+  <a href="https://www.npmjs.com/package/skillspp">
+    <img alt="NPM version" src="https://img.shields.io/npm/v/skillspp.svg" />
+  </a>
+  <a href="https://bun.sh">
+    <img alt="Bun compatible" src="https://img.shields.io/badge/bun-%3E%3D1.0.0-black?logo=bun" />
+  </a>
 </p>
 
 ---
