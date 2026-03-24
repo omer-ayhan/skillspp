@@ -12,10 +12,11 @@ packages/*/dist
 packages/*/src/**/*.js
 packages/*/src/**/*.d.ts
 
-# GitHub Actions
+# GitHub metadata
 !.github/
 !.github/workflows/
 !.github/workflows/ci.yml
+!.github/**
 
 # Agents
 .agent
@@ -29,7 +30,6 @@ packages/*/src/**/*.d.ts
 .codex
 .cursor
 .gemini
-.github
 .goose
 .junie
 .kiro
