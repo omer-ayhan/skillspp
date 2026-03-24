@@ -1,6 +1,6 @@
 <h1 align="center">Skills++</h1>
 
-<p align="center">A Skills CLI you always wanted</p>
+<p align="center">A package-manager-style CLI for managing AI agent skill files — add external Markdown dependencies, run pre/post-install hooks, and install skills globally or per-project through an easy TUI.</p>
 
 <p align="center">
   <a href="https://npmjs.org/package/skillspp">
@@ -19,6 +19,19 @@
     <img alt="Bun compatible" src="https://img.shields.io/badge/bun-%3E%3D1.0.0-black?logo=bun" />
   </a>
 </p>
+
+---
+
+### What is Skills++?
+
+Most skills CLI tools are either too basic or missing key fundamentals. Skills++ is a CLI that works like a package manager — but for AI agent skill files. Instead of cramming everything into a single skills folder, you declare external Markdown files as dependencies and let Skills++ handle the rest.
+
+With Skills++ you can:
+
+- **Declare external Markdown files as dependencies** — add remote or local `.md` skill files to your `skillspp` config and the CLI fetches and installs them for you.
+- **Run hooks before and after installation** — execute setup or cleanup commands at any point in the install lifecycle.
+- **Use an intuitive TUI** — navigate, select, and manage your skills without memorising every flag.
+- **Install skills globally or per-project** — choose the right scope for every skill, just like any modern package manager.
 
 ---
 
@@ -155,6 +168,10 @@ corepack pnpm run test:unit
 ```
 
 ### FAQ
+
+#### What is Skills++ for?
+
+Skills++ is a package-manager-style CLI for AI agent skill files. It lets you declare external Markdown files as dependencies, run pre/post-install hooks, and manage your skills with an interactive TUI — either globally or scoped to a single project.
 
 #### Is this a single package or a monorepo?
 
