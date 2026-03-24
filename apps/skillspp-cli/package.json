@@ -1,15 +1,27 @@
 {
-  "name": "@skillspp/skillspp-cli",
-  "private": true,
+  "name": "skillspp",
+  "private": false,
   "version": "0.1.0",
+  "description": "Skills++ CLI for skill source validation and management workflows.",
+  "license": "MIT",
   "type": "module",
+  "bin": {
+    "skillspp": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "skillspp": "tsx src/cli.ts",
-    "build": "tsc -p tsconfig.json",
+    "build": "node ./scripts/build.mjs",
+    "clean": "rm -rf dist .pack",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "changeset": "changeset",
-    "version-packages": "changeset version",
-    "release": "changeset publish",
+    "prepack": "corepack pnpm run build",
+    "pack:smoke": "rm -rf .pack && mkdir -p .pack && npm pack --pack-destination .pack >/dev/null && TMP_DIR=$(mktemp -d) && npm install --prefix \"$TMP_DIR\" --no-audit --no-fund ./.pack/skillspp-*.tgz >/dev/null && \"$TMP_DIR/node_modules/.bin/skillspp\" --help >/dev/null && \"$TMP_DIR/node_modules/.bin/skillspp\" --version && rm -rf \"$TMP_DIR\" .pack",
     "test:unit": "vitest run --config vitest.config.ts -t '@unit'",
     "test:integration": "vitest run --config vitest.config.ts -t '@integration'",
     "test:contract": "vitest run --config vitest.config.ts -t '@contract'",
@@ -19,8 +31,6 @@
     "lint": "eslint src tests --max-warnings 0"
   },
   "dependencies": {
-    "@skillspp/core": "workspace:*",
-    "@skillspp/platform-node": "workspace:*",
     "commander": "^14.0.3",
     "gray-matter": "^4.0.3",
     "ink": "^6.8.0",
@@ -30,11 +40,14 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.29.7",
+    "@skillspp/core": "workspace:*",
+    "@skillspp/platform-node": "workspace:*",
     "@types/node": "^25.4.0",
     "@types/react": "^19.1.13",
     "@vitest/coverage-v8": "^3.2.4",
+    "esbuild": "^0.25.10",
     "pnpm": "10.18.3",
+    "react-devtools-core": "^7.0.1",
     "tsx": "^4.20.6",
     "typescript": "^5.9.2",
     "vite-tsconfig-paths": "^5.1.4",

@@ -1,4 +1,5 @@
 import { Command, CommanderError } from "commander";
+import { createRequire } from "node:module";
 import { registerAddCommand } from "./commands/add";
 import { registerCheckCommand } from "./commands/check";
 import { registerFindCommand } from "./commands/find";
@@ -16,6 +17,11 @@ import {
 import { createCliTelemetryEmitter, parseTelemetrySink } from "./telemetry";
 import picocolors from "picocolors";
 import { finalizeUiSession } from "./ui/screens";
+
+const require = createRequire(import.meta.url);
+const packageJson = require("../package.json") as { version?: unknown };
+const CLI_VERSION =
+  typeof packageJson.version === "string" ? packageJson.version : "0.1.0";
 
 function formatCliError(error: unknown): string {
   if (error && typeof error === "object" && "code" in error) {
@@ -37,7 +43,7 @@ function createProgram(
     .description("Skills++ CLI")
     .option("--telemetry <sink>", "Emit lifecycle events (stdout-json)")
     .option("--experimental", "Enable experimental features")
-    .version("0.1.0", "-v, --version")
+    .version(CLI_VERSION, "-v, --version")
     .helpOption("-h, --help", "Show help");
 
   const context = createCliCommandContext(emitter, { experimental });
@@ -124,7 +130,8 @@ export async function runCli(argv: string[]): Promise<number> {
   } catch (error) {
     if (
       error instanceof CommanderError &&
-      error.code === "commander.helpDisplayed"
+      (error.code === "commander.helpDisplayed" ||
+        error.code === "commander.version")
     ) {
       return 0;
     }

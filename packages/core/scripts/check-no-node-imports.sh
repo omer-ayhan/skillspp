@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if rg -n "from ['\"].*apps/|from ['\"]@skillspp/skillspp-cli|from ['\"]@skillspp/skillspp-mcp" src >/dev/null; then
+if rg -n "from ['\"].*apps/|from ['\"]@skillspp/skillspp-cli|from ['\"]skillspp['\"]|from ['\"]@skillspp/skillspp-mcp" src >/dev/null; then
   echo "Core package must not import app-layer modules." >&2
-  rg -n "from ['\"].*apps/|from ['\"]@skillspp/skillspp-cli|from ['\"]@skillspp/skillspp-mcp" src >&2
+  rg -n "from ['\"].*apps/|from ['\"]@skillspp/skillspp-cli|from ['\"]skillspp['\"]|from ['\"]@skillspp/skillspp-mcp" src >&2
   exit 1
 fi
 

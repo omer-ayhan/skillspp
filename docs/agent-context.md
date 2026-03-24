@@ -50,7 +50,7 @@ pnpm run test:ci
 Package-scoped example:
 
 ```bash
-pnpm --filter @skillspp/skillspp-cli run test:unit
+pnpm --filter skillspp run test:unit
 ```
 
 ## Editing Guidelines For Agents
