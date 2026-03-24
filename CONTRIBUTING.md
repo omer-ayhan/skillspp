@@ -100,11 +100,27 @@ ci(release): publish CLI through changesets action
 - Tests are added/updated when behavior changes.
 - Documentation is updated when needed.
 
+## Branch and Release Flow
+
+Use this branch strategy:
+
+- Open feature branches as `feature/*`, `fix/*`, or `chore/*`.
+- Target `development` for regular work.
+- Promote to `main` through a dedicated PR from `development`.
+
+CI expectations:
+
+- PRs to `development` and `main` run required checks: `CI`, `PR Title`, and `Commitlint`.
+- PRs to `development` must include a changeset file (`.changeset/*.md`) for user-facing changes.
+- Maintainers can bypass changeset requirement by adding the `no-changeset` label for non-release-impact PRs (docs/internal/infra-only updates).
+
 ## Releases
 
 Release management uses Changesets and GitHub Actions:
 
-- Add a changeset for user-facing changes.
-- Versioning is handled by `corepack pnpm run version-packages`.
-- Publishing is handled by `corepack pnpm run release`.
-- The release workflow requires `NPM_TOKEN` in repository secrets.
+- Merge `development` into `main` via promotion PR.
+- On merge to `main`, Changesets Action opens/updates a release PR when pending changesets exist.
+- Merging the release PR versions packages, publishes to npm, creates `skillspp@x.y.z` tag(s), and creates a GitHub Release.
+- Versioning command: `corepack pnpm run version-packages`.
+- Publish command: `corepack pnpm run release`.
+- `NPM_TOKEN` is required in repository secrets.
