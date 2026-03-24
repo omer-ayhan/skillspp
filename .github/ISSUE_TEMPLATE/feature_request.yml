@@ -1,0 +1,36 @@
+name: Feature request
+description: Suggest an improvement to Skills++
+title: "feat(scope): "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing an improvement.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What problem are you trying to solve?
+      placeholder: Describe current pain points.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What should change?
+      placeholder: Describe your preferred behavior or API.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What alternatives did you evaluate?
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Any examples, screenshots, or references.
