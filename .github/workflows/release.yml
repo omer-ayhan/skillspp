@@ -17,17 +17,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Run release-please
+        id: release
+        uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
       - name: Checkout
+        if: steps.release.outputs.releases_created == 'true'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup pnpm
+        if: steps.release.outputs.releases_created == 'true'
         uses: pnpm/action-setup@v4
         with:
           version: 10.18.3
 
       - name: Setup Node.js
+        if: steps.release.outputs.releases_created == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -35,23 +46,19 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
+        if: steps.release.outputs.releases_created == 'true'
         run: pnpm install --frozen-lockfile
 
-      - name: Validate release baseline
+      - name: Validate publish baseline
+        if: steps.release.outputs.releases_created == 'true'
         run: |
           pnpm run typecheck
           pnpm run lint
           pnpm run test:unit
           pnpm run build
 
-      - name: Create release PR or publish
-        uses: changesets/action@v1
-        with:
-          version: pnpm run version-packages
-          publish: pnpm run release
-          createGithubReleases: true
-          commit: "chore(release): version packages"
-          title: "chore(release): version packages"
+      - name: Publish skillspp
+        if: steps.release.outputs.releases_created == 'true'
+        run: corepack pnpm --filter skillspp publish --access public --provenance --no-git-checks
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

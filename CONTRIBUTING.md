@@ -89,7 +89,7 @@ Examples:
 ```text
 feat(cli): add source host allowlist flag
 fix(core): preserve lockfile ordering in update flow
-ci(release): publish CLI through changesets action
+ci(release): publish CLI through release-please automation
 ```
 
 ## Pull Request Checklist
@@ -111,16 +111,13 @@ Use this branch strategy:
 CI expectations:
 
 - PRs to `development` and `main` run required checks: `CI`, `PR Title`, and `Commitlint`.
-- PRs to `development` must include a changeset file (`.changeset/*.md`) for user-facing changes.
-- Maintainers can bypass changeset requirement by adding the `no-changeset` label for non-release-impact PRs (docs/internal/infra-only updates).
+- Release automation PRs to `main` are created by `release-please` and are allowed by branch policy checks.
 
 ## Releases
 
-Release management uses Changesets and GitHub Actions:
+Release management uses Release Please and GitHub Actions:
 
 - Merge `development` into `main` via promotion PR.
-- On merge to `main`, Changesets Action opens/updates a release PR when pending changesets exist.
-- Merging the release PR versions packages, publishes to npm, creates `skillspp@x.y.z` tag(s), and creates a GitHub Release.
-- Versioning command: `corepack pnpm run version-packages`.
-- Publish command: `corepack pnpm run release`.
+- On merge to `main`, `release-please` opens/updates a release PR based on Conventional Commits.
+- Merging the release PR triggers automated npm publish for `skillspp` and creates release tags/GitHub release metadata.
 - `NPM_TOKEN` is required in repository secrets.
