@@ -1,6 +1,6 @@
 # skillspp CLI
 
-`skillspp` is the published command-line distribution for the Skills++ project.
+`skillspp` is the published command-line distribution for the Skills++ project — a package-manager-style CLI for AI agent skill files. Declare external Markdown files as dependencies, run pre/post-install hooks, and install skills globally or per-project through an easy interactive TUI.
 
 ## Installation
 
