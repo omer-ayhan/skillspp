@@ -68,3 +68,5 @@ tmp-skillspp-cli-*/
 
 # Build
 *.tsbuildinfo
+.pnpm-debug.log
+.pnpm-store
