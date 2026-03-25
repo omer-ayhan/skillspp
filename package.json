@@ -7,11 +7,8 @@
     "skillspp": "corepack pnpm --filter skillspp skillspp",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
-    "changeset": "changeset",
     "prepare": "husky",
     "commitlint": "commitlint --edit",
-    "version-packages": "changeset version",
-    "release": "changeset publish",
     "test:unit": "bash ./scripts/check-boundaries.sh && turbo run test:unit",
     "test:integration": "bash ./scripts/check-boundaries.sh && turbo run test:integration",
     "test:contract": "bash ./scripts/check-boundaries.sh && turbo run test:contract",
@@ -21,7 +18,6 @@
     "lint": "bash ./scripts/check-boundaries.sh && turbo run lint"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.29.7",
     "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
     "@eslint/js": "^10.0.1",
