@@ -32,10 +32,10 @@ jobs:
             esac
           elif [ "${BASE_REF}" = "main" ]; then
             case "${HEAD_REF}" in
-              development|release-please--*)
+              development)
                 ;;
               *)
-                echo "PRs to main must come from development or release-please branches."
+                echo "PRs to main must come from the development branch."
                 echo "Current head branch: ${HEAD_REF}"
                 exit 1
                 ;;
