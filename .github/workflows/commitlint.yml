@@ -34,11 +34,11 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Skip commitlint for automation PRs to main
-        if: github.base_ref == 'main' && (github.head_ref == 'development' || startsWith(github.head_ref, 'release-please--'))
-        run: echo "Skipping commitlint for development/release-please automation PRs to main."
+        if: github.base_ref == 'main' && github.head_ref == 'development'
+        run: echo "Skipping commitlint for development promotion PRs to main."
 
       - name: Lint commit messages
-        if: github.base_ref != 'main' || (github.head_ref != 'development' && !startsWith(github.head_ref, 'release-please--'))
+        if: github.base_ref != 'main' || github.head_ref != 'development'
         run: |
           pnpm exec commitlint \
             --from "${{ github.event.pull_request.base.sha }}" \

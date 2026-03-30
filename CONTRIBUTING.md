@@ -89,7 +89,7 @@ Examples:
 ```text
 feat(cli): add source host allowlist flag
 fix(core): preserve lockfile ordering in update flow
-ci(release): publish CLI through release-please automation
+ci(release): publish CLI through semantic-release automation
 ```
 
 ## Pull Request Checklist
@@ -111,13 +111,14 @@ Use this branch strategy:
 CI expectations:
 
 - PRs to `development` and `main` run required checks: `CI`, `PR Title`, and `Commitlint`.
-- Release automation PRs to `main` are created by `release-please` and are allowed by branch policy checks.
+- PRs to `main` must come from `development` to keep promotion as the deployment gate.
 
 ## Releases
 
-Release management uses Release Please and GitHub Actions:
+Release management uses semantic-release and GitHub Actions:
 
 - Merge `development` into `main` via promotion PR.
-- On merge to `main`, `release-please` opens/updates a release PR based on Conventional Commits.
-- Merging the release PR triggers automated npm publish for `skillspp` and creates release tags/GitHub release metadata.
-- `NPM_TOKEN` is required in repository secrets.
+- On merge to `main`, the release workflow runs semantic-release.
+- semantic-release publishes `skillspp` to npm and creates tag/GitHub release metadata from `main` without committing changelog/version files back to the branch.
+- Required repository secrets:
+  - `NPM_TOKEN`: npm publish token.
