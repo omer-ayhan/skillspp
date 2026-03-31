@@ -11,6 +11,7 @@
   "scripts": {
     "build": "node ./scripts/build.mjs",
     "clean": "rm -rf dist",
+    "pluginspp": "tsx src/cli.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test:unit": "vitest run --config vitest.config.ts -t '@unit'",
     "test:integration": "vitest run --config vitest.config.ts -t '@integration'",
