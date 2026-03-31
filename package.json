@@ -5,6 +5,7 @@
   "packageManager": "pnpm@10.18.3",
   "scripts": {
     "skillspp": "corepack pnpm --filter skillspp skillspp",
+    "pluginspp": "corepack pnpm --filter pluginspp pluginspp",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "prepare": "husky",
