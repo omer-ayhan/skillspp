@@ -78,3 +78,9 @@ export type InitSkillCommand = {
   yaml?: boolean;
   agents?: string[];
 };
+
+export type AddPluginCommand = {
+  plugins: string[];
+  global?: boolean;
+  nonInteractive?: boolean;
+};

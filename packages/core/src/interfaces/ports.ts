@@ -1,4 +1,5 @@
 import type {
+  AddPluginCommand,
   AddSkillCommand,
   CheckSkillCommand,
   FindSkillCommand,
@@ -9,6 +10,7 @@ import type {
   ValidateSkillCommand,
 } from "../contracts/commands";
 import type {
+  AddPluginResult,
   AddSkillResult,
   CheckSkillResult,
   FindSkillResult,
@@ -55,4 +57,5 @@ export type CoreCommandPort = {
   removeSkill(command: RemoveSkillCommand): Promise<RemoveSkillResult>;
   findSkill(command: FindSkillCommand): Promise<FindSkillResult>;
   initSkill(command: InitSkillCommand): Promise<InitSkillResult>;
+  addPlugin(command: AddPluginCommand): Promise<AddPluginResult>;
 };

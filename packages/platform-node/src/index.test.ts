@@ -20,5 +20,6 @@ describe("platform-node root exports @unit", () => {
     expect(typeof services.removeSkill.execute).toBe("function");
     expect(typeof services.findSkill.execute).toBe("function");
     expect(typeof services.initSkill.execute).toBe("function");
+    expect(typeof services.addPlugin.execute).toBe("function");
   });
 });

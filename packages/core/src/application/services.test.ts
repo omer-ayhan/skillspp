@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  AddPluginService,
   AddSkillService,
   CheckSkillService,
   FindSkillService,
@@ -48,6 +49,10 @@ describe("core services delegation @unit", () => {
         calls.push("init");
         return { skillPath: "", agentsConfigured: [] };
       },
+      async addPlugin() {
+        calls.push("addPlugin");
+        return { installedPlugins: [], skippedPlugins: [], failedPlugins: [] };
+      },
     };
 
     await new AddSkillService(port).execute({ source: "./skills" });
@@ -58,6 +63,7 @@ describe("core services delegation @unit", () => {
     await new RemoveSkillService(port).execute({});
     await new FindSkillService(port).execute({ source: "./skills" });
     await new InitSkillService(port).execute({});
+    await new AddPluginService(port).execute({ plugins: ["codex"] });
 
     expect(calls).toEqual([
       "add",
@@ -68,6 +74,7 @@ describe("core services delegation @unit", () => {
       "remove",
       "find",
       "init",
+      "addPlugin",
     ]);
   });
 });

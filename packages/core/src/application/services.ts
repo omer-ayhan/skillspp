@@ -1,4 +1,5 @@
 import type {
+  AddPluginCommand,
   AddSkillCommand,
   CheckSkillCommand,
   FindSkillCommand,
@@ -9,6 +10,7 @@ import type {
   ValidateSkillCommand,
 } from "../contracts/commands";
 import type {
+  AddPluginResult,
   AddSkillResult,
   CheckSkillResult,
   FindSkillResult,
@@ -73,5 +75,12 @@ export class InitSkillService {
   constructor(private readonly port: CoreCommandPort) {}
   execute(command: InitSkillCommand): Promise<InitSkillResult> {
     return this.port.initSkill(command);
+  }
+}
+
+export class AddPluginService {
+  constructor(private readonly port: CoreCommandPort) {}
+  execute(command: AddPluginCommand): Promise<AddPluginResult> {
+    return this.port.addPlugin(command);
   }
 }

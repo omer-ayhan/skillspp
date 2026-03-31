@@ -1,4 +1,5 @@
 import {
+  AddPluginService,
   AddSkillService,
   CheckSkillService,
   FindSkillService,
@@ -22,6 +23,7 @@ export function createNodeCoreServices() {
     removeSkill: new RemoveSkillService(port),
     findSkill: new FindSkillService(port),
     initSkill: new InitSkillService(port),
+    addPlugin: new AddPluginService(port),
   };
 }
 

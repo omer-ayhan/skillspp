@@ -1,6 +1,8 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import {
+  type AddPluginCommand,
   type AddSkillCommand,
   type CheckSkillCommand,
   type FindSkillCommand,
@@ -11,6 +13,7 @@ import {
   type ValidateSkillCommand,
 } from "@skillspp/core/commands";
 import {
+  type AddPluginResult,
   type AddSkillResult,
   type CheckSkillResult,
   type FindSkillResult,
@@ -23,6 +26,7 @@ import {
 } from "@skillspp/core/results";
 import { CoreError } from "@skillspp/core/errors";
 import { type CoreCommandPort } from "@skillspp/core";
+import { AGENTS, isAgent } from "@skillspp/core/agents";
 
 function collectSkillMarkdownFiles(root: string): string[] {
   const out: string[] = [];
@@ -191,6 +195,49 @@ function notImplemented(name: string): never {
   });
 }
 
+async function runAddPlugin(
+  command: AddPluginCommand
+): Promise<AddPluginResult> {
+  const installedPlugins: string[] = [];
+  const skippedPlugins: string[] = [];
+  const failedPlugins: { name: string; reason: string }[] = [];
+
+  const base = command.global ? os.homedir() : process.cwd();
+
+  function installAgentDir(agentKey: string, skillsDir: string): void {
+    const targetDir = path.join(base, skillsDir);
+    if (fs.existsSync(targetDir)) {
+      skippedPlugins.push(agentKey);
+    } else {
+      fs.mkdirSync(targetDir, { recursive: true });
+      installedPlugins.push(agentKey);
+    }
+  }
+
+  for (const name of command.plugins) {
+    if (name === "*") {
+      for (const agentKey of Object.keys(AGENTS)) {
+        const info = AGENTS[agentKey as keyof typeof AGENTS];
+        const skillsDir = command.global ? info.globalSkillsDir : info.projectSkillsDir;
+        installAgentDir(agentKey, skillsDir);
+      }
+      continue;
+    }
+
+    if (!isAgent(name)) {
+      failedPlugins.push({ name, reason: `Unknown plugin: ${name}` });
+      continue;
+    }
+
+    const skillsDir = command.global
+      ? AGENTS[name].globalSkillsDir
+      : AGENTS[name].projectSkillsDir;
+    installAgentDir(name, skillsDir);
+  }
+
+  return { installedPlugins, skippedPlugins, failedPlugins };
+}
+
 export function createNodeCoreCommandPort(): CoreCommandPort {
   return {
     addSkill(_command: AddSkillCommand): Promise<AddSkillResult> {
@@ -216,6 +263,9 @@ export function createNodeCoreCommandPort(): CoreCommandPort {
     },
     initSkill(_command: InitSkillCommand): Promise<InitSkillResult> {
       return Promise.resolve(notImplemented("initSkill"));
+    },
+    addPlugin(command: AddPluginCommand): Promise<AddPluginResult> {
+      return runAddPlugin(command);
     },
   };
 }

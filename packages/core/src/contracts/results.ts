@@ -66,3 +66,9 @@ export type InitSkillResult = {
   installerConfigPath?: string;
   agentsConfigured: string[];
 };
+
+export type AddPluginResult = {
+  installedPlugins: string[];
+  skippedPlugins: string[];
+  failedPlugins: { name: string; reason: string }[];
+};
