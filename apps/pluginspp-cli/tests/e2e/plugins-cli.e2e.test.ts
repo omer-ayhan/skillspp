@@ -40,7 +40,7 @@ function runCli(cwd: string, args: string[]): Promise<RunResult> {
   });
 }
 
-describe("skillspp-plugins binary @e2e", () => {
+describe("pluginspp binary @e2e", () => {
   it("resolves and returns help output in a clean temp directory @e2e", async () => {
     const workdir = fs.mkdtempSync(
       path.join(process.cwd(), "tmp-plugins-cli-"),
@@ -48,7 +48,7 @@ describe("skillspp-plugins binary @e2e", () => {
     try {
       const result = await runCli(workdir, ["--help"]);
       expect(result.code).toBe(0);
-      expect(result.output).toContain("skillspp-plugins");
+      expect(result.output).toContain("pluginspp");
       expect(result.output).toContain("add");
       expect(result.output).toContain("remove");
       expect(result.output).toContain("update");

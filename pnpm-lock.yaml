@@ -69,6 +69,43 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@20.19.37)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2)
 
+  apps/pluginspp-cli:
+    dependencies:
+      commander:
+        specifier: ^14.0.3
+        version: 14.0.3
+      picocolors:
+        specifier: ^1.1.1
+        version: 1.1.1
+    devDependencies:
+      '@skillspp/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@skillspp/platform-node':
+        specifier: workspace:*
+        version: link:../../packages/platform-node
+      '@types/node':
+        specifier: ^25.4.0
+        version: 25.5.0
+      '@vitest/coverage-v8':
+        specifier: ^3.2.4
+        version: 3.2.4(vitest@3.2.4(@types/node@25.5.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2))
+      esbuild:
+        specifier: ^0.25.10
+        version: 0.25.12
+      tsx:
+        specifier: ^4.20.6
+        version: 4.21.0
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.3
+      vite-tsconfig-paths:
+        specifier: ^5.1.4
+        version: 5.1.4(typescript@5.9.3)(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2))
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@25.5.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2)
+
   apps/skillspp-cli:
     dependencies:
       commander:
@@ -148,43 +185,6 @@ importers:
       pnpm:
         specifier: 10.18.3
         version: 10.18.3
-      tsx:
-        specifier: ^4.20.6
-        version: 4.21.0
-      typescript:
-        specifier: ^5.9.2
-        version: 5.9.3
-      vite-tsconfig-paths:
-        specifier: ^5.1.4
-        version: 5.1.4(typescript@5.9.3)(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2))
-      vitest:
-        specifier: ^3.2.4
-        version: 3.2.4(@types/node@25.5.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2)
-
-  apps/skillspp-plugins-cli:
-    dependencies:
-      commander:
-        specifier: ^14.0.3
-        version: 14.0.3
-      picocolors:
-        specifier: ^1.1.1
-        version: 1.1.1
-    devDependencies:
-      '@skillspp/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@skillspp/platform-node':
-        specifier: workspace:*
-        version: link:../../packages/platform-node
-      '@types/node':
-        specifier: ^25.4.0
-        version: 25.5.0
-      '@vitest/coverage-v8':
-        specifier: ^3.2.4
-        version: 3.2.4(vitest@3.2.4(@types/node@25.5.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2))
-      esbuild:
-        specifier: ^0.25.10
-        version: 0.25.12
       tsx:
         specifier: ^4.20.6
         version: 4.21.0

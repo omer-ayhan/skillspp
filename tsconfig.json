@@ -6,6 +6,6 @@
     { "path": "packages/test-kit" },
     { "path": "apps/skillspp-cli" },
     { "path": "apps/skillspp-mcp" },
-    { "path": "apps/skillspp-plugins-cli" }
+    { "path": "apps/pluginspp-cli" }
   ]
 }

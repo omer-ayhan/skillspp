@@ -18,7 +18,7 @@ const CLI_VERSION =
 
 function createProgram(emitter: TelemetryEmitter): Command {
   const program = new Command()
-    .name("skillspp-plugins")
+    .name("pluginspp")
     .usage("<command> [options]")
     .description("Skills++ Plugins CLI for managing AI agent plugins.")
     .version(CLI_VERSION, "-v, --version")

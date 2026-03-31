@@ -9,14 +9,14 @@ import { createTelemetryEmitter } from "@skillspp/core/telemetry";
 function buildTestProgram(): Command {
   const emitter = createTelemetryEmitter();
   const context = createCliCommandContext(emitter);
-  const program = new Command().name("skillspp-plugins").exitOverride();
+  const program = new Command().name("pluginspp").exitOverride();
   registerAddCommand(program, context);
   registerRemoveCommand(program, context);
   registerUpdateCommand(program, context);
   return program;
 }
 
-describe("skillspp-plugins CLI program @unit", () => {
+describe("pluginspp CLI program @unit", () => {
   it("registers add subcommand @unit", () => {
     const program = buildTestProgram();
     const names = program.commands.map((c) => c.name());

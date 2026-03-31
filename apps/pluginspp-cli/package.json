@@ -1,12 +1,12 @@
 {
-  "name": "skillspp-plugins",
+  "name": "pluginspp",
   "private": false,
   "version": "0.1.0",
   "description": "Skills++ Plugins CLI for managing AI agent plugins.",
   "license": "MIT",
   "type": "module",
   "bin": {
-    "skillspp-plugins": "./dist/cli.js"
+    "pluginspp": "./dist/cli.js"
   },
   "scripts": {
     "build": "node ./scripts/build.mjs",

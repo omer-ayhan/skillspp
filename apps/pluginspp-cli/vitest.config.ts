@@ -15,7 +15,7 @@ export default mergeConfig(
       }),
     ],
     test: {
-      name: "skillspp-plugins-cli",
+      name: "pluginspp-cli",
       coverage: {
         provider: "v8",
         reporter: ["text", "lcov"],

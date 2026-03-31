@@ -39,7 +39,7 @@ function runCli(args: string[]): Promise<RunResult> {
   });
 }
 
-describe("skillspp-plugins CLI @integration", () => {
+describe("pluginspp CLI @integration", () => {
   it("--help exits 0 and lists all subcommands @integration", async () => {
     const result = await runCli(["--help"]);
     expect(result.code).toBe(0);
