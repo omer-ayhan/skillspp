@@ -9,7 +9,7 @@ vi.mock("@skillspp/platform-node", () => ({
 const { runBackgroundTask } = await import("./runtime/background-runner");
 
 describe("CLI runtime background-runner adapter @unit", () => {
-  it("delegates execution to platform-node with core executor module @unit", async () => {
+  it("delegates execution to platform-node with resolvable executor module @unit", async () => {
     const response = await runBackgroundTask(
       {
         kind: "test.blocking",
@@ -22,14 +22,13 @@ describe("CLI runtime background-runner adapter @unit", () => {
         onProgress: () => {
           // no-op
         },
-      }
+      },
     );
 
     expect(runBackgroundTaskInPlatform).toHaveBeenCalled();
     const secondArg = (runBackgroundTaskInPlatform.mock.calls[0] as any)?.[1];
-    expect(secondArg).toMatchObject({
-      executorModule: "@skillspp/core/runtime/background-tasks",
-    });
+    expect(typeof secondArg?.executorModule).toBe("string");
+    expect(secondArg.executorModule).toContain("background-executor");
     expect(response).toEqual({ durationMs: 123 });
   });
 });

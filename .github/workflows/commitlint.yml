@@ -33,9 +33,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Skip promotion PR commitlint
+      - name: Skip commitlint for automation PRs to main
         if: github.base_ref == 'main' && github.head_ref == 'development'
-        run: echo "Skipping commitlint for development -> main promotion PR (commits are validated on development PRs)."
+        run: echo "Skipping commitlint for development promotion PRs to main."
 
       - name: Lint commit messages
         if: github.base_ref != 'main' || github.head_ref != 'development'

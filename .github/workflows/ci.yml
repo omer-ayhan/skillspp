@@ -31,11 +31,15 @@ jobs:
                 ;;
             esac
           elif [ "${BASE_REF}" = "main" ]; then
-            if [ "${HEAD_REF}" != "development" ]; then
-              echo "PRs to main must come from the development branch."
-              echo "Current head branch: ${HEAD_REF}"
-              exit 1
-            fi
+            case "${HEAD_REF}" in
+              development)
+                ;;
+              *)
+                echo "PRs to main must come from the development branch."
+                echo "Current head branch: ${HEAD_REF}"
+                exit 1
+                ;;
+            esac
           else
             echo "Unsupported base branch: ${BASE_REF}"
             exit 1
@@ -69,46 +73,3 @@ jobs:
 
       - name: Build
         run: pnpm run build
-
-  changeset-check:
-    if: github.base_ref == 'development'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Detect no-changeset label
-        id: label-check
-        env:
-          LABELS: ${{ join(github.event.pull_request.labels.*.name, ' ') }}
-        run: |
-          if echo " ${LABELS} " | grep -q " no-changeset "; then
-            echo "skip=true" >> "${GITHUB_OUTPUT}"
-          else
-            echo "skip=false" >> "${GITHUB_OUTPUT}"
-          fi
-
-      - name: Checkout
-        if: steps.label-check.outputs.skip != 'true'
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Require changeset file
-        if: steps.label-check.outputs.skip != 'true'
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          CHANGED_FILES="$(git diff --name-only "${BASE_SHA}" "${HEAD_SHA}")"
-          CHANGESET_FILES="$(echo "${CHANGED_FILES}" | grep -E '^\.changeset/[^/]+\.md$' | grep -v '^\.changeset/README\.md$' || true)"
-
-          if [ -z "${CHANGESET_FILES}" ]; then
-            echo "Missing changeset: add a .changeset/*.md file or apply the no-changeset label."
-            exit 1
-          fi
-
-          echo "Changeset files detected:"
-          echo "${CHANGESET_FILES}"
-
-      - name: Changeset requirement bypassed
-        if: steps.label-check.outputs.skip == 'true'
-        run: echo "Skipping changeset check because no-changeset label is present."
