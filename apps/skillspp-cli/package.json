@@ -5,6 +5,10 @@
   "description": "Skills++ CLI for skill source validation and management workflows.",
   "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/omer-ayhan/skillspp"
+  },
   "bin": {
     "skillspp": "./dist/cli.js"
   },
