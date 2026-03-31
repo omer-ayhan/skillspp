@@ -6,13 +6,16 @@ import { build } from "esbuild";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const packageRoot = path.resolve(__dirname, "..");
-const outFile = path.join(packageRoot, "dist", "cli.js");
 
-async function runBuild() {
-  await mkdir(path.dirname(outFile), { recursive: true });
-  await build({
-    entryPoints: [path.join(packageRoot, "src", "cli.ts")],
-    outfile: outFile,
+const distDir = path.join(packageRoot, "dist");
+const cliOutFile = path.join(distDir, "cli.js");
+const workerOutFile = path.join(distDir, "background-worker.js");
+const executorOutFile = path.join(distDir, "background-executor.js");
+
+function createBuildOptions(entryPoint, outfile, banner) {
+  return {
+    entryPoints: [entryPoint],
+    outfile,
     bundle: true,
     platform: "node",
     format: "esm",
@@ -21,11 +24,37 @@ async function runBuild() {
     sourcemap: true,
     tsconfig: path.join(packageRoot, "tsconfig.json"),
     logLevel: "info",
-    banner: {
+    banner,
+  };
+}
+
+async function runBuild() {
+  await mkdir(distDir, { recursive: true });
+
+  await build(
+    createBuildOptions(path.join(packageRoot, "src", "cli.ts"), cliOutFile, {
       js: "#!/usr/bin/env node",
-    },
-  });
-  await chmod(outFile, 0o755);
+    }),
+  );
+
+  await build(
+    createBuildOptions(
+      path.resolve(
+        packageRoot,
+        "../../packages/platform-node/src/background-worker.ts",
+      ),
+      workerOutFile,
+    ),
+  );
+
+  await build(
+    createBuildOptions(
+      path.join(packageRoot, "src", "runtime", "background-executor.ts"),
+      executorOutFile,
+    ),
+  );
+
+  await chmod(cliOutFile, 0o755);
 }
 
 runBuild().catch((error) => {
