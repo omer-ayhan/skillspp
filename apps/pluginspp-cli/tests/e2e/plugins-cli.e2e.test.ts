@@ -743,7 +743,9 @@ describe("pluginspp binary @e2e", () => {
       ]);
 
       expect(updateResult.code).toBe(0);
-      expect(updateResult.output).toContain("Dry-run mode: no changes applied.");
+      expect(updateResult.output).toContain(
+        "Dry-run mode: no changes applied.",
+      );
       expect(readUtf8(installedReadme)).toBe("alpha v1\n");
     } finally {
       fs.rmSync(workdir, { recursive: true, force: true });
@@ -825,12 +827,7 @@ describe("pluginspp binary @e2e", () => {
 
       const updateResult = await runCli(
         workdir,
-        [
-          "update",
-          "plugin-alpha",
-          "--global",
-          "--non-interactive",
-        ],
+        ["update", "plugin-alpha", "--global", "--non-interactive"],
         { HOME: homeDir },
       );
 

@@ -712,7 +712,10 @@ export async function runAdd(
         ...toAddOptions(options, presence),
         ...forcedOptions,
       };
-      await executeAdd(source, applyForcedAddOptionFlags(merged, forcedOptions));
+      await executeAdd(
+        source,
+        applyForcedAddOptionFlags(merged, forcedOptions),
+      );
     },
   );
   await parseStandaloneCommand(command, args);
