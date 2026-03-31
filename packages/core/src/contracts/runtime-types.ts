@@ -44,6 +44,8 @@ export type AgentInfo = {
   displayName: string;
   projectSkillsDir: string;
   globalSkillsDir: string;
+  projectPluginsDir: string;
+  globalPluginsDir: string;
   installMarkers?: string[];
 };
 

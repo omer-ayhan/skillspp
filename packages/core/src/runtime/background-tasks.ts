@@ -6,6 +6,7 @@ import {
   detectInstalledAgents,
   filterInstalledAgents,
   getAgentSkillsDir,
+  getAgentPluginsDir,
   resolveAgents,
 } from "./agents";
 import {
@@ -21,7 +22,7 @@ import type {
   ParsedSource,
   Skill,
 } from "../contracts/runtime-types";
-import { installSkill } from "./installer";
+import { installSkill, installPlugin } from "./installer";
 import {
   applyInstallerArtifacts,
   cleanupPreparedInstallerArtifacts,
