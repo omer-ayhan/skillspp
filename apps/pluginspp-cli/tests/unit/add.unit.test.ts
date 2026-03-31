@@ -35,13 +35,22 @@ describe("registerAddCommand @unit", () => {
     expect(names).toContain("add");
   });
 
-  it("add command accepts variadic plugin arguments @unit", () => {
+  it("add command accepts a single positional <source> argument @unit", () => {
     const program = buildTestProgram();
     const addCmd = program.commands.find((c) => c.name() === "add");
     expect(addCmd).toBeDefined();
-    const arg = addCmd!.registeredArguments[0];
-    expect(arg).toBeDefined();
-    expect(arg.variadic).toBe(true);
+    const args = addCmd!.registeredArguments;
+    expect(args).toHaveLength(1);
+    expect(args[0].name()).toBe("source");
+    expect(args[0].variadic).toBe(false);
+  });
+
+  it("add command has -a, --agent option @unit", () => {
+    const program = buildTestProgram();
+    const addCmd = program.commands.find((c) => c.name() === "add");
+    expect(addCmd).toBeDefined();
+    const optionNames = addCmd!.options.map((o) => o.long);
+    expect(optionNames).toContain("--agent");
   });
 
   it("add command has --global option @unit", () => {
@@ -60,19 +69,19 @@ describe("registerAddCommand @unit", () => {
     expect(optionNames).toContain("--non-interactive");
   });
 
-  it("throws for unknown plugin name @unit", async () => {
+  it("throws for unknown agent name @unit", async () => {
     const program = buildTestProgram();
 
     await expect(
-      program.parseAsync(["add", "not-a-real-plugin"], { from: "user" }),
-    ).rejects.toThrow("Unknown plugin: not-a-real-plugin");
+      program.parseAsync(["add", "./plugins", "-a", "not-a-real-agent"], { from: "user" }),
+    ).rejects.toThrow("Unknown agent: not-a-real-agent");
   });
 
-  it("does not throw validation error for wildcard '*' plugin @unit", async () => {
+  it("does not throw validation error for wildcard '*' agent @unit", async () => {
     const program = buildTestProgram();
 
     await expect(
-      program.parseAsync(["add", "*"], { from: "user" }),
+      program.parseAsync(["add", "./plugins", "-a", "*"], { from: "user" }),
     ).resolves.not.toThrow();
   });
 });

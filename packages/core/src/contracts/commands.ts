@@ -80,7 +80,8 @@ export type InitSkillCommand = {
 };
 
 export type AddPluginCommand = {
-  plugins: string[];
+  source: string;
+  agents?: string[];
   global?: boolean;
   nonInteractive?: boolean;
 };

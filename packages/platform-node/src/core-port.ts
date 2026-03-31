@@ -202,7 +202,16 @@ async function runAddPlugin(
   const skippedPlugins: string[] = [];
   const failedPlugins: { name: string; reason: string }[] = [];
 
+  const sourceDir = path.resolve(command.source);
+  if (!fs.existsSync(sourceDir)) {
+    throw new CoreError({
+      code: "SOURCE_NOT_FOUND",
+      message: `Plugins source directory not found: ${sourceDir}`,
+    });
+  }
+
   const base = command.global ? os.homedir() : process.cwd();
+  const agentList = command.agents ?? [];
 
   function installAgentDir(agentKey: string, skillsDir: string): void {
     const targetDir = path.join(base, skillsDir);
@@ -214,7 +223,7 @@ async function runAddPlugin(
     }
   }
 
-  for (const name of command.plugins) {
+  for (const name of agentList) {
     if (name === "*") {
       for (const agentKey of Object.keys(AGENTS)) {
         const info = AGENTS[agentKey as keyof typeof AGENTS];
@@ -225,7 +234,7 @@ async function runAddPlugin(
     }
 
     if (!isAgent(name)) {
-      failedPlugins.push({ name, reason: `Unknown plugin: ${name}` });
+      failedPlugins.push({ name, reason: `Unknown agent: ${name}` });
       continue;
     }
 

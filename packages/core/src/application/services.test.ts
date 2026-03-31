@@ -63,7 +63,7 @@ describe("core services delegation @unit", () => {
     await new RemoveSkillService(port).execute({});
     await new FindSkillService(port).execute({ source: "./skills" });
     await new InitSkillService(port).execute({});
-    await new AddPluginService(port).execute({ plugins: ["codex"] });
+    await new AddPluginService(port).execute({ source: "./plugins", agents: ["codex"] });
 
     expect(calls).toEqual([
       "add",
