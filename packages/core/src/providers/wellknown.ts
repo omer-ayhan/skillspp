@@ -2,6 +2,7 @@ import dns from "node:dns/promises";
 import net from "node:net";
 import type {
   ProviderMatch,
+  RemotePlugin,
   RemoteSkill,
   WellKnownFetchOptions,
   WellKnownProvider,
@@ -9,12 +10,8 @@ import type {
 
 type WellKnownIndexEntry = {
   name: string;
-  description: string;
+  description?: string;
   files: string[];
-};
-
-type WellKnownIndex = {
-  skills: WellKnownIndexEntry[];
 };
 
 type DownloadBudget = {
@@ -26,6 +23,24 @@ type NormalizedOptions = Required<
 > & {
   allowHosts: string[];
   denyHosts: string[];
+};
+
+type ResourceKind = "skills" | "plugins";
+
+type ResourceConfig<TResult> = {
+  kind: ResourceKind;
+  displayLabel: string;
+  indexPath: string;
+  entryLabel: string;
+  requireDescription: boolean;
+  missingManifestMessage: (name: string) => string;
+  validateName?: (name: string) => void;
+  hasRequiredManifest: (filePath: string) => boolean;
+  buildRemoteResult: (options: {
+    entry: WellKnownIndexEntry;
+    files: Map<string, string>;
+    sourceUrl: string;
+  }) => TResult;
 };
 
 const DEFAULT_OPTIONS: Omit<NormalizedOptions, "allowHosts" | "denyHosts"> = {
@@ -41,6 +56,56 @@ const EXCLUDED_HOSTS = new Set([
   "gitlab.com",
   "raw.githubusercontent.com",
 ]);
+
+const SKILL_CONFIG: ResourceConfig<RemoteSkill> = {
+  kind: "skills",
+  displayLabel: "well-known skills",
+  indexPath: "/.well-known/skills/index.json",
+  entryLabel: "skill",
+  requireDescription: true,
+  missingManifestMessage: (name) => `Well-known skill '${name}' is missing SKILL.md`,
+  validateName(name) {
+    if (!/^[a-z0-9]([a-z0-9-]{0,62}[a-z0-9])?$/.test(name)) {
+      throw new Error(`Invalid well-known skill name: ${name}`);
+    }
+  },
+  hasRequiredManifest(filePath) {
+    return filePath.toLowerCase() === "skill.md";
+  },
+  buildRemoteResult({ entry, files, sourceUrl }) {
+    return {
+      name: entry.name,
+      description: entry.description || "",
+      installName: entry.name,
+      sourceUrl,
+      sourceType: "well-known",
+      files,
+    };
+  },
+};
+
+const PLUGIN_CONFIG: ResourceConfig<RemotePlugin> = {
+  kind: "plugins",
+  displayLabel: "well-known plugins",
+  indexPath: "/.well-known/plugins/index.json",
+  entryLabel: "plugin",
+  requireDescription: false,
+  missingManifestMessage: (name) =>
+    `Well-known plugin '${name}' is missing plugin.json`,
+  hasRequiredManifest(filePath) {
+    return filePath.split("/").at(-1)?.toLowerCase() === "plugin.json";
+  },
+  buildRemoteResult({ entry, files, sourceUrl }) {
+    return {
+      name: entry.name,
+      description: entry.description || "",
+      installName: entry.name,
+      sourceUrl,
+      sourceType: "well-known",
+      files,
+    };
+  },
+};
 
 export class SecureWellKnownProvider implements WellKnownProvider {
   readonly id = "well-known";
@@ -64,19 +129,33 @@ export class SecureWellKnownProvider implements WellKnownProvider {
 
   getSourceIdentifier(url: string): string {
     const parsed = new URL(url);
-    const path = parsed.pathname.replace(/\/$/, "");
-    return path && path !== "/"
-      ? `wellknown/${parsed.hostname}${path}`
+    const pathname = parsed.pathname.replace(/\/$/, "");
+    return pathname && pathname !== "/"
+      ? `wellknown/${parsed.hostname}${pathname}`
       : `wellknown/${parsed.hostname}`;
   }
 
   async fetchAllSkills(
     url: string,
-    options: WellKnownFetchOptions = {}
+    options: WellKnownFetchOptions = {},
   ): Promise<RemoteSkill[]> {
+    return this.fetchAllResources(url, options, SKILL_CONFIG);
+  }
+
+  async fetchAllPlugins(
+    url: string,
+    options: WellKnownFetchOptions = {},
+  ): Promise<RemotePlugin[]> {
+    return this.fetchAllResources(url, options, PLUGIN_CONFIG);
+  }
+
+  private async fetchAllResources<TResult>(
+    url: string,
+    options: WellKnownFetchOptions,
+    config: ResourceConfig<TResult>,
+  ): Promise<TResult[]> {
     const normalized = this.normalizeOptions(options);
     const budget: DownloadBudget = { remaining: normalized.maxDownloadBytes };
-
     const parsed = new URL(url);
     if (parsed.protocol !== "https:") {
       throw new Error("Well-known provider requires HTTPS URLs");
@@ -87,32 +166,27 @@ export class SecureWellKnownProvider implements WellKnownProvider {
     const { index, resolvedBase } = await this.fetchIndex(
       parsed,
       normalized,
-      budget
+      budget,
+      config,
     );
-    const skills: RemoteSkill[] = [];
 
-    for (const entry of index.skills) {
-      const skill = await this.fetchSkillByEntry(
-        resolvedBase,
-        entry,
-        normalized,
-        budget
+    const resources: TResult[] = [];
+    for (const entry of index) {
+      resources.push(
+        await this.fetchResourceByEntry(resolvedBase, entry, normalized, budget, config),
       );
-      if (skill) {
-        skills.push(skill);
-      }
     }
 
-    return skills;
+    return resources;
   }
 
   private normalizeOptions(options: WellKnownFetchOptions): NormalizedOptions {
     return {
       allowHosts: (options.allowHosts || [])
-        .map((x) => x.trim().toLowerCase())
+        .map((value) => value.trim().toLowerCase())
         .filter(Boolean),
       denyHosts: (options.denyHosts || [])
-        .map((x) => x.trim().toLowerCase())
+        .map((value) => value.trim().toLowerCase())
         .filter(Boolean),
       maxDownloadBytes:
         options.maxDownloadBytes ?? DEFAULT_OPTIONS.maxDownloadBytes,
@@ -128,21 +202,26 @@ export class SecureWellKnownProvider implements WellKnownProvider {
   private async fetchIndex(
     parsedUrl: URL,
     options: NormalizedOptions,
-    budget: DownloadBudget
-  ): Promise<{ index: WellKnownIndex; resolvedBase: string }> {
-    const candidates = this.buildBaseCandidates(parsedUrl);
+    budget: DownloadBudget,
+    config: ResourceConfig<unknown>,
+  ): Promise<{ index: WellKnownIndexEntry[]; resolvedBase: string }> {
+    const candidates = this.buildBaseCandidates(parsedUrl, config.indexPath);
 
     for (const base of candidates) {
-      const indexUrl = `${base}/.well-known/skills/index.json`;
+      const indexUrl = `${base}${config.indexPath}`;
       try {
         const jsonText = await this.fetchTextWithLimit(
           indexUrl,
           options.maxDownloadBytes,
           options,
-          budget
+          budget,
         );
         const parsed = JSON.parse(jsonText) as unknown;
-        const validated = this.validateIndex(parsed, options.maxFilesPerSkill);
+        const validated = this.validateIndex(
+          parsed,
+          options.maxFilesPerSkill,
+          config,
+        );
         return { index: validated, resolvedBase: base };
       } catch {
         continue;
@@ -150,14 +229,14 @@ export class SecureWellKnownProvider implements WellKnownProvider {
     }
 
     throw new Error(
-      "No valid well-known skills index found at /.well-known/skills/index.json"
+      `No valid ${config.displayLabel} index found at ${config.indexPath}`,
     );
   }
 
-  private buildBaseCandidates(parsed: URL): string[] {
+  private buildBaseCandidates(parsed: URL, indexPath: string): string[] {
     const origin = parsed.origin;
     const pathname = parsed.pathname.replace(/\/$/, "");
-    const marker = "/.well-known/skills";
+    const marker = indexPath.replace(/\/index\.json$/, "");
 
     const out: string[] = [];
 
@@ -175,47 +254,55 @@ export class SecureWellKnownProvider implements WellKnownProvider {
     }
 
     return [
-      ...new Set(out.map((x) => (x.endsWith("/") ? x.slice(0, -1) : x))),
+      ...new Set(out.map((value) => (value.endsWith("/") ? value.slice(0, -1) : value))),
     ].filter(Boolean);
   }
 
   private validateIndex(
     raw: unknown,
-    maxFilesPerSkill: number
-  ): WellKnownIndex {
+    maxFilesPerSkill: number,
+    config: ResourceConfig<unknown>,
+  ): WellKnownIndexEntry[] {
     if (!raw || typeof raw !== "object") {
       throw new Error("Invalid well-known index: expected object");
     }
 
     const data = raw as Record<string, unknown>;
-    if (!Array.isArray(data.skills)) {
-      throw new Error("Invalid well-known index: 'skills' must be an array");
+    const rows = data[config.kind];
+    if (!Array.isArray(rows)) {
+      throw new Error(
+        `Invalid well-known index: '${config.kind}' must be an array`,
+      );
     }
 
-    const skills: WellKnownIndexEntry[] = data.skills.map((item, idx) => {
+    return rows.map((item, idx) => {
       if (!item || typeof item !== "object") {
         throw new Error(`Invalid well-known index entry[${idx}]`);
       }
       const row = item as Record<string, unknown>;
       const name = String(row.name || "").trim();
-      const description = String(row.description || "").trim();
+      const description =
+        typeof row.description === "string" ? row.description.trim() : undefined;
       const files = Array.isArray(row.files)
-        ? row.files.map((x) => String(x))
+        ? row.files.map((value) => String(value))
         : [];
 
-      if (!name || !description || files.length === 0) {
+      if (!name || files.length === 0) {
         throw new Error(
-          `Invalid well-known index entry[${idx}]: missing required fields`
+          `Invalid well-known index entry[${idx}]: missing required fields`,
         );
       }
-      if (!/^[a-z0-9]([a-z0-9-]{0,62}[a-z0-9])?$/.test(name)) {
-        throw new Error(`Invalid well-known skill name: ${name}`);
+      if (config.requireDescription && !description) {
+        throw new Error(
+          `Invalid well-known index entry[${idx}]: missing required fields`,
+        );
       }
+      config.validateName?.(name);
       if (files.length > maxFilesPerSkill) {
-        throw new Error(`Too many files in well-known skill '${name}'`);
+        throw new Error(`Too many files in well-known ${config.entryLabel} '${name}'`);
       }
-      if (!files.some((f) => f.toLowerCase() === "skill.md")) {
-        throw new Error(`Well-known skill '${name}' is missing SKILL.md`);
+      if (!files.some((filePath) => config.hasRequiredManifest(filePath))) {
+        throw new Error(config.missingManifestMessage(name));
       }
 
       for (const file of files) {
@@ -224,8 +311,6 @@ export class SecureWellKnownProvider implements WellKnownProvider {
 
       return { name, description, files };
     });
-
-    return { skills };
   }
 
   private assertSafeRelativePath(filePath: string): void {
@@ -240,13 +325,14 @@ export class SecureWellKnownProvider implements WellKnownProvider {
     }
   }
 
-  private async fetchSkillByEntry(
+  private async fetchResourceByEntry<TResult>(
     resolvedBase: string,
     entry: WellKnownIndexEntry,
     options: NormalizedOptions,
-    budget: DownloadBudget
-  ): Promise<RemoteSkill | null> {
-    const baseUrl = `${resolvedBase}/.well-known/skills/${entry.name}`;
+    budget: DownloadBudget,
+    config: ResourceConfig<TResult>,
+  ): Promise<TResult> {
+    const baseUrl = `${resolvedBase}/.well-known/${config.kind}/${entry.name}`;
     const files = new Map<string, string>();
 
     for (const filePath of entry.files) {
@@ -256,36 +342,51 @@ export class SecureWellKnownProvider implements WellKnownProvider {
         fileUrl,
         options.maxSkillFileBytes,
         options,
-        budget
+        budget,
       );
       if (text.includes("\u0000")) {
         throw new Error(
-          `Binary content is not allowed in well-known file: ${filePath}`
+          `Binary content is not allowed in well-known file: ${filePath}`,
         );
       }
       files.set(filePath, text);
     }
 
-    const skillContent = files.get("SKILL.md") || files.get("skill.md");
-    if (!skillContent) {
-      return null;
-    }
-
-    return {
-      name: entry.name,
-      description: entry.description,
-      installName: entry.name,
-      sourceUrl: `${baseUrl}/SKILL.md`,
-      sourceType: "well-known",
+    const manifestPath = this.pickPrimaryManifestPath(entry.files, config);
+    return config.buildRemoteResult({
+      entry,
       files,
-    };
+      sourceUrl: `${baseUrl}/${manifestPath}`,
+    });
+  }
+
+  private pickPrimaryManifestPath(
+    filePaths: string[],
+    config: ResourceConfig<unknown>,
+  ): string {
+    const manifests = filePaths
+      .filter((filePath) => config.hasRequiredManifest(filePath))
+      .sort((left, right) => {
+        const leftDepth = left.split("/").length;
+        const rightDepth = right.split("/").length;
+        if (leftDepth !== rightDepth) {
+          return leftDepth - rightDepth;
+        }
+        return left.localeCompare(right);
+      });
+
+    const manifestPath = manifests[0];
+    if (!manifestPath) {
+      throw new Error("Missing required manifest in well-known index entry");
+    }
+    return manifestPath;
   }
 
   private async fetchTextWithLimit(
     url: string,
     maxPerRequestBytes: number,
     options: NormalizedOptions,
-    budget: DownloadBudget
+    budget: DownloadBudget,
   ): Promise<string> {
     let currentUrl = url;
     let redirects = 0;
@@ -325,142 +426,91 @@ export class SecureWellKnownProvider implements WellKnownProvider {
 
       if (!response.ok) {
         throw new Error(
-          `Fetch failed (${response.status} ${response.statusText}) for ${currentUrl}`
+          `Failed to fetch ${currentUrl}: ${response.status} ${response.statusText}`,
         );
       }
 
-      const contentLengthHeader = response.headers.get("content-length");
-      if (contentLengthHeader) {
-        const declared = Number(contentLengthHeader);
-        if (Number.isFinite(declared) && declared > maxPerRequestBytes) {
-          throw new Error(
-            `Response exceeds per-file size limit for ${currentUrl}`
-          );
-        }
-        if (Number.isFinite(declared) && declared > budget.remaining) {
-          throw new Error(
-            `Response exceeds remaining download budget for ${currentUrl}`
-          );
-        }
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      if (bytes.byteLength > maxPerRequestBytes) {
+        throw new Error(`Exceeded per-file download limit for ${currentUrl}`);
+      }
+      budget.remaining -= bytes.byteLength;
+      if (budget.remaining < 0) {
+        throw new Error(`Exceeded total download budget while fetching ${url}`);
       }
 
-      const reader = response.body?.getReader();
-      if (!reader) {
-        return "";
-      }
-
-      let received = 0;
-      const chunks: Uint8Array[] = [];
-      while (true) {
-        const result = await reader.read();
-        if (result.done) {
-          break;
-        }
-
-        const chunk = result.value;
-        received += chunk.byteLength;
-
-        if (received > maxPerRequestBytes) {
-          throw new Error(
-            `Response exceeded per-file size limit for ${currentUrl}`
-          );
-        }
-        if (received > budget.remaining) {
-          throw new Error(
-            `Response exceeded remaining download budget for ${currentUrl}`
-          );
-        }
-
-        chunks.push(chunk);
-      }
-
-      budget.remaining -= received;
-      const total = new Uint8Array(received);
-      let offset = 0;
-      for (const chunk of chunks) {
-        total.set(chunk, offset);
-        offset += chunk.byteLength;
-      }
-
-      return new TextDecoder("utf-8", { fatal: false }).decode(total);
+      return new TextDecoder("utf8").decode(bytes);
     }
   }
 
   private async assertHostAllowed(
     hostname: string,
-    options: NormalizedOptions
+    options: NormalizedOptions,
   ): Promise<void> {
-    const host = hostname.toLowerCase();
+    const lowerHost = hostname.toLowerCase();
 
-    if (options.denyHosts.includes(host)) {
-      throw new Error(`Well-known host denied by policy: ${hostname}`);
+    if (options.denyHosts.includes(lowerHost)) {
+      throw new Error(`Host '${hostname}' is explicitly denied`);
+    }
+    if (
+      options.allowHosts.length > 0 &&
+      !options.allowHosts.includes(lowerHost)
+    ) {
+      throw new Error(`Host '${hostname}' is not in allowed host list`);
+    }
+    if (isLocalHostname(lowerHost)) {
+      throw new Error(`Local or loopback host '${hostname}' is not allowed`);
     }
 
-    if (options.allowHosts.length > 0 && !options.allowHosts.includes(host)) {
-      throw new Error(`Well-known host is not in allowlist: ${hostname}`);
-    }
-
-    if (this.isLocalHostname(host)) {
-      throw new Error(`Well-known host is not allowed: ${hostname}`);
-    }
-
-    const records = await this.resolveHostIps(host);
-    for (const ip of records) {
-      if (this.isPrivateOrLocalIp(ip)) {
-        throw new Error(
-          `Well-known host resolves to private/local address: ${hostname}`
-        );
-      }
+    const ips = await resolveHostIps(hostname);
+    if (ips.some((ip) => isPrivateOrLocalIp(ip))) {
+      throw new Error(`Host '${hostname}' resolves to a private/local address`);
     }
   }
+}
 
-  private isLocalHostname(host: string): boolean {
+function isLocalHostname(hostname: string): boolean {
+  return (
+    hostname === "localhost" ||
+    hostname.endsWith(".localhost") ||
+    hostname.endsWith(".local")
+  );
+}
+
+async function resolveHostIps(hostname: string): Promise<string[]> {
+  const out = new Set<string>();
+  try {
+    const entries = await dns.lookup(hostname, { all: true });
+    for (const entry of entries) {
+      out.add(entry.address);
+    }
+  } catch {
+    // Ignore DNS lookup errors here and let fetch surface its own error.
+  }
+  return [...out];
+}
+
+function isPrivateOrLocalIp(ip: string): boolean {
+  const family = net.isIP(ip);
+  if (family === 4) {
     return (
-      host === "localhost" ||
-      host.endsWith(".local") ||
-      host.endsWith(".internal") ||
-      host === "0.0.0.0"
+      ip.startsWith("10.") ||
+      ip.startsWith("127.") ||
+      ip.startsWith("169.254.") ||
+      ip.startsWith("192.168.") ||
+      /^172\.(1[6-9]|2\d|3[0-1])\./.test(ip)
     );
   }
-
-  private async resolveHostIps(hostname: string): Promise<string[]> {
-    const out = new Set<string>();
-    try {
-      const records = await dns.lookup(hostname, { all: true });
-      for (const record of records) {
-        out.add(record.address);
-      }
-    } catch {
-      // keep empty; resolution failures will fail during fetch anyway
-    }
-    return [...out];
-  }
-
-  private isPrivateOrLocalIp(ip: string): boolean {
-    if (!net.isIP(ip)) {
-      return false;
-    }
-
-    if (net.isIPv4(ip)) {
-      const parts = ip.split(".").map((x) => Number(x));
-      const [a, b] = parts;
-      if (a === 10 || a === 127 || a === 0) return true;
-      if (a === 169 && b === 254) return true;
-      if (a === 172 && b >= 16 && b <= 31) return true;
-      if (a === 192 && b === 168) return true;
-      if (a >= 224) return true;
-      return false;
-    }
-
-    const value = ip.toLowerCase();
+  if (family === 6) {
+    const normalized = ip.toLowerCase();
     return (
-      value === "::1" ||
-      value === "::" ||
-      value.startsWith("fc") ||
-      value.startsWith("fd") ||
-      value.startsWith("fe80:")
+      normalized === "::1" ||
+      normalized.startsWith("fc") ||
+      normalized.startsWith("fd") ||
+      normalized.startsWith("fe80:")
     );
   }
+  return false;
 }
 
 export const wellKnownProvider = new SecureWellKnownProvider();
