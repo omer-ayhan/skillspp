@@ -20,9 +20,9 @@ if [ -e "apps/skillspp-cli/src/runtime/background-tasks.ts" ]; then
   echo "Boundary violation: apps/skillspp-cli/src/runtime/background-tasks.ts must live in packages/core." >&2
   exit 1
 fi
-if rg --files apps/skillspp-cli/src/runtime | rg -v "background-runner.ts|background-task-types.ts" >/dev/null; then
-  echo "Boundary violation: apps/skillspp-cli/src/runtime may only contain background-runner.ts and background-task-types.ts." >&2
-  rg --files apps/skillspp-cli/src/runtime | rg -v "background-runner.ts|background-task-types.ts" >&2
+if rg --files apps/skillspp-cli/src/runtime | rg -v "background-executor.ts|background-runner.ts|background-task-types.ts" >/dev/null; then
+  echo "Boundary violation: apps/skillspp-cli/src/runtime may only contain background-executor.ts, background-runner.ts, and background-task-types.ts." >&2
+  rg --files apps/skillspp-cli/src/runtime | rg -v "background-executor.ts|background-runner.ts|background-task-types.ts" >&2
   exit 1
 fi
 

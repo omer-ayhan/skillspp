@@ -12,7 +12,11 @@ import {
   stageRemoteSkillFilesToTempDir,
 } from "./skills";
 import { getProviderById, initializeProviders } from "../providers";
-import type { RemoteSkill, RemoteSkillsProvider } from "../providers";
+import type {
+  RemotePlugin,
+  RemoteSkill,
+  RemoteSkillsProvider,
+} from "../providers";
 
 import type { LockEntry } from "../runtime/lockfile";
 import { assertExperimentalFeatureEnabled } from "../application/experimental";
@@ -54,6 +58,42 @@ export async function resolveCatalogSkills(
   }
   const catalog = provider as RemoteSkillsProvider;
   return catalog.fetchAllSkills(sourceUrl, {
+    allowHosts: options.allowHost,
+    denyHosts: options.denyHost,
+    maxDownloadBytes: options.maxDownloadBytes,
+  });
+}
+
+export async function resolveWellKnownPlugins(
+  sourceUrl: string,
+  options: AddOptions,
+): Promise<RemotePlugin[]> {
+  initializeProviders();
+  const provider = getProviderById("well-known");
+  if (!provider) {
+    throw new Error("Well-known provider is not registered");
+  }
+
+  const wellKnown = provider as RemoteSkillsProvider;
+  return wellKnown.fetchAllPlugins(sourceUrl, {
+    allowHosts: options.allowHost,
+    denyHosts: options.denyHost,
+    maxDownloadBytes: options.maxDownloadBytes,
+  });
+}
+
+export async function resolveCatalogPlugins(
+  sourceUrl: string,
+  options: AddOptions,
+): Promise<RemotePlugin[]> {
+  assertExperimentalFeatureEnabled("catalog", Boolean(options.experimental));
+  initializeProviders();
+  const provider = getProviderById("catalog");
+  if (!provider) {
+    throw new Error("Catalog provider is not registered");
+  }
+  const catalog = provider as RemoteSkillsProvider;
+  return catalog.fetchAllPlugins(sourceUrl, {
     allowHosts: options.allowHost,
     denyHosts: options.denyHost,
     maxDownloadBytes: options.maxDownloadBytes,

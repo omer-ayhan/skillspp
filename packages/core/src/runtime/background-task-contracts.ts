@@ -76,6 +76,15 @@ export type AddInstallTaskResult = {
   agentCount: number;
 };
 
+export type PluginAddFetchOrDiscoverTaskResult = {
+  plugins: AddSourceSkill[];
+};
+
+export type PluginAddInstallTaskResult = {
+  installedPluginNames: string[];
+  agentCount: number;
+};
+
 export type FindInventoryTaskResult = {
   sourceType: "local" | "github" | "git" | "well-known" | "catalog";
   sourceLabel: string;
@@ -133,6 +142,18 @@ export type BackgroundTaskRequestMap = {
     selectedSkillNames: string[];
     agents: AgentType[];
   };
+  "plugin.add.fetchOrDiscover": {
+    cwd: string;
+    sourceInput: string;
+    options: AddOptions;
+  };
+  "plugin.add.install": {
+    cwd: string;
+    sourceInput: string;
+    options: AddOptions;
+    selectedPluginNames: string[];
+    agents: AgentType[];
+  };
   "find.fetchInventory": {
     cwd: string;
     sourceInput: string;
@@ -157,6 +178,8 @@ export type BackgroundTaskResultMap = {
   "list.scanInventory": ListScanInventoryTaskResult;
   "add.fetchOrDiscover": AddFetchOrDiscoverTaskResult;
   "add.install": AddInstallTaskResult;
+  "plugin.add.fetchOrDiscover": PluginAddFetchOrDiscoverTaskResult;
+  "plugin.add.install": PluginAddInstallTaskResult;
   "find.fetchInventory": FindInventoryTaskResult;
   "validate.run": ValidateRunTaskResult;
   "test.blocking": TestBlockingTaskResult;
