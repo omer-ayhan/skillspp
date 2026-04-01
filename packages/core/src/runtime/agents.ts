@@ -469,7 +469,7 @@ export function resolveAddPluginAgentSelectionRows(
           label: `${info.displayName} (global)`,
           pluginsDir: info.globalPluginsDir,
         }))
-      : Object.entries(STANDARD_AGENTS).map(([agent, info]) => ({
+      : Object.entries(AGENTS).map(([agent, info]) => ({
           agent: agent as AgentType,
           label: info.displayName,
           pluginsDir: info.projectPluginsDir,

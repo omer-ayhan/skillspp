@@ -1,6 +1,7 @@
 export type {
   HostProvider,
   ProviderMatch,
+  RemotePlugin,
   RemoteSkill,
   WellKnownFetchOptions,
   WellKnownProvider,

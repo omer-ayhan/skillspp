@@ -6,7 +6,6 @@ import {
   detectInstalledAgents,
   filterInstalledAgents,
   getAgentSkillsDir,
-  getAgentPluginsDir,
   resolveAgents,
 } from "./agents";
 import {
@@ -20,6 +19,7 @@ import type {
   AgentType,
   InstallMode,
   ParsedSource,
+  Plugin,
   Skill,
 } from "../contracts/runtime-types";
 import { installSkill, installPlugin } from "./installer";
@@ -49,7 +49,13 @@ import {
   stageRemoteSkillFilesToTempDir,
 } from "../sources/skills";
 import {
+  discoverPluginsAsync,
+  stageRemotePluginFilesToTempDir,
+} from "../sources/plugins";
+import {
+  resolveCatalogPlugins,
   resolveCatalogSkills,
+  resolveWellKnownPlugins,
   resolveWellKnownSkills,
 } from "../sources/source-resolution";
 import {
@@ -68,6 +74,8 @@ import type {
   ListDetectAgentsTaskResult,
   ListInventoryRow,
   ListScanInventoryTaskResult,
+  PluginAddFetchOrDiscoverTaskResult,
+  PluginAddInstallTaskResult,
   UpdateApplyTaskResult,
   UpdateAssessTaskResult,
   UpdateMigrateTaskResult,
@@ -278,6 +286,11 @@ type StagedRemoteSkill = {
   cleanup: () => void;
 };
 
+type StagedRemotePlugin = {
+  plugin: Plugin;
+  cleanup: () => void;
+};
+
 function buildRemoteSkill(remote: {
   installName: string;
   description: string;
@@ -292,6 +305,29 @@ function buildRemoteSkill(remote: {
     },
     cleanup: staged.cleanup,
   };
+}
+
+async function buildRemotePlugin(remote: {
+  installName: string;
+  files: Map<string, string>;
+}): Promise<StagedRemotePlugin> {
+  const staged = stageRemotePluginFilesToTempDir(remote.installName, remote.files);
+
+  try {
+    const plugins = await discoverPluginsAsync(staged.path, [remote.installName]);
+    const plugin = plugins[0];
+    if (!plugin) {
+      throw new Error(`Plugin '${remote.installName}' is missing plugin.json`);
+    }
+
+    return {
+      plugin,
+      cleanup: staged.cleanup,
+    };
+  } catch (error) {
+    staged.cleanup();
+    throw error;
+  }
 }
 
 async function runCheckScanTask(
@@ -790,6 +826,74 @@ async function resolveAddSourceSkills(
   }
 }
 
+async function resolveAddSourcePlugins(
+  sourceInput: string,
+  options: AddOptions,
+  emitProgress: ProgressReporter,
+): Promise<PluginAddFetchOrDiscoverTaskResult> {
+  const parsed = parseSource(sourceInput);
+  const requestedPlugins = options.skill;
+
+  if (parsed.type === "well-known" || parsed.type === "catalog") {
+    await emitProgress("fetching plugin index");
+    const remotePlugins =
+      parsed.type === "well-known"
+        ? await resolveWellKnownPlugins(parsed.url, options)
+        : await resolveCatalogPlugins(parsed.url, options);
+    if (remotePlugins.length === 0) {
+      throw new Error("No plugins found at remote endpoint");
+    }
+
+    const selectedRemotePlugins =
+      requestedPlugins && !requestedPlugins.includes("*")
+        ? remotePlugins.filter((remote) =>
+            requestedPlugins.includes(remote.installName),
+          )
+        : remotePlugins;
+
+    const discoveredPlugins: Plugin[] = [];
+    for (const remote of selectedRemotePlugins) {
+      const staged = await buildRemotePlugin(remote);
+      try {
+        discoveredPlugins.push(staged.plugin);
+      } finally {
+        staged.cleanup();
+      }
+    }
+
+    if (discoveredPlugins.length === 0) {
+      throw new Error("No plugins found in source");
+    }
+    return {
+      plugins: discoveredPlugins.map((plugin) => ({
+        name: plugin.name,
+        description: plugin.description,
+      })),
+    };
+  }
+
+  await emitProgress("loading source");
+  const prepared = await prepareSourceDirAsync(
+    parsed as Exclude<ParsedSource, { type: "well-known" | "catalog" }>,
+  );
+  try {
+    const plugins = await discoverPluginsAsync(prepared.basePath, requestedPlugins);
+    if (plugins.length === 0) {
+      throw new Error("No plugins found in source");
+    }
+    return {
+      plugins: plugins.map((plugin) => ({
+        name: plugin.name,
+        description: plugin.description,
+      })),
+    };
+  } finally {
+    if (prepared.cleanup) {
+      prepared.cleanup();
+    }
+  }
+}
+
 async function installSelectedAddSkills(
   payload: BackgroundTaskRequest<"add.install">["payload"],
   emitProgress: ProgressReporter,
@@ -1013,6 +1117,227 @@ async function installSelectedAddSkills(
   }
 }
 
+async function installSelectedAddPlugins(
+  payload: BackgroundTaskRequest<"plugin.add.install">["payload"],
+  emitProgress: ProgressReporter,
+): Promise<PluginAddInstallTaskResult> {
+  const parsedSource = parseSource(payload.sourceInput);
+  const globalInstall = resolveAddGlobalInstall(payload.options);
+  const mode = resolveAddInstallMode(payload.options);
+
+  if (parsedSource.type === "well-known" || parsedSource.type === "catalog") {
+    await emitProgress("fetching selected plugins");
+    const remotePlugins =
+      parsedSource.type === "well-known"
+        ? await resolveWellKnownPlugins(parsedSource.url, payload.options)
+        : await resolveCatalogPlugins(parsedSource.url, payload.options);
+    const remoteByName = new Map(
+      remotePlugins.map((remote) => [remote.installName, remote]),
+    );
+
+    const tempCleanups: Array<() => void> = [];
+    const stagedSelected: Plugin[] = [];
+    const sourceHashesBefore = new Map<string, string>();
+
+    try {
+      for (const pluginName of payload.selectedPluginNames) {
+        const remote = remoteByName.get(pluginName);
+        if (!remote) {
+          throw new Error("No matching plugins found in source");
+        }
+        const staged = await buildRemotePlugin(remote);
+        tempCleanups.push(staged.cleanup);
+        stagedSelected.push(staged.plugin);
+        sourceHashesBefore.set(
+          staged.plugin.path,
+          hashDirectory(staged.plugin.path),
+        );
+      }
+
+      const missingInstallerPluginDirs = listSkillsMissingInstallerConfig(
+        stagedSelected.map((item) => item.path),
+      );
+      const scaffoldFormat = resolveAddInstallerScaffoldFormat(
+        payload.options,
+        missingInstallerPluginDirs.length,
+      );
+      if (scaffoldFormat) {
+        scaffoldInstallerConfigForSkills(
+          missingInstallerPluginDirs,
+          scaffoldFormat,
+        );
+      }
+
+      for (const localPlugin of stagedSelected) {
+        const remote = remoteByName.get(localPlugin.name);
+        if (!remote) {
+          throw new Error(
+            `Could not resolve remote metadata for selected plugin '${localPlugin.name}'`,
+          );
+        }
+
+        const sourceHash =
+          sourceHashesBefore.get(localPlugin.path) ||
+          hashDirectory(localPlugin.path);
+        const sourceCanonical = canonicalSourceIdentity({
+          parsedSource,
+          wellKnownSourceUrl: remote.sourceUrl,
+        });
+
+        await emitProgress(`installing ${localPlugin.name}`);
+        const preparedInstaller = await prepareInstallerArtifacts(
+          localPlugin.path,
+          payload.cwd,
+          {
+            sourceType: parsedSource.type,
+            policyMode: payload.options.policyMode || "enforce",
+            trustWellKnown: Boolean(payload.options.trustWellKnown),
+          },
+        );
+        const outcome = installPlugin(
+          localPlugin,
+          payload.agents as AgentType[],
+          {
+            mode,
+            globalInstall,
+            cwd: payload.cwd,
+          },
+        );
+
+        try {
+          await applyInstallerArtifacts(outcome.canonicalDir, preparedInstaller);
+          writeLockEntryAfterInstall({
+            globalInstall,
+            cwd: payload.cwd,
+            sourceInput: payload.sourceInput,
+            sourceType: parsedSource.type,
+            sourceCanonical,
+            sourcePinnedRef: sourceHash,
+            sourceSkillName: remote.installName,
+            sourceHash,
+            wellKnownSourceUrl: remote.sourceUrl,
+            outcome,
+            mode,
+            lockFormat: payload.options.lockFormat,
+          });
+        } finally {
+          cleanupPreparedInstallerArtifacts(preparedInstaller);
+        }
+      }
+    } finally {
+      for (const cleanup of tempCleanups) {
+        cleanup();
+      }
+    }
+
+    return {
+      installedPluginNames: [...payload.selectedPluginNames],
+      agentCount: payload.agents.length,
+    };
+  }
+
+  await emitProgress("loading source");
+  const prepared = await prepareSourceDirAsync(
+    parsedSource as Exclude<ParsedSource, { type: "well-known" | "catalog" }>,
+  );
+
+  try {
+    const sourceCanonical = canonicalSourceIdentity({ parsedSource });
+    const sourcePinnedRef =
+      parsedSource.type === "github" || parsedSource.type === "git"
+        ? await resolveGitHeadRefAsync(prepared.basePath)
+        : undefined;
+    const sourceIsSymlink =
+      parsedSource.type === "local"
+        ? isLocalSymlinkSource(parsedSource.localPath)
+        : undefined;
+    const selected = await discoverPluginsAsync(
+      prepared.basePath,
+      payload.selectedPluginNames,
+    );
+    if (selected.length === 0) {
+      throw new Error("No matching plugins found in source");
+    }
+
+    const sourceHashesBefore = new Map(
+      selected.map((plugin) => [plugin.path, hashDirectory(plugin.path)]),
+    );
+    const missingInstallerPluginDirs = listSkillsMissingInstallerConfig(
+      selected.map((plugin) => plugin.path),
+    );
+    const scaffoldFormat = resolveAddInstallerScaffoldFormat(
+      payload.options,
+      missingInstallerPluginDirs.length,
+    );
+    if (scaffoldFormat) {
+      scaffoldInstallerConfigForSkills(
+        missingInstallerPluginDirs,
+        scaffoldFormat,
+      );
+    }
+
+    for (const plugin of selected) {
+      const sourceResolvedPath =
+        parsedSource.type === "local"
+          ? resolveSafeRealPath(plugin.path)
+          : undefined;
+
+      await emitProgress(`installing ${plugin.name}`);
+      const sourceSkillPath =
+        path.relative(prepared.basePath, plugin.path) || ".";
+      const preparedInstaller = await prepareInstallerArtifacts(
+        plugin.path,
+        payload.cwd,
+        {
+          sourceType: parsedSource.type,
+          policyMode: payload.options.policyMode || "enforce",
+          trustWellKnown: Boolean(payload.options.trustWellKnown),
+        },
+      );
+      const outcome = installPlugin(plugin, payload.agents as AgentType[], {
+        mode,
+        globalInstall,
+        cwd: payload.cwd,
+      });
+
+      try {
+        await applyInstallerArtifacts(outcome.canonicalDir, preparedInstaller);
+        writeLockEntryAfterInstall({
+          globalInstall,
+          cwd: payload.cwd,
+          sourceInput: payload.sourceInput,
+          sourceType: parsedSource.type,
+          sourceCanonical,
+          sourcePinnedRef,
+          sourceResolvedPath,
+          sourceIsSymlink,
+          sourceSkillName: plugin.name,
+          sourceSkillPath,
+          sourceHash: sourceHashForInstalledSkill({
+            parsedSource,
+            skillPath: plugin.path,
+            beforeHash: sourceHashesBefore.get(plugin.path),
+          }),
+          outcome,
+          mode,
+          lockFormat: payload.options.lockFormat,
+        });
+      } finally {
+        cleanupPreparedInstallerArtifacts(preparedInstaller);
+      }
+    }
+
+    return {
+      installedPluginNames: selected.map((plugin) => plugin.name),
+      agentCount: payload.agents.length,
+    };
+  } finally {
+    if (prepared.cleanup) {
+      prepared.cleanup();
+    }
+  }
+}
+
 async function runFindFetchInventoryTask(
   sourceInput: string,
   options: BackgroundTaskRequest<"find.fetchInventory">["payload"]["options"],
@@ -1127,6 +1452,14 @@ export async function executeBackgroundTask(
       );
     case "add.install":
       return await installSelectedAddSkills(request.payload, emitProgress);
+    case "plugin.add.fetchOrDiscover":
+      return await resolveAddSourcePlugins(
+        request.payload.sourceInput,
+        request.payload.options,
+        emitProgress,
+      );
+    case "plugin.add.install":
+      return await installSelectedAddPlugins(request.payload, emitProgress);
     case "find.fetchInventory":
       return await runFindFetchInventoryTask(
         request.payload.sourceInput,

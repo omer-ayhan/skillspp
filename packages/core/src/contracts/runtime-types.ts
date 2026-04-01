@@ -62,6 +62,12 @@ export type Skill = {
   path: string;
 };
 
+export type Plugin = {
+  name: string;
+  description: string;
+  path: string;
+};
+
 export type AddOptions = {
   global?: boolean;
   agent?: string[];
