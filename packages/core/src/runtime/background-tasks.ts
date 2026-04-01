@@ -6,7 +6,6 @@ import {
   detectInstalledAgents,
   filterInstalledAgents,
   getAgentSkillsDir,
-  getAgentPluginsDir,
   resolveAgents,
 } from "./agents";
 import {
