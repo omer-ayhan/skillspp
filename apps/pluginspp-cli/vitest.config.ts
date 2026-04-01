@@ -11,7 +11,10 @@ export default mergeConfig(
   defineConfig({
     plugins: [
       tsconfigPaths({
-        projects: [path.resolve(__dirname, "tsconfig.json")],
+        projects: [
+          path.resolve(__dirname, "tsconfig.json"),
+          path.resolve(__dirname, "../../packages/platform-node/tsconfig.json"),
+        ],
       }),
     ],
     test: {
@@ -20,7 +23,7 @@ export default mergeConfig(
         provider: "v8",
         reporter: ["text", "lcov"],
         reportsDirectory: "./coverage",
-        include: ["src/command-builder.ts"],
+        include: ["src/runtime/background-runner.ts"],
         thresholds: {
           lines: 85,
           functions: 85,
