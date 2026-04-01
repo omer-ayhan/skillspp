@@ -66,7 +66,11 @@ function createPluginSourceRepo(
     const pluginDir = path.join(pluginsRoot, fixture.folderName);
     fs.mkdirSync(pluginDir, { recursive: true });
     if (fixture.writeManifest === false) {
-      fs.writeFileSync(path.join(pluginDir, "README.md"), "placeholder", "utf8");
+      fs.writeFileSync(
+        path.join(pluginDir, "README.md"),
+        "placeholder",
+        "utf8",
+      );
       continue;
     }
 
