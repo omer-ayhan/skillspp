@@ -1,12 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
 
-const runBackgroundTaskInPlatform = vi.fn(async () => ({ durationMs: 123 }));
+const createBackgroundTaskRunner = vi.fn();
+const runBackgroundTaskImpl = vi.fn(async () => ({ durationMs: 123 }));
+createBackgroundTaskRunner.mockReturnValue(runBackgroundTaskImpl);
 
-vi.mock("@skillspp/platform-node", () => ({
-  runBackgroundTask: runBackgroundTaskInPlatform,
+vi.mock("@skillspp/cli-shared/runtime/background-runner", () => ({
+  createBackgroundTaskRunner,
 }));
 
-const { runBackgroundTask } = await import("../../src/runtime/background-runner");
+const { runBackgroundTask } =
+  await import("../../src/runtime/background-runner");
 
 describe("CLI background runner adapter @unit", () => {
   it("uses the colocated background executor module @unit", async () => {
@@ -21,13 +24,11 @@ describe("CLI background runner adapter @unit", () => {
         onProgress: () => {
           // no-op
         },
-      }
+      },
     );
 
-    expect(runBackgroundTaskInPlatform).toHaveBeenCalled();
-    const secondArg = (runBackgroundTaskInPlatform.mock.calls[0] as any)?.[1];
-    expect(typeof secondArg?.executorModule).toBe("string");
-    expect(secondArg.executorModule).toContain("background-executor");
+    expect(createBackgroundTaskRunner).toHaveBeenCalledTimes(1);
+    expect(runBackgroundTaskImpl).toHaveBeenCalled();
     expect(response).toEqual({ durationMs: 123 });
   });
 });

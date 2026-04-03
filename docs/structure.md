@@ -147,7 +147,8 @@ apps/pluginspp-cli/
 Purpose:
 
 - User-facing CLI for plugin installation and lifecycle workflows.
-- Mirrors the `skillspp add` transport/UI flow while routing installs to agent plugin cache directories.
+- Reuses shared transport/UI primitives from `packages/cli-shared`.
+- Routes plugin lifecycle flows to agent plugin cache directories instead of skill directories.
 
 Entry:
 

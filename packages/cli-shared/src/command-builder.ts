@@ -15,21 +15,21 @@ export type CliCommandContext = {
       error?: string;
       metadata?: Record<string, unknown>;
       source?: string;
-    }
+    },
   ) => void;
   wrapAction: <TArgs extends unknown[]>(
     command: string,
-    action: (...args: TArgs) => Promise<void>
+    action: (...args: TArgs) => Promise<void>,
   ) => (...args: TArgs) => Promise<void>;
 };
 
 export function createCliCommandContext(
   emitter: TelemetryEmitter,
-  options: { experimental?: boolean } = {}
+  options: { experimental?: boolean } = {},
 ): CliCommandContext {
   const emitCommandEvent: CliCommandContext["emitCommandEvent"] = (
     command,
-    event
+    event,
   ) => {
     emitLifecycleEvent(emitter, {
       eventType: event.eventType,
@@ -48,7 +48,7 @@ export function createCliCommandContext(
     wrapAction:
       <TArgs extends unknown[]>(
         command: string,
-        action: (...args: TArgs) => Promise<void>
+        action: (...args: TArgs) => Promise<void>,
       ) =>
       async (...args: TArgs): Promise<void> => {
         emitCommandEvent(command, {
@@ -88,7 +88,7 @@ export function applyExitOverride(command: Command): void {
 }
 
 export function isGracefulCommanderExit(
-  error: unknown
+  error: unknown,
 ): error is CommanderError {
   return (
     error instanceof CommanderError &&
@@ -104,7 +104,7 @@ type InferCommandSourceOptions = {
 
 export function inferCommandSource(
   argv: string[],
-  options: InferCommandSourceOptions = {}
+  options: InferCommandSourceOptions = {},
 ): string {
   const valueFlags = new Set(options.valueFlags ?? []);
 
@@ -127,7 +127,7 @@ export function emitCommanderParseErrorTelemetry(
   emitter: TelemetryEmitter,
   argv: string[],
   error: CommanderError,
-  options: InferCommandSourceOptions = {}
+  options: InferCommandSourceOptions = {},
 ): void {
   const source = inferCommandSource(argv, options);
   emitLifecycleEvent(emitter, {
@@ -145,7 +145,7 @@ export function emitCommanderParseErrorTelemetry(
 
 export async function parseStandaloneCommand(
   command: Command,
-  args: string[]
+  args: string[],
 ): Promise<void> {
   applyExitOverride(command);
 

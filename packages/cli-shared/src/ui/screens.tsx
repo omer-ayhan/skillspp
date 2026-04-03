@@ -1,3 +1,4 @@
+<<<<<<<< HEAD:packages/cli-shared/src/ui/screens.tsx
 import { stripVTControlCharacters } from "node:util";
 import React, { type ReactNode, useEffect, useState } from "react";
 import { Box, Text, render, useInput, useStdout } from "ink";
@@ -1054,3 +1055,6 @@ export function Spinner({ label }: { label: string }) {
     <Text>{`  ${colorToken(frames[frameIndex], "primary")} ${label}`}</Text>
   );
 }
+========
+export * from "@skillspp/cli-shared/ui/screens";
+>>>>>>>> 23a2c2a (feat(cli): add shared ui package (#20)):apps/skillspp-cli/src/ui/screens.tsx

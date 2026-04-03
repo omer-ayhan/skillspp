@@ -36,7 +36,9 @@ let staticCache: string[] | null | undefined;
 let configuredSessionPath: string | null = null;
 let configuredStaticPath: string | null = null;
 
-function normalizeConfiguredPath(filePath: string | null | undefined): string | null {
+function normalizeConfiguredPath(
+  filePath: string | null | undefined,
+): string | null {
   if (typeof filePath !== "string") {
     return null;
   }
