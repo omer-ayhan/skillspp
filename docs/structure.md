@@ -13,6 +13,7 @@ Companion doc: see docs/agent-context.md for coding-agent focused guidance.
 │   └── skillspp-mcp/
 ├── assets/
 ├── packages/
+│   ├── cli-shared/
 │   ├── core/
 │   ├── platform-node/
 │   └── test-kit/
@@ -67,6 +68,7 @@ Purpose:
 
 - User-facing CLI transport layer.
 - Command parsing, interactive UX, telemetry forwarding, and command wiring.
+- Reuses shared transport/UI primitives from `packages/cli-shared`.
 
 Entry:
 
@@ -102,7 +104,8 @@ apps/pluginspp-cli/
 Purpose:
 
 - User-facing CLI for plugin installation and lifecycle workflows.
-- Mirrors the `skillspp add` transport/UI flow while routing installs to agent plugin cache directories.
+- Reuses shared transport/UI primitives from `packages/cli-shared`.
+- Routes plugin lifecycle flows to agent plugin cache directories instead of skill directories.
 
 Entry:
 
@@ -129,6 +132,29 @@ Entry:
 - src/index.ts
 
 ## Packages
+
+### packages/cli-shared
+
+```text
+packages/cli-shared/
+├── src/
+│   ├── command-builder.ts
+│   ├── interactive.ts
+│   ├── runtime/
+│   │   └── background-runner.ts
+│   └── ui/
+│       ├── colors.ts
+│       ├── format.ts
+│       ├── logo.ts
+│       ├── screens.tsx
+│       └── selection-step.tsx
+└── tests/
+```
+
+Purpose:
+
+- Shared CLI transport helpers used by both `skillspp-cli` and `pluginspp-cli`.
+- Houses command context wrapping, interactive helpers, background-task runner adapter, and shared Ink UI primitives.
 
 ### packages/core
 
@@ -203,14 +229,15 @@ Purpose:
 
    - apps/skillspp-cli/src/cli.ts creates a Commander program.
    - Commands are registered from apps/skillspp-cli/src/commands/\*.
-   - Command actions are wrapped via command-builder context for telemetry.
+   - Command actions are wrapped via `packages/cli-shared` command-builder context for telemetry.
    - Runtime calls route into @skillspp/platform-node services, which delegate to @skillspp/core contracts/services.
 
 2. Plugins CLI path:
 
    - apps/pluginspp-cli/src/cli.ts creates a Commander program.
    - Commands are registered from apps/pluginspp-cli/src/commands/\*.
-   - Add-flow background work routes through apps/pluginspp-cli/src/runtime/\* into @skillspp/core runtime task handlers.
+   - Shared interactive/runtime helpers are consumed from `packages/cli-shared`.
+   - Background work routes through apps/pluginspp-cli/src/runtime/\* into @skillspp/core runtime task handlers.
 
 3. MCP path:
    - apps/skillspp-mcp/src/index.ts reads stdio JSON-RPC messages.
@@ -222,10 +249,14 @@ Purpose:
 Configured primarily in:
 
 - apps/skillspp-cli/tsconfig.json
+- apps/pluginspp-cli/tsconfig.json
+- packages/cli-shared/tsconfig.json
 - packages/platform-node/tsconfig.json
 
 Common aliases:
 
+- @skillspp/cli-shared
+- @skillspp/cli-shared/\* subpaths
 - @skillspp/core
 - @skillspp/core/\* subpaths (contracts, sources, runtime, and specific modules)
 - @skillspp/platform-node
@@ -233,6 +264,7 @@ Common aliases:
 ## Conventions
 
 - Keep apps as transport layers; business logic belongs in packages/core.
+- Keep shared CLI transport/UI helpers in packages/cli-shared rather than copying them between apps.
 - Prefer explicit @skillspp/core subpath imports in apps.
 - Run scripts/check-boundaries.sh before lint/test-sensitive changes.
 - Keep package public APIs aligned with package.json exports.

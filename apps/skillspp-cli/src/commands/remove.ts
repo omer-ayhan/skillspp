@@ -173,7 +173,12 @@ function renderRemoveUninstallSummaryBox(options: {
   skillNames: string[];
   agentDisplayNames: string[];
 }) {
-  return uninstallSummarySection(options);
+  return uninstallSummarySection({
+    globalInstall: options.globalInstall,
+    itemNames: options.skillNames,
+    itemLabel: "Skills",
+    agentDisplayNames: options.agentDisplayNames,
+  });
 }
 
 type InstallIndex = {
