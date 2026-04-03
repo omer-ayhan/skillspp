@@ -78,6 +78,9 @@ Entry:
 
 ```text
 apps/pluginspp-cli/
+├── assets/
+│   └── ascii/
+│       └── logo/
 ├── src/
 │   ├── cli.ts
 │   ├── command-builder.ts
@@ -115,6 +118,9 @@ Entry:
 
 ```text
 apps/pluginspp-cli/
+├── assets/
+│   └── ascii/
+│       └── logo/
 ├── src/
 │   ├── cli.ts
 │   ├── command-builder.ts
