@@ -5,6 +5,8 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
+      "@skillspp/cli-shared": ["../../packages/cli-shared/src/index.ts"],
+      "@skillspp/cli-shared/*": ["../../packages/cli-shared/src/*"],
       "@skillspp/core": ["../../packages/core/src/index.ts"],
       "@skillspp/core/lockfile": ["../../packages/core/src/runtime/lockfile.ts"],
       "@skillspp/core/telemetry": ["../../packages/core/src/runtime/telemetry.ts"],

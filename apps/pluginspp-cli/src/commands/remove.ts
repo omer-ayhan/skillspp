@@ -347,7 +347,7 @@ async function executeRemove(
       "target candidates resolved",
       "interactive session ready",
     ]),
-    sourceSection(shortenHomePath(cwd)),
+    sourceSection(shortenHomePath(cwd), "Plugins source"),
   ]);
 
   let renderedPluginsPanel = false;

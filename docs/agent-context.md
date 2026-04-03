@@ -11,6 +11,7 @@ Use docs/structure.md for the complete map of where code lives.
   - pluginspp CLI app (apps/pluginspp-cli)
   - skillspp MCP server app (apps/skillspp-mcp)
 - Shared logic: packages/core.
+- Shared CLI transport/UI helpers: packages/cli-shared.
 - Node adapter implementation: packages/platform-node.
 
 ## Architectural Boundaries
@@ -20,6 +21,7 @@ Use docs/structure.md for the complete map of where code lives.
 - apps should not use broad @skillspp/core root barrel imports.
 - avoid deep cross-workspace private src imports.
 - core exports and platform-node exports are intentionally constrained.
+- cross-CLI reuse belongs in packages/cli-shared, not app-to-app imports.
 
 Enforced by:
 
@@ -30,6 +32,8 @@ Enforced by:
 - CLI entry: apps/skillspp-cli/src/cli.ts
 - Plugins CLI entry: apps/pluginspp-cli/src/cli.ts
 - Plugins add flow: apps/pluginspp-cli/src/commands/add.ts
+- Plugins update flow: apps/pluginspp-cli/src/commands/update.ts
+- Shared CLI runner/UI primitives: packages/cli-shared/src/*
 - MCP entry: apps/skillspp-mcp/src/index.ts
 - MCP request routing: apps/skillspp-mcp/src/request-handler.ts
 - Node core service composition: packages/platform-node/src/index.ts
@@ -62,15 +66,17 @@ pnpm --filter skillspp run test:unit
 - Prefer minimal diffs and preserve existing style.
 - Do not reformat unrelated files.
 - Keep transport concerns in apps and business rules in packages/core.
+- Keep duplicated CLI-only helpers out of apps; extract them to packages/cli-shared.
 - Update tests when behavior changes.
 - If touching import/export surfaces, run boundary checks and typecheck.
-- `pluginspp-cli` reuses transport-only UI/runtime files locally; do not import those files from `skillspp-cli`.
+- `pluginspp-cli` must not import transport/UI/runtime files from `skillspp-cli`; reuse `packages/cli-shared` instead.
 
 ## Known Implementation Notes
 
 - platform-node currently has full validate path and partial command-port coverage for other operations.
 - skillspp-mcp currently exposes validation-oriented tooling via request-handler.
-- `pluginspp add` mirrors `skillspp add` UX but installs into agent plugin cache directories, not skill directories.
+- `pluginspp` reuses shared CLI transport primitives from `packages/cli-shared`.
+- `pluginspp add/remove/update` operate on agent plugin cache directories and plugin lock/state artifacts, not skill directories.
 
 ## Read Before Large Changes
 

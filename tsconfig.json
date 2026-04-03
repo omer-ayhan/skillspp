@@ -1,6 +1,7 @@
 {
   "files": [],
   "references": [
+    { "path": "packages/cli-shared" },
     { "path": "packages/core" },
     { "path": "packages/platform-node" },
     { "path": "packages/test-kit" },

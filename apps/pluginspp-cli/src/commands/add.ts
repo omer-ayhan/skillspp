@@ -247,7 +247,7 @@ async function printAddListScreen(options: {
   plugins: SourcePlugin[];
 }): Promise<void> {
   await renderStaticScreen([
-    sourceSection(shortenHomePath(options.sourceLabel)),
+    sourceSection(shortenHomePath(options.sourceLabel), "Plugins source"),
     renderAddPluginsSection({
       plugins: options.plugins,
       selectedNames: options.plugins.map((plugin) => plugin.name),
@@ -656,7 +656,9 @@ async function executeAdd(
     ]);
 
     if (!merged.list) {
-      await renderStaticScreen([sourceSection(shortenHomePath(sourceLabel))]);
+      await renderStaticScreen([
+        sourceSection(shortenHomePath(sourceLabel), "Plugins source"),
+      ]);
     }
 
     const selected = await resolveAddPlugins(
