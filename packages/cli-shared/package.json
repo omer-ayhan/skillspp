@@ -1,0 +1,72 @@
+{
+  "name": "@skillspp/cli-shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./command-builder": {
+      "types": "./dist/command-builder.d.ts",
+      "default": "./dist/command-builder.js"
+    },
+    "./interactive": {
+      "types": "./dist/interactive.d.ts",
+      "default": "./dist/interactive.js"
+    },
+    "./runtime/background-runner": {
+      "types": "./dist/runtime/background-runner.d.ts",
+      "default": "./dist/runtime/background-runner.js"
+    },
+    "./ui/colors": {
+      "types": "./dist/ui/colors.d.ts",
+      "default": "./dist/ui/colors.js"
+    },
+    "./ui/format": {
+      "types": "./dist/ui/format.d.ts",
+      "default": "./dist/ui/format.js"
+    },
+    "./ui/logo": {
+      "types": "./dist/ui/logo.d.ts",
+      "default": "./dist/ui/logo.js"
+    },
+    "./ui/screens": {
+      "types": "./dist/ui/screens.d.ts",
+      "default": "./dist/ui/screens.js"
+    },
+    "./ui/selection-step": {
+      "types": "./dist/ui/selection-step.d.ts",
+      "default": "./dist/ui/selection-step.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test:unit": "vitest run --config vitest.config.ts -t '@unit'",
+    "test:integration": "vitest run --config vitest.config.ts -t '@integration'",
+    "test:contract": "vitest run --config vitest.config.ts -t '@contract'",
+    "test:e2e": "vitest run --config vitest.config.ts -t '@e2e'",
+    "test:ci": "vitest run --config vitest.config.ts --coverage",
+    "lint": "eslint src --max-warnings 0"
+  },
+  "dependencies": {
+    "@skillspp/core": "workspace:*",
+    "@skillspp/platform-node": "workspace:*",
+    "commander": "^14.0.3",
+    "ink": "^6.8.0",
+    "react": "^19.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.4.0",
+    "@types/react": "^19.1.13",
+    "@vitest/coverage-v8": "^3.2.4",
+    "typescript": "^5.9.2",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4"
+  }
+}
