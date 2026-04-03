@@ -762,7 +762,7 @@ function configureAddCommand(
     .description("Install plugins from local path or git source")
     .argument("<source>", "Plugin source path or URL")
     .option("-a, --agent <agents...>", "Target agent(s) for installation")
-    .option("-s, --plugin <plugins...>", "Install only selected plugin(s)")
+    .option("-p, --plugin <plugins...>", "Install only selected plugin(s)")
     .option("-l, --list", "List plugins from source without installing")
     .option("--symlink", "Install by symlinking files to all agents")
     .option(

@@ -170,20 +170,26 @@ export function installSkill(
     options.globalInstall,
     options.cwd,
   );
-  const canonicalDir = installToCanonicalDir(skill.path, skillName, canonicalBase);
+  const canonicalDir = installToCanonicalDir(
+    skill.path,
+    skillName,
+    canonicalBase,
+  );
 
   const installedTo = [
     { agent: canonicalAgent, path: canonicalDir, mode: options.mode },
-    ...uniqueAgents.slice(1).map((agent) =>
-      installSkillToAgent(
-        skillName,
-        canonicalDir,
-        agent,
-        options.mode,
-        options.globalInstall,
-        options.cwd,
+    ...uniqueAgents
+      .slice(1)
+      .map((agent) =>
+        installSkillToAgent(
+          skillName,
+          canonicalDir,
+          agent,
+          options.mode,
+          options.globalInstall,
+          options.cwd,
+        ),
       ),
-    ),
   ];
 
   return {
@@ -218,16 +224,18 @@ export function installPlugin(
 
   const installedTo = [
     { agent: canonicalAgent, path: canonicalDir, mode: options.mode },
-    ...uniqueAgents.slice(1).map((agent) =>
-      installPluginToAgent(
-        pluginName,
-        canonicalDir,
-        agent,
-        options.mode,
-        options.globalInstall,
-        options.cwd,
+    ...uniqueAgents
+      .slice(1)
+      .map((agent) =>
+        installPluginToAgent(
+          pluginName,
+          canonicalDir,
+          agent,
+          options.mode,
+          options.globalInstall,
+          options.cwd,
+        ),
       ),
-    ),
   ];
 
   return {
