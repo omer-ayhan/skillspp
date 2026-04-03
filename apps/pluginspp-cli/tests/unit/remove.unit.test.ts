@@ -1,14 +1,16 @@
 import { Command } from "commander";
 import { describe, expect, it } from "vitest";
 import { createTelemetryEmitter } from "@skillspp/core/telemetry";
-import { createCliCommandContext } from "../../src/command-builder";
+import { createCliCommandContext } from "@skillspp/cli-shared/command-builder";
 import { registerRemoveCommand } from "../../src/commands/remove";
 
 function buildRemoveCommand(): Command {
   const program = new Command().name("pluginspp").exitOverride();
   const context = createCliCommandContext(createTelemetryEmitter());
   registerRemoveCommand(program, context);
-  return program.commands.find((command) => command.name() === "remove") as Command;
+  return program.commands.find(
+    (command) => command.name() === "remove",
+  ) as Command;
 }
 
 describe("pluginspp remove command @unit", () => {

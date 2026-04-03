@@ -10,15 +10,15 @@ import {
   setAllRowsSelected,
   toggleSelectionAtVisibleIndex,
   type SelectableRowState,
-} from "./selection-step";
+} from "@skillspp/cli-shared/ui/selection-step";
 import {
   bannerSection,
   composeUiSections,
   manySelectionClosedSection,
   panelSection,
   singleSelectionClosedSection,
-} from "./screens";
-import { resetLogoCache } from "./logo";
+} from "@skillspp/cli-shared/ui/screens";
+import { resetLogoCache } from "@skillspp/cli-shared/ui/logo";
 
 const rows: SelectableRowState[] = [
   { id: "a", label: "Alpha", description: "first", selected: false },

@@ -3,7 +3,7 @@ import { createRequire } from "node:module";
 import { registerAddCommand } from "./commands/add";
 import { registerRemoveCommand } from "./commands/remove";
 import { registerUpdateCommand } from "./commands/update";
-import { createCliCommandContext } from "./command-builder";
+import { createCliCommandContext } from "@skillspp/cli-shared/command-builder";
 import {
   createTelemetryEmitter,
   emitLifecycleEvent,

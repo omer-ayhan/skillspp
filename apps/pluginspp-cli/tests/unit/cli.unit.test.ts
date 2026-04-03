@@ -3,7 +3,7 @@ import { Command } from "commander";
 import { registerAddCommand } from "../../src/commands/add";
 import { registerRemoveCommand } from "../../src/commands/remove";
 import { registerUpdateCommand } from "../../src/commands/update";
-import { createCliCommandContext } from "../../src/command-builder";
+import { createCliCommandContext } from "@skillspp/cli-shared/command-builder";
 import { createTelemetryEmitter } from "@skillspp/core/telemetry";
 
 function buildTestProgram(): Command {

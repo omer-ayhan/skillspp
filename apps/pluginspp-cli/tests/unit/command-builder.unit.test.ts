@@ -3,7 +3,7 @@ import { Command } from "commander";
 import {
   createCliCommandContext,
   parseStandaloneCommand,
-} from "../../src/command-builder";
+} from "@skillspp/cli-shared/command-builder";
 import { createTelemetryEmitter } from "@skillspp/core/telemetry";
 
 describe("createCliCommandContext @unit", () => {
@@ -67,7 +67,9 @@ describe("parseStandaloneCommand @unit", () => {
 
   it("swallows helpDisplayed commander error @unit", async () => {
     const cmd = new Command("test").helpOption("-h, --help");
-    await expect(parseStandaloneCommand(cmd, ["--help"])).resolves.toBeUndefined();
+    await expect(
+      parseStandaloneCommand(cmd, ["--help"]),
+    ).resolves.toBeUndefined();
   });
 
   it("converts other CommanderError to Error @unit", async () => {

@@ -111,6 +111,42 @@ Entry:
 
 - src/cli.ts
 
+### apps/pluginspp-cli
+
+```text
+apps/pluginspp-cli/
+├── src/
+│   ├── cli.ts
+│   ├── command-builder.ts
+│   ├── interactive.ts
+│   ├── policy-mode.ts
+│   ├── commands/
+│   │   ├── add.ts
+│   │   ├── remove.ts
+│   │   └── update.ts
+│   ├── runtime/
+│   │   ├── background-executor.ts
+│   │   ├── background-runner.ts
+│   │   └── background-task-types.ts
+│   └── ui/
+│       ├── screens.tsx
+│       ├── selection-step.tsx
+│       └── ...
+└── tests/
+    ├── e2e/
+    ├── integration/
+    └── unit/
+```
+
+Purpose:
+
+- User-facing CLI for plugin installation and lifecycle workflows.
+- Mirrors the `skillspp add` transport/UI flow while routing installs to agent plugin cache directories.
+
+Entry:
+
+- src/cli.ts
+
 ### apps/skillspp-mcp
 
 ```text
@@ -226,14 +262,12 @@ Purpose:
 ## Entry And Bootstrap Flow
 
 1. CLI path:
-
    - apps/skillspp-cli/src/cli.ts creates a Commander program.
    - Commands are registered from apps/skillspp-cli/src/commands/\*.
    - Command actions are wrapped via `packages/cli-shared` command-builder context for telemetry.
    - Runtime calls route into @skillspp/platform-node services, which delegate to @skillspp/core contracts/services.
 
 2. Plugins CLI path:
-
    - apps/pluginspp-cli/src/cli.ts creates a Commander program.
    - Commands are registered from apps/pluginspp-cli/src/commands/\*.
    - Shared interactive/runtime helpers are consumed from `packages/cli-shared`.

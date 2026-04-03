@@ -27,24 +27,24 @@ import {
   renderStaticScreen,
   showLoader,
   sourceSection,
-} from "../ui/screens";
+} from "@skillspp/cli-shared/ui/screens";
 import {
   type ManySelectionViewConfig,
   type SelectionKeyHint,
   runManySelectionStep,
   runOneSelectionStep,
   type SingleSelectionViewConfig,
-} from "../ui/selection-step";
-import { singleSelectionClosedSection } from "../ui/screens";
+} from "@skillspp/cli-shared/ui/selection-step";
+import { singleSelectionClosedSection } from "@skillspp/cli-shared/ui/screens";
 import { type LockfileFormat } from "@skillspp/core/lockfile";
-import { canUseInteractive } from "../interactive";
+import { canUseInteractive } from "@skillspp/cli-shared/interactive";
 import { parsePolicyMode } from "../policy-mode";
 import {
   parseStandaloneCommand,
   type CliCommandContext,
-} from "../command-builder";
+} from "@skillspp/cli-shared/command-builder";
 import { runBackgroundTask } from "../runtime/background-runner";
-import { shortenHomePath } from "../ui/format";
+import { shortenHomePath } from "@skillspp/cli-shared/ui/format";
 
 const PLUGIN_NAME_WIDTH = 32;
 const PLUGIN_DESC_WIDTH = 40;

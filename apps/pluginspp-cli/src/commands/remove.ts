@@ -13,11 +13,11 @@ import {
   resolveAgents,
   type SelectionRow,
 } from "@skillspp/core/agents";
-import { canUseInteractive } from "../interactive";
+import { canUseInteractive } from "@skillspp/cli-shared/interactive";
 import {
   parseStandaloneCommand,
   type CliCommandContext,
-} from "../command-builder";
+} from "@skillspp/cli-shared/command-builder";
 import {
   completedStepsSection,
   failedStepsSection,
@@ -28,15 +28,15 @@ import {
   singleSelectionClosedSection,
   sourceSection,
   uninstallSummarySection,
-} from "../ui/screens";
+} from "@skillspp/cli-shared/ui/screens";
 import {
   type ManySelectionViewConfig,
   type SelectionKeyHint,
   runManySelectionStep,
   runOneSelectionStep,
   type SingleSelectionViewConfig,
-} from "../ui/selection-step";
-import { shortenHomePath } from "../ui/format";
+} from "@skillspp/cli-shared/ui/selection-step";
+import { shortenHomePath } from "@skillspp/cli-shared/ui/format";
 
 type RemoveCommanderOptions = {
   agent?: string[];

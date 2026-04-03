@@ -7,7 +7,9 @@ import type {
   ParsedSource,
 } from "../contracts/runtime-types";
 import { parseSource } from "../sources/source-parser";
-import { AGENTS, getAgentSkillsDir } from "./agents";
+import { AGENTS, getAgentPluginsDir, getAgentSkillsDir } from "./agents";
+
+export type ResourceKind = "skill" | "plugin";
 
 export type LockedSource = {
   input: string;
@@ -39,6 +41,9 @@ export type SkillsLockfile = {
   version: 1;
   entries: LockEntry[];
 };
+
+export type ResourceLockEntry = LockEntry;
+export type ResourceLockfile = SkillsLockfile;
 
 export type LockfileFormat = "json" | "yaml";
 
@@ -156,18 +161,28 @@ function isSkillDirEntry(entry: fs.Dirent): boolean {
   return entry.isDirectory() || entry.isSymbolicLink();
 }
 
-function listInstalledSkillDirs(globalInstall: boolean, cwd: string): string[] {
+function listInstalledResourceDirs(
+  kind: ResourceKind,
+  globalInstall: boolean,
+  cwd: string,
+): string[] {
   const out = new Set<string>();
   for (const agent of Object.keys(AGENTS) as AgentType[]) {
-    const skillsRoot = getAgentSkillsDir(agent, globalInstall, cwd);
-    if (!fs.existsSync(skillsRoot) || !fs.statSync(skillsRoot).isDirectory()) {
+    const resourceRoot =
+      kind === "plugin"
+        ? getAgentPluginsDir(agent, globalInstall, cwd)
+        : getAgentSkillsDir(agent, globalInstall, cwd);
+    if (
+      !fs.existsSync(resourceRoot) ||
+      !fs.statSync(resourceRoot).isDirectory()
+    ) {
       continue;
     }
-    for (const entry of fs.readdirSync(skillsRoot, { withFileTypes: true })) {
+    for (const entry of fs.readdirSync(resourceRoot, { withFileTypes: true })) {
       if (!isSkillDirEntry(entry)) {
         continue;
       }
-      out.add(path.join(skillsRoot, entry.name));
+      out.add(path.join(resourceRoot, entry.name));
     }
   }
 
@@ -183,8 +198,16 @@ export function readLockfile(
   globalInstall: boolean,
   cwd: string,
 ): SkillsLockfile {
+  return readResourceLockfile("skill", globalInstall, cwd);
+}
+
+export function readResourceLockfile(
+  kind: ResourceKind,
+  globalInstall: boolean,
+  cwd: string,
+): ResourceLockfile {
   const entriesBySkill = new Map<string, LockEntry>();
-  for (const skillDir of listInstalledSkillDirs(globalInstall, cwd)) {
+  for (const skillDir of listInstalledResourceDirs(kind, globalInstall, cwd)) {
     const entry = readPerSkillLockfile(skillDir);
     if (!entry || typeof entry.skillName !== "string") {
       continue;
@@ -213,6 +236,16 @@ export function writeLockfile(
   lockfile: SkillsLockfile,
   format: LockfileFormat = "json",
 ): void {
+  writeResourceLockfile("skill", globalInstall, cwd, lockfile, format);
+}
+
+export function writeResourceLockfile(
+  _kind: ResourceKind,
+  _globalInstall: boolean,
+  _cwd: string,
+  lockfile: ResourceLockfile,
+  format: LockfileFormat = "json",
+): void {
   const normalized = [...lockfile.entries].sort((a, b) =>
     a.skillName.localeCompare(b.skillName),
   );
@@ -226,6 +259,13 @@ export function upsertLockEntry(
   lockfile: SkillsLockfile,
   entry: LockEntry,
 ): SkillsLockfile {
+  return upsertResourceLockEntry(lockfile, entry);
+}
+
+export function upsertResourceLockEntry(
+  lockfile: ResourceLockfile,
+  entry: ResourceLockEntry,
+): ResourceLockfile {
   const next = lockfile.entries.filter(
     (item) => item.skillName !== entry.skillName,
   );
@@ -237,9 +277,16 @@ export function removeLockEntry(
   lockfile: SkillsLockfile,
   skillName: string,
 ): SkillsLockfile {
+  return removeResourceLockEntry(lockfile, skillName);
+}
+
+export function removeResourceLockEntry(
+  lockfile: ResourceLockfile,
+  resourceName: string,
+): ResourceLockfile {
   return {
     version: 1,
-    entries: lockfile.entries.filter((item) => item.skillName !== skillName),
+    entries: lockfile.entries.filter((item) => item.skillName !== resourceName),
   };
 }
 
@@ -247,6 +294,19 @@ export function listCanonicalSkillDirs(
   globalInstall: boolean,
   cwd: string,
 ): string[] {
-  return [...new Set(listInstalledSkillDirs(globalInstall, cwd).map((dir) => path.basename(dir)))]
-    .sort((a, b) => a.localeCompare(b));
+  return listCanonicalResourceDirs("skill", globalInstall, cwd);
+}
+
+export function listCanonicalResourceDirs(
+  kind: ResourceKind,
+  globalInstall: boolean,
+  cwd: string,
+): string[] {
+  return [
+    ...new Set(
+      listInstalledResourceDirs(kind, globalInstall, cwd).map((dir) =>
+        path.basename(dir),
+      ),
+    ),
+  ].sort((a, b) => a.localeCompare(b));
 }

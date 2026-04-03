@@ -33,7 +33,7 @@ Enforced by:
 - Plugins CLI entry: apps/pluginspp-cli/src/cli.ts
 - Plugins add flow: apps/pluginspp-cli/src/commands/add.ts
 - Plugins update flow: apps/pluginspp-cli/src/commands/update.ts
-- Shared CLI runner/UI primitives: packages/cli-shared/src/*
+- Shared CLI runner/UI primitives: packages/cli-shared/src/\*
 - MCP entry: apps/skillspp-mcp/src/index.ts
 - MCP request routing: apps/skillspp-mcp/src/request-handler.ts
 - Node core service composition: packages/platform-node/src/index.ts
