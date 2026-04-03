@@ -10,6 +10,7 @@ import { registerRemoveCommand } from "./commands/remove";
 import { registerUpdateCommand } from "./commands/update";
 import { registerValidateCommand } from "./commands/validate";
 import { createCliCommandContext } from "./command-builder";
+import { configureLogoAssetPaths } from "@skillspp/cli-shared/ui/logo";
 import {
   emitLifecycleEvent,
   type TelemetryEmitter,
@@ -17,11 +18,26 @@ import {
 import { createCliTelemetryEmitter, parseTelemetrySink } from "./telemetry";
 import picocolors from "picocolors";
 import { finalizeUiSession } from "./ui/screens";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const require = createRequire(import.meta.url);
 const packageJson = require("../package.json") as { version?: unknown };
 const CLI_VERSION =
   typeof packageJson.version === "string" ? packageJson.version : "0.1.0";
+
+function resolveSkillsppLogoDir(): string {
+  const moduleDir = path.dirname(fileURLToPath(import.meta.url));
+  return path.resolve(moduleDir, "../src/assets/ascii/logo");
+}
+
+export function configureSkillsppLogoAssetPaths(): void {
+  const logoDir = resolveSkillsppLogoDir();
+  configureLogoAssetPaths({
+    sessionPath: path.join(logoDir, "skillspp-logo.session.json"),
+    textPath: path.join(logoDir, "skillspp-logo.txt"),
+  });
+}
 
 function formatCliError(error: unknown): string {
   if (error && typeof error === "object" && "code" in error) {
@@ -114,6 +130,8 @@ function emitCommanderParseErrorTelemetry(
 }
 
 export async function runCli(argv: string[]): Promise<number> {
+  configureSkillsppLogoAssetPaths();
+
   const telemetrySink = parseTelemetrySink(parseTelemetryFromArgv(argv));
   const emitter = createCliTelemetryEmitter(telemetrySink);
   const experimental = argv.includes("--experimental");

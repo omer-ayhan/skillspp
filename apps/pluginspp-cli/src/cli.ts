@@ -1,9 +1,12 @@
 import { Command, CommanderError } from "commander";
+import path from "node:path";
 import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
 import { registerAddCommand } from "./commands/add";
 import { registerRemoveCommand } from "./commands/remove";
 import { registerUpdateCommand } from "./commands/update";
 import { createCliCommandContext } from "@skillspp/cli-shared/command-builder";
+import { configureLogoAssetPaths } from "@skillspp/cli-shared/ui/logo";
 import {
   createTelemetryEmitter,
   emitLifecycleEvent,
@@ -15,6 +18,19 @@ const require = createRequire(import.meta.url);
 const packageJson = require("../package.json") as { version?: unknown };
 const CLI_VERSION =
   typeof packageJson.version === "string" ? packageJson.version : "0.1.0";
+
+function resolvePluginsppLogoDir(): string {
+  const moduleDir = path.dirname(fileURLToPath(import.meta.url));
+  return path.resolve(moduleDir, "../assets/ascii/logo");
+}
+
+export function configurePluginsppLogoAssetPaths(): void {
+  const logoDir = resolvePluginsppLogoDir();
+  configureLogoAssetPaths({
+    sessionPath: path.join(logoDir, "pluginspp-logo.session.json"),
+    textPath: path.join(logoDir, "pluginspp-logo.txt"),
+  });
+}
 
 function createProgram(emitter: TelemetryEmitter): Command {
   const program = new Command()
@@ -73,6 +89,8 @@ function emitCommanderParseErrorTelemetry(
 }
 
 export async function runCli(argv: string[]): Promise<number> {
+  configurePluginsppLogoAssetPaths();
+
   const emitter = createTelemetryEmitter();
   const program = createProgram(emitter);
 
@@ -100,17 +118,27 @@ export async function runCli(argv: string[]): Promise<number> {
   }
 }
 
-runCli(process.argv.slice(2)).then(
-  (code) => {
-    process.exit(code);
-  },
-  (error: unknown) => {
-    if (error instanceof CommanderError) {
-      process.stderr.write(`${error.message}\n`);
+function isDirectCliInvocation(): boolean {
+  const entrypoint = process.argv[1];
+  if (!entrypoint) {
+    return false;
+  }
+  return path.resolve(entrypoint) === fileURLToPath(import.meta.url);
+}
+
+if (isDirectCliInvocation()) {
+  runCli(process.argv.slice(2)).then(
+    (code) => {
+      process.exit(code);
+    },
+    (error: unknown) => {
+      if (error instanceof CommanderError) {
+        process.stderr.write(`${error.message}\n`);
+        process.exit(1);
+      }
+      const message = error instanceof Error ? error.message : String(error);
+      process.stderr.write(picocolors.red(`${message}\n`));
       process.exit(1);
-    }
-    const message = error instanceof Error ? error.message : String(error);
-    process.stderr.write(picocolors.red(`${message}\n`));
-    process.exit(1);
-  },
-);
+    },
+  );
+}
