@@ -957,6 +957,88 @@ async function resolvePluginMigrationSource(options: {
   }
 }
 
+async function resolvePluginMigrationSource(options: {
+  sourceInput: string;
+  pluginName: string;
+  addOptions: AddOptions;
+}): Promise<ResolvedPluginMigrationSource> {
+  const parsedSource = parseSource(options.sourceInput);
+
+  if (parsedSource.type === "well-known" || parsedSource.type === "catalog") {
+    const remotePlugins =
+      parsedSource.type === "well-known"
+        ? await resolveWellKnownPlugins(parsedSource.url, options.addOptions)
+        : await resolveCatalogPlugins(parsedSource.url, options.addOptions);
+    const remote = remotePlugins.find(
+      (item) => item.installName === options.pluginName,
+    );
+    if (!remote) {
+      throw new Error(
+        `Plugin '${options.pluginName}' not found in migration source`,
+      );
+    }
+    const staged = await buildRemotePlugin(remote);
+    const sourceHash = hashDirectory(staged.plugin.path);
+    return {
+      parsedSource,
+      plugin: staged.plugin,
+      sourceHash,
+      sourceCanonical: canonicalSourceIdentity({
+        parsedSource,
+        wellKnownSourceUrl: remote.sourceUrl,
+      }),
+      sourcePinnedRef: sourceHash,
+      wellKnownSourceUrl: remote.sourceUrl,
+      cleanup: staged.cleanup,
+    };
+  }
+
+  const prepared = await prepareSourceDirAsync(
+    parsedSource as Exclude<ParsedSource, { type: "well-known" | "catalog" }>,
+  );
+  try {
+    const plugins = await discoverPluginsAsync(prepared.basePath, [
+      options.pluginName,
+    ]);
+    const plugin = plugins.find((item) => item.name === options.pluginName);
+    if (!plugin) {
+      throw new Error(
+        `Plugin '${options.pluginName}' not found in migration source`,
+      );
+    }
+    const sourceHash = sourceHashForInstalledSkill({
+      parsedSource,
+      skillPath: plugin.path,
+    });
+    const sourcePinnedRef =
+      parsedSource.type === "github" || parsedSource.type === "git"
+        ? await resolveGitHeadRefAsync(prepared.basePath)
+        : undefined;
+    return {
+      parsedSource,
+      plugin,
+      sourcePluginPath: path.relative(prepared.basePath, plugin.path) || ".",
+      sourceHash,
+      sourceCanonical: canonicalSourceIdentity({ parsedSource }),
+      sourcePinnedRef,
+      sourceResolvedPath:
+        parsedSource.type === "local"
+          ? resolveSafeRealPath(plugin.path)
+          : undefined,
+      sourceIsSymlink:
+        parsedSource.type === "local"
+          ? isLocalSymlinkSource(parsedSource.localPath)
+          : undefined,
+      cleanup: prepared.cleanup,
+    };
+  } catch (error) {
+    if (prepared.cleanup) {
+      prepared.cleanup();
+    }
+    throw error;
+  }
+}
+
 async function runUpdateMigrateTask(
   payload: BackgroundTaskRequest<"update.migrate">["payload"],
   emitProgress: ProgressReporter,
