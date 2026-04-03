@@ -13,6 +13,8 @@ export default mergeConfig(
       tsconfigPaths({
         projects: [
           path.resolve(__dirname, "tsconfig.json"),
+          path.resolve(__dirname, "../../packages/cli-shared/tsconfig.json"),
+          path.resolve(__dirname, "../../packages/core/tsconfig.json"),
           path.resolve(__dirname, "../../packages/platform-node/tsconfig.json"),
         ],
       }),
