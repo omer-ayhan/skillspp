@@ -92,6 +92,21 @@ function createPluginSourceRepo(
   return { repoRoot, pluginsRoot };
 }
 
+function writePluginFile(
+  repoRoot: string,
+  pluginName: string,
+  relativePath: string,
+  content: string,
+): void {
+  const filePath = path.join(repoRoot, "plugins", pluginName, relativePath);
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, content, "utf8");
+}
+
+function readUtf8(filePath: string): string {
+  return fs.readFileSync(filePath, "utf8");
+}
+
 describe("pluginspp binary @e2e", () => {
   it("resolves and returns help output in a clean temp directory @e2e", async () => {
     const workdir = fs.mkdtempSync(
@@ -637,6 +652,255 @@ describe("pluginspp binary @e2e", () => {
       expect(result.output).toContain(
         "Plugin 'plugin-alpha' plugin.json name must match plugin folder name",
       );
+    } finally {
+      fs.rmSync(workdir, { recursive: true, force: true });
+    }
+  }, 30_000);
+
+  it("updates a locally sourced plugin in place @e2e", async () => {
+    const workdir = fs.mkdtempSync(
+      path.join(process.cwd(), "tmp-plugins-cli-update-local-"),
+    );
+    try {
+      const { repoRoot } = createPluginSourceRepo(workdir, [
+        { folderName: "plugin-alpha", description: "alpha plugin" },
+      ]);
+      writePluginFile(repoRoot, "plugin-alpha", "README.md", "alpha v1\n");
+
+      const addResult = await runCli(workdir, [
+        "add",
+        repoRoot,
+        "--agent",
+        "codex",
+        "--plugin",
+        "plugin-alpha",
+        "--non-interactive",
+      ]);
+      expect(addResult.code).toBe(0);
+
+      const installedReadme = path.join(
+        workdir,
+        ".agents",
+        "plugins",
+        "cache",
+        "plugin-alpha",
+        "README.md",
+      );
+      expect(readUtf8(installedReadme)).toBe("alpha v1\n");
+
+      writePluginFile(repoRoot, "plugin-alpha", "README.md", "alpha v2\n");
+
+      const updateResult = await runCli(workdir, [
+        "update",
+        "plugin-alpha",
+        "--non-interactive",
+      ]);
+
+      expect(updateResult.code).toBe(0);
+      expect(updateResult.output).toContain("Updated 1 plugins.");
+      expect(readUtf8(installedReadme)).toBe("alpha v2\n");
+    } finally {
+      fs.rmSync(workdir, { recursive: true, force: true });
+    }
+  }, 30_000);
+
+  it("does not mutate installed plugins during dry-run update @e2e", async () => {
+    const workdir = fs.mkdtempSync(
+      path.join(process.cwd(), "tmp-plugins-cli-update-dry-run-"),
+    );
+    try {
+      const { repoRoot } = createPluginSourceRepo(workdir, [
+        { folderName: "plugin-alpha", description: "alpha plugin" },
+      ]);
+      writePluginFile(repoRoot, "plugin-alpha", "README.md", "alpha v1\n");
+
+      const addResult = await runCli(workdir, [
+        "add",
+        repoRoot,
+        "--agent",
+        "codex",
+        "--plugin",
+        "plugin-alpha",
+        "--non-interactive",
+      ]);
+      expect(addResult.code).toBe(0);
+
+      const installedReadme = path.join(
+        workdir,
+        ".agents",
+        "plugins",
+        "cache",
+        "plugin-alpha",
+        "README.md",
+      );
+      writePluginFile(repoRoot, "plugin-alpha", "README.md", "alpha v2\n");
+
+      const updateResult = await runCli(workdir, [
+        "update",
+        "plugin-alpha",
+        "--dry-run",
+        "--non-interactive",
+      ]);
+
+      expect(updateResult.code).toBe(0);
+      expect(updateResult.output).toContain("Dry-run mode: no changes applied.");
+      expect(readUtf8(installedReadme)).toBe("alpha v1\n");
+    } finally {
+      fs.rmSync(workdir, { recursive: true, force: true });
+    }
+  }, 30_000);
+
+  it("requires exactly one plugin target for migration @e2e", async () => {
+    const workdir = fs.mkdtempSync(
+      path.join(process.cwd(), "tmp-plugins-cli-update-migrate-target-"),
+    );
+    try {
+      const updateResult = await runCli(workdir, [
+        "update",
+        "plugin-alpha",
+        "plugin-beta",
+        "--migrate",
+        "./other-source",
+        "--non-interactive",
+      ]);
+
+      expect(updateResult.code).toBe(1);
+      expect(updateResult.output).toContain(
+        "Migration requires exactly one plugin target: pluginspp update <plugin-name> --migrate <new-plugin-source>",
+      );
+    } finally {
+      fs.rmSync(workdir, { recursive: true, force: true });
+    }
+  }, 30_000);
+
+  it("updates only global plugin installs when --global is set @e2e", async () => {
+    const workdir = fs.mkdtempSync(
+      path.join(process.cwd(), "tmp-plugins-cli-update-global-"),
+    );
+    try {
+      const homeDir = path.join(workdir, "home");
+      fs.mkdirSync(path.join(homeDir, ".codex"), { recursive: true });
+
+      const { repoRoot } = createPluginSourceRepo(workdir, [
+        { folderName: "plugin-alpha", description: "alpha plugin" },
+      ]);
+      writePluginFile(repoRoot, "plugin-alpha", "README.md", "alpha v1\n");
+
+      const addResult = await runCli(
+        workdir,
+        [
+          "add",
+          repoRoot,
+          "--agent",
+          "codex",
+          "--plugin",
+          "plugin-alpha",
+          "--global",
+          "--non-interactive",
+        ],
+        { HOME: homeDir },
+      );
+      expect(addResult.code).toBe(0);
+
+      const globalReadme = path.join(
+        homeDir,
+        ".codex",
+        "plugins",
+        "cache",
+        "plugin-alpha",
+        "README.md",
+      );
+      const localReadme = path.join(
+        workdir,
+        ".agents",
+        "plugins",
+        "cache",
+        "plugin-alpha",
+        "README.md",
+      );
+      fs.mkdirSync(path.dirname(localReadme), { recursive: true });
+      fs.writeFileSync(localReadme, "local only\n", "utf8");
+
+      writePluginFile(repoRoot, "plugin-alpha", "README.md", "alpha v2\n");
+
+      const updateResult = await runCli(
+        workdir,
+        [
+          "update",
+          "plugin-alpha",
+          "--global",
+          "--non-interactive",
+        ],
+        { HOME: homeDir },
+      );
+
+      expect(updateResult.code).toBe(0);
+      expect(updateResult.output).toContain("Updated 1 plugins.");
+      expect(readUtf8(globalReadme)).toBe("alpha v2\n");
+      expect(readUtf8(localReadme)).toBe("local only\n");
+    } finally {
+      fs.rmSync(workdir, { recursive: true, force: true });
+    }
+  }, 30_000);
+
+  it("updates all drifted plugins in non-interactive mode without prompting @e2e", async () => {
+    const workdir = fs.mkdtempSync(
+      path.join(process.cwd(), "tmp-plugins-cli-update-all-"),
+    );
+    try {
+      const { repoRoot } = createPluginSourceRepo(workdir, [
+        { folderName: "plugin-alpha", description: "alpha plugin" },
+        { folderName: "plugin-beta", description: "beta plugin" },
+      ]);
+      writePluginFile(repoRoot, "plugin-alpha", "README.md", "alpha v1\n");
+      writePluginFile(repoRoot, "plugin-beta", "README.md", "beta v1\n");
+
+      const addResult = await runCli(workdir, [
+        "add",
+        repoRoot,
+        "--agent",
+        "codex",
+        "--plugin",
+        "plugin-alpha",
+        "plugin-beta",
+        "--non-interactive",
+      ]);
+      expect(addResult.code).toBe(0);
+
+      writePluginFile(repoRoot, "plugin-alpha", "README.md", "alpha v2\n");
+      writePluginFile(repoRoot, "plugin-beta", "README.md", "beta v2\n");
+
+      const updateResult = await runCli(workdir, [
+        "update",
+        "--non-interactive",
+      ]);
+
+      expect(updateResult.code).toBe(0);
+      expect(updateResult.output).toContain("Updated 2 plugins.");
+      expect(
+        readUtf8(
+          path.join(
+            workdir,
+            ".agents",
+            "plugins",
+            "cache",
+            "plugin-alpha",
+            "README.md",
+          ),
+        ),
+      ).toBe("alpha v2\n");
+      expect(
+        readUtf8(
+          path.join(
+            workdir,
+            ".agents",
+            "plugins",
+            "cache",
+            "plugin-beta",
+            "README.md",
+          ),
+        ),
+      ).toBe("beta v2\n");
     } finally {
       fs.rmSync(workdir, { recursive: true, force: true });
     }

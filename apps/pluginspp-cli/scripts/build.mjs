@@ -1,4 +1,5 @@
-import { chmod, mkdir } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { chmod, mkdir, rm } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
@@ -10,6 +11,12 @@ const packageRoot = path.resolve(__dirname, "..");
 const distDir = path.join(packageRoot, "dist");
 const cliOutFile = path.join(distDir, "cli.js");
 const workerOutFile = path.join(distDir, "background-worker.js");
+const executorEntry = path.join(
+  packageRoot,
+  "src",
+  "runtime",
+  "background-executor.ts",
+);
 const executorOutFile = path.join(distDir, "background-executor.js");
 
 function createBuildOptions(entryPoint, outfile, banner) {
@@ -47,12 +54,14 @@ async function runBuild() {
     ),
   );
 
-  await build(
-    createBuildOptions(
-      path.join(packageRoot, "src", "runtime", "background-executor.ts"),
-      executorOutFile,
-    ),
-  );
+  if (existsSync(executorEntry)) {
+    await build(createBuildOptions(executorEntry, executorOutFile));
+  } else {
+    await Promise.all([
+      rm(executorOutFile, { force: true }),
+      rm(`${executorOutFile}.map`, { force: true }),
+    ]);
+  }
 
   await chmod(cliOutFile, 0o755);
 }

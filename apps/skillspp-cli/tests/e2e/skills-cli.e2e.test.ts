@@ -14,8 +14,7 @@ function runCommand(cwd: string, args: string[]): Promise<RunResult> {
     path.dirname(fileURLToPath(import.meta.url)),
     "../..",
   );
-  const workspaceRoot = path.resolve(appRoot, "../..");
-  const tsxPath = path.resolve(workspaceRoot, "node_modules/tsx/dist/cli.mjs");
+  const tsxPath = path.resolve(appRoot, "node_modules/tsx/dist/cli.mjs");
   const cliEntry = path.resolve(appRoot, "src/cli.ts");
 
   return new Promise((resolve, reject) => {

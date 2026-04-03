@@ -5,6 +5,7 @@ import {
   AGENTS,
   detectInstalledAgents,
   filterInstalledAgents,
+  getAgentPluginsDir,
   getAgentSkillsDir,
   resolveAgents,
 } from "./agents";
@@ -13,6 +14,10 @@ import {
   type CheckOptions,
   type SkillAssessment,
 } from "./check-analysis";
+import {
+  assessPluginLockEntries,
+  type PluginAssessment,
+} from "./plugin-check-analysis";
 import { runValidateAnalysis } from "./validate-analysis";
 import type {
   AddOptions,
@@ -31,10 +36,14 @@ import {
 import { hashDirectory, hashDirectoryAsync } from "./hash";
 import {
   readLockfile,
+  readResourceLockfile,
   upsertLockEntry,
+  upsertResourceLockEntry,
   writeLockfile,
+  writeResourceLockfile,
   type LockEntry,
   type LockfileFormat,
+  type ResourceKind,
 } from "./lockfile";
 import {
   detectLocalGlobalConflicts,
@@ -76,6 +85,9 @@ import type {
   ListScanInventoryTaskResult,
   PluginAddFetchOrDiscoverTaskResult,
   PluginAddInstallTaskResult,
+  PluginUpdateApplyTaskResult,
+  PluginUpdateAssessTaskResult,
+  PluginUpdateMigrateTaskResult,
   UpdateApplyTaskResult,
   UpdateAssessTaskResult,
   UpdateMigrateTaskResult,
@@ -85,7 +97,7 @@ import type {
 type ProgressReporter = (label: string) => Promise<void> | void;
 
 function serializeAssessments(
-  assessments: SkillAssessment[],
+  assessments: Array<Pick<SkillAssessment | PluginAssessment, "entry" | "drift">>,
 ): UpdateAssessTaskResult["assessments"] {
   return assessments.map((assessment) => ({
     entry: assessment.entry,
@@ -207,6 +219,7 @@ function propagateLockfileVisibility(options: {
 }
 
 function writeLockEntryAfterInstall(options: {
+  resourceKind?: ResourceKind;
   globalInstall: boolean;
   cwd: string;
   sourceInput: string;
@@ -232,7 +245,12 @@ function writeLockEntryAfterInstall(options: {
   lockFormat?: LockfileFormat;
 }): void {
   const installedHash = hashDirectory(options.outcome.canonicalDir);
-  const lock = readLockfile(options.globalInstall, options.cwd);
+  const resourceKind = options.resourceKind || "skill";
+  const lock = readResourceLockfile(
+    resourceKind,
+    options.globalInstall,
+    options.cwd,
+  );
   const entry = {
     skillName: options.outcome.skillName,
     global: options.globalInstall,
@@ -257,8 +275,9 @@ function writeLockEntryAfterInstall(options: {
     updatedAt: new Date().toISOString(),
   };
 
-  const next = upsertLockEntry(lock, entry);
-  writeLockfile(
+  const next = upsertResourceLockEntry(lock, entry);
+  writeResourceLockfile(
+    resourceKind,
     options.globalInstall,
     options.cwd,
     next,
@@ -370,6 +389,20 @@ async function runUpdateAssessTask(
   };
 }
 
+async function runPluginUpdateAssessTask(
+  cwd: string,
+  options: BackgroundTaskRequest<"plugin.update.assess">["payload"]["options"],
+  emitProgress: ProgressReporter,
+): Promise<PluginUpdateAssessTaskResult> {
+  await emitProgress("assessing drift");
+  const assessed = await assessPluginLockEntries(options, cwd, {
+    keepResolved: false,
+  });
+  return {
+    assessments: serializeAssessments(assessed.assessments),
+  };
+}
+
 function createBackupDir(skillName: string, sourceDir: string): string {
   const backupRoot = fs.mkdtempSync(
     path.join(os.tmpdir(), "skillspp-update-backup-"),
@@ -469,6 +502,99 @@ async function applyEntryUpdate(
   }
 }
 
+async function applyPluginEntryUpdate(
+  assessment: PluginAssessment,
+  options: BackgroundTaskRequest<"plugin.update.apply">["payload"]["options"],
+  cwd: string,
+): Promise<LockEntry> {
+  const { entry } = assessment;
+  if (!assessment.resolved || !assessment.sourceHash) {
+    throw new Error(`No resolved source available for ${entry.skillName}`);
+  }
+
+  const resolved = assessment.resolved;
+  const sourceHash = assessment.sourceHash;
+  const backupDir = createBackupDir(entry.skillName, entry.canonicalDir);
+
+  try {
+    const preparedInstaller = await prepareInstallerArtifacts(
+      resolved.plugin.path,
+      cwd,
+      {
+        sourceType: entry.source.type,
+        policyMode: options.policyMode || "enforce",
+        trustWellKnown: Boolean(options.trustWellKnown),
+      },
+    );
+
+    const outcome = installPlugin(
+      resolved.plugin,
+      entry.agents as AgentType[],
+      {
+        mode: entry.installMode,
+        globalInstall: entry.global,
+        cwd,
+      },
+    );
+
+    try {
+      await applyInstallerArtifacts(outcome.canonicalDir, preparedInstaller);
+    } finally {
+      cleanupPreparedInstallerArtifacts(preparedInstaller);
+    }
+
+    const installedHash = await hashDirectoryAsync(outcome.canonicalDir);
+
+    return {
+      ...entry,
+      source: {
+        ...entry.source,
+        canonical:
+          assessment.refreshedSource?.canonical ?? entry.source.canonical,
+        pinnedRef:
+          assessment.refreshedSource?.pinnedRef ?? entry.source.pinnedRef,
+        resolvedPath:
+          assessment.refreshedSource?.resolvedPath ?? entry.source.resolvedPath,
+        isSymlinkSource:
+          assessment.refreshedSource?.isSymlinkSource ??
+          entry.source.isSymlinkSource,
+        selector: {
+          ...entry.source.selector,
+          relativePath:
+            assessment.refreshedSource?.sourcePluginPath ??
+            entry.source.selector.relativePath,
+          wellKnownSourceUrl:
+            assessment.refreshedSource?.wellKnownSourceUrl ??
+            entry.source.selector.wellKnownSourceUrl,
+        },
+      },
+      sourceHash,
+      installedHash,
+      canonicalDir: outcome.canonicalDir,
+      updatedAt: new Date().toISOString(),
+    };
+  } catch (error) {
+    const rollbackPlugin = {
+      name: entry.skillName,
+      description: `Rollback for ${entry.skillName}`,
+      path: backupDir,
+    };
+
+    installPlugin(rollbackPlugin, entry.agents as AgentType[], {
+      mode: entry.installMode,
+      globalInstall: entry.global,
+      cwd,
+    });
+
+    throw error;
+  } finally {
+    fs.rmSync(path.dirname(backupDir), { recursive: true, force: true });
+    if (resolved.cleanup) {
+      resolved.cleanup();
+    }
+  }
+}
+
 async function runUpdateApplyTask(
   payload: BackgroundTaskRequest<"update.apply">["payload"],
   emitProgress: ProgressReporter,
@@ -548,10 +674,107 @@ async function runUpdateApplyTask(
   }
 }
 
+async function runPluginUpdateApplyTask(
+  payload: BackgroundTaskRequest<"plugin.update.apply">["payload"],
+  emitProgress: ProgressReporter,
+): Promise<PluginUpdateApplyTaskResult> {
+  const selectedOptions = {
+    ...payload.options,
+    skill: payload.selectedPluginNames,
+  };
+
+  await emitProgress("assessing selected plugins");
+  const assessed = await assessPluginLockEntries(selectedOptions, payload.cwd, {
+    keepResolved: true,
+  });
+
+  const candidateAssessments = assessed.assessments.filter((assessment) =>
+    !assessment.drift.some((item) => item.kind === "migrate-required") &&
+    assessment.drift.some(
+      (item) =>
+        item.kind === "changed-source" || item.kind === "local-modified",
+    ),
+  );
+
+  let nextLock = readResourceLockfile(
+    "plugin",
+    Boolean(payload.options.global),
+    payload.cwd,
+  );
+  const updatedEntries: LockEntry[] = [];
+  const ordered = [...candidateAssessments].sort((a, b) =>
+    a.entry.skillName.localeCompare(b.entry.skillName),
+  );
+
+  try {
+    for (const assessment of ordered) {
+      await emitProgress(`updating ${assessment.entry.skillName}`);
+      const updated = await applyPluginEntryUpdate(
+        assessment,
+        payload.options,
+        payload.cwd,
+      );
+      updatedEntries.push(updated);
+      nextLock = upsertResourceLockEntry(nextLock, updated);
+    }
+
+    await emitProgress("writing lockfile");
+    writeResourceLockfile(
+      "plugin",
+      Boolean(payload.options.global),
+      payload.cwd,
+      nextLock,
+      payload.lockFormat,
+    );
+    for (const updated of updatedEntries) {
+      const targetDirs = Array.from(
+        new Set(
+          updated.agents.map((agent) =>
+            path.join(
+              getAgentPluginsDir(agent, updated.global, payload.cwd),
+              updated.skillName,
+            ),
+          ),
+        ),
+      );
+      propagateLockfileVisibility({
+        canonicalDir: updated.canonicalDir,
+        targetDirs,
+        lockFormat: payload.lockFormat,
+      });
+    }
+
+    return {
+      updatedPluginNames: ordered.map(
+        (assessment) => assessment.entry.skillName,
+      ),
+    };
+  } finally {
+    for (const assessment of assessed.assessments) {
+      if (assessment.resolved?.cleanup) {
+        assessment.resolved.cleanup();
+      }
+    }
+  }
+}
+
 type ResolvedMigrationSource = {
   parsedSource: ParsedSource;
   skill: Skill;
   sourceSkillPath?: string;
+  wellKnownSourceUrl?: string;
+  sourceHash: string;
+  sourceCanonical: string;
+  sourcePinnedRef?: string;
+  sourceResolvedPath?: string;
+  sourceIsSymlink?: boolean;
+  cleanup?: () => void;
+};
+
+type ResolvedPluginMigrationSource = {
+  parsedSource: ParsedSource;
+  plugin: Plugin;
+  sourcePluginPath?: string;
   wellKnownSourceUrl?: string;
   sourceHash: string;
   sourceCanonical: string;
@@ -621,6 +844,88 @@ async function resolveMigrationSource(options: {
       sourcePinnedRef,
       sourceResolvedPath:
         parsedSource.type === "local" ? resolveSafeRealPath(skill.path) : undefined,
+      sourceIsSymlink:
+        parsedSource.type === "local"
+          ? isLocalSymlinkSource(parsedSource.localPath)
+          : undefined,
+      cleanup: prepared.cleanup,
+    };
+  } catch (error) {
+    if (prepared.cleanup) {
+      prepared.cleanup();
+    }
+    throw error;
+  }
+}
+
+async function resolvePluginMigrationSource(options: {
+  sourceInput: string;
+  pluginName: string;
+  addOptions: AddOptions;
+}): Promise<ResolvedPluginMigrationSource> {
+  const parsedSource = parseSource(options.sourceInput);
+
+  if (parsedSource.type === "well-known" || parsedSource.type === "catalog") {
+    const remotePlugins =
+      parsedSource.type === "well-known"
+        ? await resolveWellKnownPlugins(parsedSource.url, options.addOptions)
+        : await resolveCatalogPlugins(parsedSource.url, options.addOptions);
+    const remote = remotePlugins.find(
+      (item) => item.installName === options.pluginName,
+    );
+    if (!remote) {
+      throw new Error(
+        `Plugin '${options.pluginName}' not found in migration source`,
+      );
+    }
+    const staged = await buildRemotePlugin(remote);
+    const sourceHash = hashDirectory(staged.plugin.path);
+    return {
+      parsedSource,
+      plugin: staged.plugin,
+      sourceHash,
+      sourceCanonical: canonicalSourceIdentity({
+        parsedSource,
+        wellKnownSourceUrl: remote.sourceUrl,
+      }),
+      sourcePinnedRef: sourceHash,
+      wellKnownSourceUrl: remote.sourceUrl,
+      cleanup: staged.cleanup,
+    };
+  }
+
+  const prepared = await prepareSourceDirAsync(
+    parsedSource as Exclude<ParsedSource, { type: "well-known" | "catalog" }>,
+  );
+  try {
+    const plugins = await discoverPluginsAsync(prepared.basePath, [
+      options.pluginName,
+    ]);
+    const plugin = plugins.find((item) => item.name === options.pluginName);
+    if (!plugin) {
+      throw new Error(
+        `Plugin '${options.pluginName}' not found in migration source`,
+      );
+    }
+    const sourceHash = sourceHashForInstalledSkill({
+      parsedSource,
+      skillPath: plugin.path,
+    });
+    const sourcePinnedRef =
+      parsedSource.type === "github" || parsedSource.type === "git"
+        ? await resolveGitHeadRefAsync(prepared.basePath)
+        : undefined;
+    return {
+      parsedSource,
+      plugin,
+      sourcePluginPath: path.relative(prepared.basePath, plugin.path) || ".",
+      sourceHash,
+      sourceCanonical: canonicalSourceIdentity({ parsedSource }),
+      sourcePinnedRef,
+      sourceResolvedPath:
+        parsedSource.type === "local"
+          ? resolveSafeRealPath(plugin.path)
+          : undefined,
       sourceIsSymlink:
         parsedSource.type === "local"
           ? isLocalSymlinkSource(parsedSource.localPath)
@@ -714,6 +1019,92 @@ async function runUpdateMigrateTask(
   }
 
   return { skillName: entry.skillName };
+}
+
+async function runPluginUpdateMigrateTask(
+  payload: BackgroundTaskRequest<"plugin.update.migrate">["payload"],
+  emitProgress: ProgressReporter,
+): Promise<PluginUpdateMigrateTaskResult> {
+  await emitProgress("resolving migration source");
+  const lock = readResourceLockfile(
+    "plugin",
+    Boolean(payload.options.global),
+    payload.cwd,
+  );
+  const entry = lock.entries.find((item) => item.skillName === payload.pluginName);
+  if (!entry) {
+    throw new Error(`Unknown plugin for migration: ${payload.pluginName}`);
+  }
+
+  const source = await resolvePluginMigrationSource({
+    sourceInput: payload.sourceInput,
+    pluginName: payload.pluginName,
+    addOptions: payload.options,
+  });
+  const backupDir = createBackupDir(entry.skillName, entry.canonicalDir);
+
+  try {
+    await emitProgress(`migrating ${entry.skillName}`);
+    const preparedInstaller = await prepareInstallerArtifacts(
+      source.plugin.path,
+      payload.cwd,
+      {
+        sourceType: source.parsedSource.type,
+        policyMode: payload.options.policyMode || "enforce",
+        trustWellKnown: Boolean(payload.options.trustWellKnown),
+      },
+    );
+    const outcome = installPlugin(source.plugin, entry.agents as AgentType[], {
+      mode: entry.installMode,
+      globalInstall: entry.global,
+      cwd: payload.cwd,
+    });
+
+    try {
+      await applyInstallerArtifacts(outcome.canonicalDir, preparedInstaller);
+      await emitProgress("writing lockfile");
+      writeLockEntryAfterInstall({
+        resourceKind: "plugin",
+        globalInstall: entry.global,
+        cwd: payload.cwd,
+        sourceInput: payload.sourceInput,
+        sourceType: source.parsedSource.type,
+        sourceCanonical: source.sourceCanonical,
+        sourcePinnedRef: source.sourcePinnedRef,
+        sourceResolvedPath: source.sourceResolvedPath,
+        sourceIsSymlink: source.sourceIsSymlink,
+        sourceSkillName: source.plugin.name,
+        sourceSkillPath: source.sourcePluginPath,
+        wellKnownSourceUrl: source.wellKnownSourceUrl,
+        sourceHash: source.sourceHash,
+        outcome,
+        mode: entry.installMode,
+        lockFormat: payload.lockFormat,
+      });
+    } finally {
+      cleanupPreparedInstallerArtifacts(preparedInstaller);
+    }
+  } catch (error) {
+    const rollbackPlugin = {
+      name: entry.skillName,
+      description: `Rollback for ${entry.skillName}`,
+      path: backupDir,
+    };
+
+    installPlugin(rollbackPlugin, entry.agents as AgentType[], {
+      mode: entry.installMode,
+      globalInstall: entry.global,
+      cwd: payload.cwd,
+    });
+    throw error;
+  } finally {
+    fs.rmSync(path.dirname(backupDir), { recursive: true, force: true });
+    if (source.cleanup) {
+      source.cleanup();
+    }
+  }
+
+  return { pluginName: entry.skillName };
 }
 
 async function runListDetectAgentsTask(
@@ -986,6 +1377,7 @@ async function installSelectedAddSkills(
             preparedInstaller,
           );
           writeLockEntryAfterInstall({
+            resourceKind: "plugin",
             globalInstall,
             cwd: payload.cwd,
             sourceInput: payload.sourceInput,
@@ -1082,6 +1474,7 @@ async function installSelectedAddSkills(
       try {
         await applyInstallerArtifacts(outcome.canonicalDir, preparedInstaller);
         writeLockEntryAfterInstall({
+          resourceKind: "plugin",
           globalInstall,
           cwd: payload.cwd,
           sourceInput: payload.sourceInput,
@@ -1432,10 +1825,20 @@ export async function executeBackgroundTask(
         request.payload.options,
         emitProgress,
       );
+    case "plugin.update.assess":
+      return await runPluginUpdateAssessTask(
+        request.payload.cwd,
+        request.payload.options,
+        emitProgress,
+      );
     case "update.apply":
       return await runUpdateApplyTask(request.payload, emitProgress);
+    case "plugin.update.apply":
+      return await runPluginUpdateApplyTask(request.payload, emitProgress);
     case "update.migrate":
       return await runUpdateMigrateTask(request.payload, emitProgress);
+    case "plugin.update.migrate":
+      return await runPluginUpdateMigrateTask(request.payload, emitProgress);
     case "list.detectAgents":
       return await runListDetectAgentsTask(
         request.payload.cwd,
