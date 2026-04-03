@@ -222,6 +222,203 @@ describe("pluginspp binary @e2e", () => {
     }
   }, 30_000);
 
+  it("removes an explicit plugin from an explicit agent without touching skills @e2e", async () => {
+    const workdir = fs.mkdtempSync(
+      path.join(process.cwd(), "tmp-plugins-cli-remove-explicit-"),
+    );
+    try {
+      const { repoRoot } = createPluginSourceRepo(workdir, [
+        { folderName: "plugin-alpha", description: "alpha plugin" },
+      ]);
+
+      const addResult = await runCli(workdir, [
+        "add",
+        repoRoot,
+        "--agent",
+        "codex",
+        "claude-code",
+        "--plugin",
+        "plugin-alpha",
+        "--non-interactive",
+      ]);
+
+      expect(addResult.code).toBe(0);
+
+      fs.mkdirSync(path.join(workdir, ".agents", "skills", "plugin-alpha"), {
+        recursive: true,
+      });
+      fs.writeFileSync(
+        path.join(workdir, ".agents", "skills", "plugin-alpha", "SKILL.md"),
+        "# sentinel\n",
+        "utf8",
+      );
+      fs.mkdirSync(path.join(workdir, ".claude", "skills", "plugin-alpha"), {
+        recursive: true,
+      });
+      fs.writeFileSync(
+        path.join(workdir, ".claude", "skills", "plugin-alpha", "SKILL.md"),
+        "# sentinel\n",
+        "utf8",
+      );
+
+      const removeResult = await runCli(workdir, [
+        "remove",
+        "--plugin",
+        "plugin-alpha",
+        "--agent",
+        "codex",
+        "--non-interactive",
+      ]);
+
+      expect(removeResult.code).toBe(0);
+      expect(removeResult.output).toContain("Plugins (1):");
+      expect(removeResult.output).toContain("Total removed: 1");
+      expect(
+        fs.existsSync(
+          path.join(workdir, ".agents", "plugins", "cache", "plugin-alpha"),
+        ),
+      ).toBe(false);
+      expect(
+        fs.existsSync(
+          path.join(workdir, ".claude", "plugins", "cache", "plugin-alpha"),
+        ),
+      ).toBe(true);
+      expect(
+        fs.existsSync(path.join(workdir, ".agents", "skills", "plugin-alpha")),
+      ).toBe(true);
+      expect(
+        fs.existsSync(path.join(workdir, ".claude", "skills", "plugin-alpha")),
+      ).toBe(true);
+    } finally {
+      fs.rmSync(workdir, { recursive: true, force: true });
+    }
+  }, 30_000);
+
+  it("removes the only installed plugin for an explicit agent in non-interactive mode @e2e", async () => {
+    const workdir = fs.mkdtempSync(
+      path.join(process.cwd(), "tmp-plugins-cli-remove-single-"),
+    );
+    try {
+      const { repoRoot } = createPluginSourceRepo(workdir, [
+        { folderName: "plugin-alpha", description: "alpha plugin" },
+      ]);
+
+      const addResult = await runCli(workdir, [
+        "add",
+        repoRoot,
+        "--agent",
+        "codex",
+        "--plugin",
+        "plugin-alpha",
+        "--non-interactive",
+      ]);
+
+      expect(addResult.code).toBe(0);
+
+      const removeResult = await runCli(workdir, [
+        "remove",
+        "--agent",
+        "codex",
+        "--non-interactive",
+      ]);
+
+      expect(removeResult.code).toBe(0);
+      expect(removeResult.output).toContain("Total removed: 1");
+      expect(
+        fs.existsSync(
+          path.join(workdir, ".agents", "plugins", "cache", "plugin-alpha"),
+        ),
+      ).toBe(false);
+    } finally {
+      fs.rmSync(workdir, { recursive: true, force: true });
+    }
+  }, 30_000);
+
+  it("fails in non-interactive mode when installed plugin selection is ambiguous @e2e", async () => {
+    const workdir = fs.mkdtempSync(
+      path.join(process.cwd(), "tmp-plugins-cli-remove-ambiguous-plugin-"),
+    );
+    try {
+      const { repoRoot } = createPluginSourceRepo(workdir, [
+        { folderName: "plugin-alpha", description: "alpha plugin" },
+        { folderName: "plugin-beta", description: "beta plugin" },
+      ]);
+
+      const addAlpha = await runCli(workdir, [
+        "add",
+        repoRoot,
+        "--agent",
+        "codex",
+        "--plugin",
+        "plugin-alpha",
+        "--non-interactive",
+      ]);
+      expect(addAlpha.code).toBe(0);
+
+      const addBeta = await runCli(workdir, [
+        "add",
+        repoRoot,
+        "--agent",
+        "codex",
+        "--plugin",
+        "plugin-beta",
+        "--non-interactive",
+      ]);
+      expect(addBeta.code).toBe(0);
+
+      const removeResult = await runCli(workdir, [
+        "remove",
+        "--agent",
+        "codex",
+        "--non-interactive",
+      ]);
+
+      expect(removeResult.code).toBe(1);
+      expect(removeResult.output).toContain(
+        "Multiple installed plugins found. Use --plugin <name>... or run in TTY without --non-interactive.",
+      );
+    } finally {
+      fs.rmSync(workdir, { recursive: true, force: true });
+    }
+  }, 30_000);
+
+  it("fails in non-interactive mode when one plugin is installed across multiple agents @e2e", async () => {
+    const workdir = fs.mkdtempSync(
+      path.join(process.cwd(), "tmp-plugins-cli-remove-ambiguous-agent-"),
+    );
+    try {
+      const { repoRoot } = createPluginSourceRepo(workdir, [
+        { folderName: "plugin-alpha", description: "alpha plugin" },
+      ]);
+
+      const addResult = await runCli(workdir, [
+        "add",
+        repoRoot,
+        "--agent",
+        "codex",
+        "claude-code",
+        "--plugin",
+        "plugin-alpha",
+        "--non-interactive",
+      ]);
+
+      expect(addResult.code).toBe(0);
+
+      const removeResult = await runCli(workdir, [
+        "remove",
+        "plugin-alpha",
+        "--non-interactive",
+      ]);
+
+      expect(removeResult.code).toBe(1);
+      expect(removeResult.output).toContain(
+        "Multiple agents found. Use --agent <name>... or run in TTY without --non-interactive.",
+      );
+    } finally {
+      fs.rmSync(workdir, { recursive: true, force: true });
+    }
+  }, 30_000);
+
   it("uses detected agents for wildcard installs in global mode @e2e", async () => {
     const workdir = fs.mkdtempSync(
       path.join(process.cwd(), "tmp-plugins-cli-global-"),
@@ -268,6 +465,87 @@ describe("pluginspp binary @e2e", () => {
           path.join(homeDir, ".cursor", "plugins", "cache", "plugin-alpha"),
         ),
       ).toBe(false);
+    } finally {
+      fs.rmSync(workdir, { recursive: true, force: true });
+    }
+  }, 30_000);
+
+  it("removes only global plugin installs when --global is set @e2e", async () => {
+    const workdir = fs.mkdtempSync(
+      path.join(process.cwd(), "tmp-plugins-cli-remove-global-"),
+    );
+    try {
+      const homeDir = path.join(workdir, "home");
+      fs.mkdirSync(path.join(homeDir, ".codex"), { recursive: true });
+
+      const { repoRoot } = createPluginSourceRepo(workdir, [
+        { folderName: "plugin-alpha", description: "alpha plugin" },
+      ]);
+
+      const addResult = await runCli(
+        workdir,
+        [
+          "add",
+          repoRoot,
+          "--agent",
+          "codex",
+          "--plugin",
+          "plugin-alpha",
+          "--global",
+          "--non-interactive",
+        ],
+        {
+          HOME: homeDir,
+        },
+      );
+
+      expect(addResult.code).toBe(0);
+
+      fs.mkdirSync(
+        path.join(workdir, ".agents", "plugins", "cache", "plugin-alpha"),
+        { recursive: true },
+      );
+      fs.writeFileSync(
+        path.join(
+          workdir,
+          ".agents",
+          "plugins",
+          "cache",
+          "plugin-alpha",
+          "sentinel.txt",
+        ),
+        "keep local\n",
+        "utf8",
+      );
+
+      const removeResult = await runCli(
+        workdir,
+        [
+          "remove",
+          "--plugin",
+          "plugin-alpha",
+          "--agent",
+          "codex",
+          "--global",
+          "--non-interactive",
+        ],
+        {
+          HOME: homeDir,
+        },
+      );
+
+      expect(removeResult.code).toBe(0);
+      expect(removeResult.output).toContain("Total removed: 1");
+      expect(
+        fs.existsSync(
+          path.join(homeDir, ".codex", "plugins", "cache", "plugin-alpha"),
+        ),
+      ).toBe(false);
+      expect(
+        fs.existsSync(
+          path.join(workdir, ".agents", "plugins", "cache", "plugin-alpha"),
+        ),
+      ).toBe(true);
     } finally {
       fs.rmSync(workdir, { recursive: true, force: true });
     }

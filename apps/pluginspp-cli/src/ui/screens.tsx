@@ -891,16 +891,18 @@ export function installationSummarySection(options: {
 
 export function uninstallSummarySection(options: {
   globalInstall: boolean;
-  skillNames: string[];
+  itemNames: string[];
+  itemLabel?: string;
   agentDisplayNames: string[];
 }): UiSection {
+  const itemLabel = options.itemLabel || "Skills";
   return panelSection({
     title: "Uninstall Summary",
     lines: [
       `Scope: ${options.globalInstall ? "global" : "current project"}`,
       "",
-      `Skills (${options.skillNames.length}):`,
-      ...options.skillNames.map((name) => `  - ${name}`),
+      `${itemLabel} (${options.itemNames.length}):`,
+      ...options.itemNames.map((name) => `  - ${name}`),
       "",
       `Agents (${options.agentDisplayNames.length}): ${compactAgentDisplayNames(
         [...options.agentDisplayNames].sort((a, b) => a.localeCompare(b)),
