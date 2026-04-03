@@ -1,7 +1,7 @@
 import { Command } from "commander";
 import { describe, expect, it } from "vitest";
 import { createTelemetryEmitter } from "@skillspp/core/telemetry";
-import { createCliCommandContext } from "../../src/command-builder";
+import { createCliCommandContext } from "@skillspp/cli-shared/command-builder";
 import { registerUpdateCommand } from "../../src/commands/update";
 
 function buildUpdateCommand(): Command {

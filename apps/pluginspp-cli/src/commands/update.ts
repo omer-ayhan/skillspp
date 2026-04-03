@@ -1,18 +1,21 @@
 import { Command } from "commander";
-import { type LockfileFormat, readResourceLockfile } from "@skillspp/core/lockfile";
+import {
+  type LockfileFormat,
+  readResourceLockfile,
+} from "@skillspp/core/lockfile";
 import type { SelectionRow } from "@skillspp/core/agents";
 import { parsePolicyMode } from "../policy-mode";
 import {
   parseStandaloneCommand,
   type CliCommandContext,
-} from "../command-builder";
+} from "@skillspp/cli-shared/command-builder";
 import { runBackgroundTask } from "../runtime/background-runner";
-import { canUseInteractive } from "../interactive";
+import { canUseInteractive } from "@skillspp/cli-shared/interactive";
 import {
   type ManySelectionViewConfig,
   type SelectionKeyHint,
   runManySelectionStep,
-} from "../ui/selection-step";
+} from "@skillspp/cli-shared/ui/selection-step";
 import {
   completedStepsSection,
   failedStepsSection,
@@ -24,8 +27,11 @@ import {
   renderStaticScreen,
   showLoader,
   sourceSection,
-} from "../ui/screens";
-import { formatDriftChips, shortenHomePath } from "../ui/format";
+} from "@skillspp/cli-shared/ui/screens";
+import {
+  formatDriftChips,
+  shortenHomePath,
+} from "@skillspp/cli-shared/ui/format";
 
 export type UpdateOptions = {
   global?: boolean;
@@ -273,7 +279,11 @@ async function executeUpdate(
     }
   }
   if (requestedPlugins.length > 0) {
-    const lock = readResourceLockfile("plugin", Boolean(effectiveOptions.global), cwd);
+    const lock = readResourceLockfile(
+      "plugin",
+      Boolean(effectiveOptions.global),
+      cwd,
+    );
     const known = new Set(lock.entries.map((entry) => entry.skillName));
     const unknown = [...new Set(requestedPlugins)]
       .filter((plugin) => !known.has(plugin))
@@ -535,7 +545,10 @@ export function registerUpdateCommand(
     program.command("update"),
     ctx.wrapAction(
       "update",
-      async (plugins: string[] | undefined, options: UpdateCommanderOptions) => {
+      async (
+        plugins: string[] | undefined,
+        options: UpdateCommanderOptions,
+      ) => {
         await executeUpdate(
           {
             ...toUpdateOptions(options),
