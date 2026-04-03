@@ -23,7 +23,9 @@
       "@skillspp/core/skills": ["../core/dist/sources/skills.d.ts"],
       "@skillspp/core/commands": ["../core/dist/contracts/commands.d.ts"],
       "@skillspp/core/results": ["../core/dist/contracts/results.d.ts"],
-      "@skillspp/core/errors": ["../core/dist/contracts/errors/core-error.d.ts"],
+      "@skillspp/core/errors": [
+        "../core/dist/contracts/errors/core-error.d.ts"
+      ],
       "@skillspp/core/events": [
         "../core/dist/contracts/events/lifecycle-event.d.ts"
       ],
