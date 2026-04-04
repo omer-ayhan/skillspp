@@ -4,20 +4,22 @@ import { registerAddCommand } from "./commands/add";
 import { registerCheckCommand } from "./commands/check";
 import { registerFindCommand } from "./commands/find";
 import { registerInitCommand } from "./commands/init";
-import { isPromptCancelledError } from "./interactive";
 import { registerListCommand } from "./commands/list";
 import { registerRemoveCommand } from "./commands/remove";
 import { registerUpdateCommand } from "./commands/update";
 import { registerValidateCommand } from "./commands/validate";
-import { createCliCommandContext } from "./command-builder";
-import { configureLogoAssetPaths } from "@skillspp/cli-shared/ui/logo";
 import {
-  emitLifecycleEvent,
-  type TelemetryEmitter,
-} from "@skillspp/core/telemetry";
+  applyExitOverride,
+  createCliCommandContext,
+  emitCommanderParseErrorTelemetry,
+  isGracefulCommanderExit,
+} from "@skillspp/cli-shared/command-builder";
+import { isPromptCancelledError } from "@skillspp/cli-shared/interactive";
+import { configureLogoAssetPaths } from "@skillspp/cli-shared/ui/logo";
+import { type TelemetryEmitter } from "@skillspp/core/telemetry";
 import { createCliTelemetryEmitter, parseTelemetrySink } from "./telemetry";
 import picocolors from "picocolors";
-import { finalizeUiSession } from "./ui/screens";
+import { finalizeUiSession } from "@skillspp/cli-shared/ui/screens";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -76,15 +78,6 @@ function createProgram(
   return program;
 }
 
-function applyExitOverride(command: Command): void {
-  command.exitOverride((error) => {
-    throw error;
-  });
-  for (const subcommand of command.commands) {
-    applyExitOverride(subcommand);
-  }
-}
-
 function parseTelemetryFromArgv(argv: string[]): string | undefined {
   for (let i = 0; i < argv.length; i += 1) {
     if (argv[i] !== "--telemetry") {
@@ -93,40 +86,6 @@ function parseTelemetryFromArgv(argv: string[]): string | undefined {
     return argv[i + 1];
   }
   return undefined;
-}
-
-function inferCommandSource(argv: string[]): string {
-  for (let i = 0; i < argv.length; i += 1) {
-    const arg = argv[i];
-    if (arg === "--telemetry") {
-      i += 1;
-      continue;
-    }
-    if (arg.startsWith("-")) {
-      continue;
-    }
-    return arg;
-  }
-  return "cli";
-}
-
-function emitCommanderParseErrorTelemetry(
-  emitter: TelemetryEmitter,
-  argv: string[],
-  error: CommanderError,
-): void {
-  const source = inferCommandSource(argv);
-  emitLifecycleEvent(emitter, {
-    eventType: `${source}_failed`,
-    source,
-    reason: "commander_parse_error",
-    command: source,
-    status: "error",
-    error: error.message,
-    metadata: {
-      commanderCode: error.code,
-    },
-  });
 }
 
 export async function runCli(argv: string[]): Promise<number> {
@@ -146,15 +105,13 @@ export async function runCli(argv: string[]): Promise<number> {
     await program.parseAsync(argv, { from: "user" });
     return 0;
   } catch (error) {
-    if (
-      error instanceof CommanderError &&
-      (error.code === "commander.helpDisplayed" ||
-        error.code === "commander.version")
-    ) {
+    if (isGracefulCommanderExit(error)) {
       return 0;
     }
     if (error instanceof CommanderError) {
-      emitCommanderParseErrorTelemetry(emitter, argv, error);
+      emitCommanderParseErrorTelemetry(emitter, argv, error, {
+        valueFlags: ["--telemetry"],
+      });
       throw new Error(error.message);
     }
     throw error;

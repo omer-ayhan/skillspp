@@ -1,9 +1,13 @@
+import { Command, CommanderError } from "commander";
 import { describe, expect, it, vi } from "vitest";
-import { Command } from "commander";
 import {
+  applyExitOverride,
   createCliCommandContext,
+  emitCommanderParseErrorTelemetry,
+  inferCommandSource,
+  isGracefulCommanderExit,
   parseStandaloneCommand,
-} from "@skillspp/cli-shared/command-builder";
+} from "./command-builder";
 import { createTelemetryEmitter } from "@skillspp/core/telemetry";
 
 describe("createCliCommandContext @unit", () => {
@@ -52,6 +56,76 @@ describe("createCliCommandContext @unit", () => {
     });
 
     expect(received).toContain("update_custom");
+  });
+});
+
+describe("commander helpers @unit", () => {
+  it("applyExitOverride cascades to subcommands @unit", async () => {
+    const program = new Command("root");
+    const child = new Command("child")
+      .requiredOption("--required <value>")
+      .action(() => undefined);
+    program.addCommand(child);
+
+    applyExitOverride(program);
+
+    await expect(
+      program.parseAsync(["child"], { from: "user" }),
+    ).rejects.toBeInstanceOf(CommanderError);
+  });
+
+  it("inferCommandSource skips option values and falls back to cli @unit", () => {
+    expect(
+      inferCommandSource(["--telemetry", "stdout-json", "add", "foo"], {
+        valueFlags: ["--telemetry"],
+      }),
+    ).toBe("add");
+    expect(inferCommandSource(["--help"])).toBe("cli");
+  });
+
+  it("emitCommanderParseErrorTelemetry reports command-specific metadata @unit", () => {
+    const emitter = createTelemetryEmitter();
+    const received: Array<Record<string, unknown>> = [];
+    emitter.subscribe((event) => received.push(event));
+
+    emitCommanderParseErrorTelemetry(
+      emitter,
+      ["--telemetry", "stdout-json", "validate"],
+      new CommanderError(1, "commander.unknownOption", "unknown option"),
+      {
+        valueFlags: ["--telemetry"],
+      },
+    );
+
+    expect(received).toEqual([
+      expect.objectContaining({
+        eventType: "validate_failed",
+        source: "validate",
+        reason: "commander_parse_error",
+        command: "validate",
+        status: "error",
+        error: "unknown option",
+        metadata: expect.objectContaining({
+          commanderCode: "commander.unknownOption",
+        }),
+      }),
+    ]);
+  });
+
+  it("detects help/version exits without swallowing real commander errors @unit", () => {
+    expect(
+      isGracefulCommanderExit(
+        new CommanderError(0, "commander.helpDisplayed", "help"),
+      ),
+    ).toBe(true);
+    expect(
+      isGracefulCommanderExit(new CommanderError(0, "commander.version", "1")),
+    ).toBe(true);
+    expect(
+      isGracefulCommanderExit(
+        new CommanderError(1, "commander.unknownOption", "bad"),
+      ),
+    ).toBe(false);
   });
 });
 

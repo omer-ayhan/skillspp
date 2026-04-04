@@ -5,11 +5,15 @@ import { fileURLToPath } from "node:url";
 import { registerAddCommand } from "./commands/add";
 import { registerRemoveCommand } from "./commands/remove";
 import { registerUpdateCommand } from "./commands/update";
-import { createCliCommandContext } from "@skillspp/cli-shared/command-builder";
+import {
+  applyExitOverride,
+  createCliCommandContext,
+  emitCommanderParseErrorTelemetry,
+  isGracefulCommanderExit,
+} from "@skillspp/cli-shared/command-builder";
 import { configureLogoAssetPaths } from "@skillspp/cli-shared/ui/logo";
 import {
   createTelemetryEmitter,
-  emitLifecycleEvent,
   type TelemetryEmitter,
 } from "@skillspp/core/telemetry";
 import picocolors from "picocolors";
@@ -49,45 +53,6 @@ function createProgram(emitter: TelemetryEmitter): Command {
   return program;
 }
 
-function applyExitOverride(command: Command): void {
-  command.exitOverride((error) => {
-    throw error;
-  });
-  for (const subcommand of command.commands) {
-    applyExitOverride(subcommand);
-  }
-}
-
-function inferCommandSource(argv: string[]): string {
-  for (let i = 0; i < argv.length; i += 1) {
-    const arg = argv[i];
-    if (arg.startsWith("-")) {
-      continue;
-    }
-    return arg;
-  }
-  return "cli";
-}
-
-function emitCommanderParseErrorTelemetry(
-  emitter: TelemetryEmitter,
-  argv: string[],
-  error: CommanderError,
-): void {
-  const source = inferCommandSource(argv);
-  emitLifecycleEvent(emitter, {
-    eventType: `${source}_failed`,
-    source,
-    reason: "commander_parse_error",
-    command: source,
-    status: "error",
-    error: error.message,
-    metadata: {
-      commanderCode: error.code,
-    },
-  });
-}
-
 export async function runCli(argv: string[]): Promise<number> {
   configurePluginsppLogoAssetPaths();
 
@@ -103,11 +68,7 @@ export async function runCli(argv: string[]): Promise<number> {
     await program.parseAsync(argv, { from: "user" });
     return 0;
   } catch (error) {
-    if (
-      error instanceof CommanderError &&
-      (error.code === "commander.helpDisplayed" ||
-        error.code === "commander.version")
-    ) {
+    if (isGracefulCommanderExit(error)) {
       return 0;
     }
     if (error instanceof CommanderError) {
