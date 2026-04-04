@@ -147,43 +147,6 @@ apps/pluginspp-cli/
 Purpose:
 
 - User-facing CLI for plugin installation and lifecycle workflows.
-- Reuses shared transport/UI primitives from `packages/cli-shared`.
-- Routes plugin lifecycle flows to agent plugin cache directories instead of skill directories.
-
-Entry:
-
-- src/cli.ts
-
-### apps/pluginspp-cli
-
-```text
-apps/pluginspp-cli/
-├── src/
-│   ├── cli.ts
-│   ├── command-builder.ts
-│   ├── interactive.ts
-│   ├── policy-mode.ts
-│   ├── commands/
-│   │   ├── add.ts
-│   │   ├── remove.ts
-│   │   └── update.ts
-│   ├── runtime/
-│   │   ├── background-executor.ts
-│   │   ├── background-runner.ts
-│   │   └── background-task-types.ts
-│   └── ui/
-│       ├── screens.tsx
-│       ├── selection-step.tsx
-│       └── ...
-└── tests/
-    ├── e2e/
-    ├── integration/
-    └── unit/
-```
-
-Purpose:
-
-- User-facing CLI for plugin installation and lifecycle workflows.
 - Mirrors the `skillspp add` transport/UI flow while routing installs to agent plugin cache directories.
 
 Entry:
