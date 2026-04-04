@@ -19,6 +19,10 @@
       "types": "./dist/interactive.d.ts",
       "default": "./dist/interactive.js"
     },
+    "./add-command": {
+      "types": "./dist/add-command.d.ts",
+      "default": "./dist/add-command.js"
+    },
     "./runtime/background-runner": {
       "types": "./dist/runtime/background-runner.d.ts",
       "default": "./dist/runtime/background-runner.js"
