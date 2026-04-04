@@ -4,17 +4,17 @@ import type {
   ListOptions,
 } from "@skillspp/core/contracts/runtime-types";
 import { AGENTS, normalizeAgentSelectionInput } from "@skillspp/core/agents";
-import { canUseInteractive } from "../interactive";
+import { canUseInteractive } from "@skillspp/cli-shared/interactive";
 import {
   parseStandaloneCommand,
   type CliCommandContext,
-} from "../command-builder";
+} from "@skillspp/cli-shared/command-builder";
 import { runBackgroundTask } from "../runtime/background-runner";
 import {
   type ManySelectionViewConfig,
   type SelectionKeyHint,
   runManySelectionStep,
-} from "../ui/selection-step";
+} from "@skillspp/cli-shared/ui/selection-step";
 import {
   flushUiFrame,
   hideLoader,
@@ -22,10 +22,10 @@ import {
   panelSection,
   renderStaticScreen,
   showLoader,
-} from "../ui/screens";
+} from "@skillspp/cli-shared/ui/screens";
 import type { SelectionRow } from "@skillspp/core/agents";
-import { shortenHomePath } from "../ui/format";
-import { bold, colorToken, dim } from "../ui/colors";
+import { shortenHomePath } from "@skillspp/cli-shared/ui/format";
+import { bold, colorToken, dim } from "@skillspp/cli-shared/ui/colors";
 
 type ListCommanderOptions = {
   agent?: string[];

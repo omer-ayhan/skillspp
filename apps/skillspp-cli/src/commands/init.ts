@@ -7,14 +7,17 @@ import {
   normalizeAgentSelectionInput,
   resolveAgents,
 } from "@skillspp/core/agents";
-import { askText, canUseInteractive } from "../interactive";
+import {
+  askText,
+  canUseInteractive,
+} from "@skillspp/cli-shared/interactive";
 import { buildAgentConfigScaffoldPlan } from "@skillspp/core/runtime/agent-config-mapper";
 import type { InstallerScaffoldFormat } from "@skillspp/core/runtime/installer-scaffold";
 import { scaffoldInstallerConfigFile } from "@skillspp/core/runtime/installer-scaffold";
 import {
   parseStandaloneCommand,
   type CliCommandContext,
-} from "../command-builder";
+} from "@skillspp/cli-shared/command-builder";
 import type { AgentType } from "@skillspp/core/contracts/runtime-types";
 import {
   completedStepsSection,
@@ -24,15 +27,15 @@ import {
   panelSection,
   renderStaticScreen,
   singleSelectionClosedSection,
-} from "../ui/screens";
-import { shortenHomePath } from "../ui/format";
+} from "@skillspp/cli-shared/ui/screens";
+import { shortenHomePath } from "@skillspp/cli-shared/ui/format";
 import {
   type ManySelectionViewConfig,
   type SelectionKeyHint,
   runManySelectionStep,
   runOneSelectionStep,
   type SingleSelectionViewConfig,
-} from "../ui/selection-step";
+} from "@skillspp/cli-shared/ui/selection-step";
 import type { SelectionRow } from "@skillspp/core/agents";
 
 type InitTemplate = "general" | "framework" | "automation";
