@@ -13,7 +13,8 @@
     "skillspp": "./dist/cli.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "src/assets"
   ],
   "publishConfig": {
     "access": "public",

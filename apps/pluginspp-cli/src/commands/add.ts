@@ -11,10 +11,17 @@ import {
   AGENTS,
   filterInstalledAgents,
   getAgentPluginsDir,
-  normalizeAgentSelectionInput,
   resolveAddPluginAgentSelectionRows,
   type SelectionRow,
 } from "@skillspp/core/agents";
+import {
+  applyForcedAddOptionFlags,
+  buildBaseAddOptions,
+  type AddOptionPresence,
+  buildNamedAddSelectionRows,
+  resolveNamedAddSelection,
+  type NamedAddSelectionItem,
+} from "@skillspp/cli-shared/add-command";
 import { sanitizeSkillName } from "@skillspp/core/runtime/installer";
 import {
   completedStepsSection,
@@ -36,7 +43,6 @@ import {
   type SingleSelectionViewConfig,
 } from "@skillspp/cli-shared/ui/selection-step";
 import { singleSelectionClosedSection } from "@skillspp/cli-shared/ui/screens";
-import { type LockfileFormat } from "@skillspp/core/lockfile";
 import { canUseInteractive } from "@skillspp/cli-shared/interactive";
 import { parsePolicyMode } from "../policy-mode";
 import {
@@ -108,10 +114,7 @@ const ADD_SCOPE_SELECTION_ROWS: SelectionRow[] = [
   },
 ];
 
-type SourcePlugin = {
-  name: string;
-  description: string;
-};
+type SourcePlugin = NamedAddSelectionItem;
 
 type InstallationSummaryRow = {
   pluginName: string;
@@ -125,11 +128,7 @@ function pluralize(count: number, singular: string, plural = `${singular}s`) {
 }
 
 function buildAddPluginSelectionRows(plugins: SourcePlugin[]): SelectionRow[] {
-  return plugins.map((plugin) => ({
-    id: plugin.name,
-    label: plugin.name,
-    description: plugin.description,
-  }));
+  return buildNamedAddSelectionRows(plugins);
 }
 
 function renderAddPluginsSection(options: {
@@ -278,26 +277,6 @@ async function resolveAddPlugins(
   merged: AddOptions,
   interactive: boolean,
 ): Promise<SourcePlugin[]> {
-  const filterByRequestedName = (
-    items: SourcePlugin[],
-    requested?: string[],
-  ): SourcePlugin[] => {
-    if (!requested || requested.length === 0) {
-      return items;
-    }
-
-    if (requested.includes("*")) {
-      return items;
-    }
-
-    const wanted = new Set(requested.map((item) => item.toLowerCase()));
-    return items.filter((item) => wanted.has(item.name.toLowerCase()));
-  };
-
-  if (merged.list) {
-    return filterByRequestedName(available, merged.skill);
-  }
-
   const pluginRows = buildAddPluginSelectionRows(available);
   const renderClosed = (selectedNames: string[]) =>
     renderAddPluginsSection({
@@ -305,73 +284,21 @@ async function resolveAddPlugins(
       selectedNames,
     });
 
-  if (merged.skill) {
-    const selected = filterByRequestedName(available, merged.skill);
-    if (selected.length > 0) {
-      await runManySelectionStep({
-        interactive,
-        rows: pluginRows,
-        selectedIds: selected.map((item) => item.name),
-        shouldPrompt: false,
-        prompt: {
-          title: "Choose Plugins",
-          required: true,
-          requiredMessage: "At least one plugin must be selected",
-          searchable: true,
-          keyHints: ADD_PLUGINS_KEY_HINTS,
-          view: ADD_PLUGINS_SELECTION_VIEW,
-        },
-        renderClosed,
-      });
-    }
-    return selected;
-  }
-
-  if (available.length === 0) {
-    throw new Error("No plugins available");
-  }
-
-  if (available.length === 1) {
-    await runManySelectionStep({
-      interactive,
-      rows: pluginRows,
-      selectedIds: [available[0].name],
-      shouldPrompt: false,
-      prompt: {
-        title: "Choose Plugins",
-        required: true,
-        requiredMessage: "At least one plugin must be selected",
-        searchable: true,
-        keyHints: ADD_PLUGINS_KEY_HINTS,
-        view: ADD_PLUGINS_SELECTION_VIEW,
-      },
-      renderClosed,
-    });
-    return available;
-  }
-
-  if (!interactive) {
-    throw new Error(
-      "Multiple plugins found. Use --plugin <name> or run in TTY without --non-interactive.",
-    );
-  }
-
-  const selectedNames = await runManySelectionStep({
+  return resolveNamedAddSelection({
+    available,
     interactive,
+    listMode: merged.list,
+    requested: merged.skill,
     rows: pluginRows,
-    shouldPrompt: true,
-    prompt: {
-      title: "Choose Plugins",
-      required: true,
-      requiredMessage: "At least one plugin must be selected",
-      searchable: true,
-      keyHints: ADD_PLUGINS_KEY_HINTS,
-      view: ADD_PLUGINS_SELECTION_VIEW,
-    },
+    keyHints: ADD_PLUGINS_KEY_HINTS,
+    view: ADD_PLUGINS_SELECTION_VIEW,
+    promptTitle: "Choose Plugins",
+    requiredMessage: "At least one plugin must be selected",
+    emptyMessage: "No plugins available",
+    multipleInNonInteractiveMessage:
+      "Multiple plugins found. Use --plugin <name> or run in TTY without --non-interactive.",
     renderClosed,
   });
-  const wanted = new Set(selectedNames);
-  return available.filter((item) => wanted.has(item.name));
 }
 
 async function resolveAddAgents(
@@ -535,69 +462,29 @@ type AddCommanderOptions = {
   nonInteractive?: boolean;
 };
 
-type AddOptionPresence = {
-  agentProvided?: boolean;
-  globalProvided?: boolean;
-  symlinkProvided?: boolean;
-};
-
-function parseLockFormatValue(value?: string): LockfileFormat | undefined {
-  if (!value) {
-    return undefined;
-  }
-  if (value !== "json" && value !== "yaml") {
-    throw new Error(`Invalid --lock-format value: ${value}`);
-  }
-  return value;
-}
-
 function toAddOptions(
   options: AddCommanderOptions,
   presence: AddOptionPresence = {},
 ): AddOptions {
-  const maxDownloadBytes = options.maxDownloadBytes
-    ? Number(options.maxDownloadBytes)
-    : undefined;
-  if (
-    typeof maxDownloadBytes === "number" &&
-    (!Number.isFinite(maxDownloadBytes) || maxDownloadBytes <= 0)
-  ) {
-    throw new Error(
-      `Invalid --max-download-bytes value: ${options.maxDownloadBytes}`,
-    );
-  }
-
-  const parsed: AddOptions = {
-    global: Boolean(options.global),
-    symlink: Boolean(options.symlink),
-    yaml: Boolean(options.yaml),
-    list: Boolean(options.list),
-    nonInteractive: Boolean(options.nonInteractive),
-    trustWellKnown: Boolean(options.trustWellKnown),
-    agent: normalizeAgentSelectionInput(options.agent),
-    skill: options.plugin,
-    allowHost: options.allowHost?.map((item) => item.toLowerCase()),
-    denyHost: options.denyHost?.map((item) => item.toLowerCase()),
-    maxDownloadBytes,
-    policyMode: parsePolicyMode(options.policyMode),
-    lockFormat: parseLockFormatValue(options.lockFormat),
-    experimental: false,
-  };
-
-  if (parsed.agent && parsed.agent.length > 0) {
-    parsed.agentFlagProvided = true;
-  }
-  if (presence.agentProvided) {
-    parsed.agentFlagProvided = true;
-  }
-  if (presence.globalProvided) {
-    parsed.globalFlagProvided = true;
-  }
-  if (presence.symlinkProvided) {
-    parsed.symlinkFlagProvided = true;
-  }
-
-  return parsed;
+  return buildBaseAddOptions(
+    {
+      global: options.global,
+      symlink: options.symlink,
+      yaml: options.yaml,
+      list: options.list,
+      nonInteractive: options.nonInteractive,
+      trustWellKnown: options.trustWellKnown,
+      agent: options.agent,
+      selectedNames: options.plugin,
+      allowHost: options.allowHost,
+      denyHost: options.denyHost,
+      maxDownloadBytes: options.maxDownloadBytes,
+      policyMode: parsePolicyMode(options.policyMode),
+      lockFormat: options.lockFormat,
+      experimental: false,
+    },
+    presence,
+  );
 }
 
 async function executeAdd(
@@ -825,13 +712,7 @@ export async function runAdd(
         ...toAddOptions(options, presence),
         ...forcedOptions,
       };
-      if (Object.prototype.hasOwnProperty.call(forcedOptions, "global")) {
-        merged.globalFlagProvided = true;
-      }
-      if (Object.prototype.hasOwnProperty.call(forcedOptions, "symlink")) {
-        merged.symlinkFlagProvided = true;
-      }
-      await executeAdd(source, merged);
+      await executeAdd(source, applyForcedAddOptionFlags(merged, forcedOptions));
     },
   );
   await parseStandaloneCommand(command, args);

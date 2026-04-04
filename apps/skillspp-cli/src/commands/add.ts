@@ -10,10 +10,16 @@ import { resolveSourceLabel } from "@skillspp/core/skills";
 import {
   AGENTS,
   getAgentSkillsDir,
-  normalizeAgentSelectionInput,
   resolveAddAgentSelectionRows,
   type SelectionRow,
 } from "@skillspp/core/agents";
+import {
+  applyForcedAddOptionFlags,
+  buildBaseAddOptions,
+  type AddOptionPresence,
+  buildNamedAddSelectionRows,
+  resolveNamedAddSelection,
+} from "@skillspp/cli-shared/add-command";
 import {
   sanitizeSkillName,
 } from "@skillspp/core/runtime/installer";
@@ -28,24 +34,23 @@ import {
   hideLoader,
   showLoader,
   sourceSection,
-} from "../ui/screens";
+  singleSelectionClosedSection,
+} from "@skillspp/cli-shared/ui/screens";
 import {
   type ManySelectionViewConfig,
   type SelectionKeyHint,
   runManySelectionStep,
   runOneSelectionStep,
   type SingleSelectionViewConfig,
-} from "../ui/selection-step";
-import { singleSelectionClosedSection } from "../ui/screens";
-import { type LockfileFormat } from "@skillspp/core/lockfile";
-import { canUseInteractive } from "../interactive";
+} from "@skillspp/cli-shared/ui/selection-step";
+import { canUseInteractive } from "@skillspp/cli-shared/interactive";
 import { parsePolicyMode } from "../policy-mode";
 import {
   parseStandaloneCommand,
   type CliCommandContext,
-} from "../command-builder";
+} from "@skillspp/cli-shared/command-builder";
 import { runBackgroundTask } from "../runtime/background-runner";
-import { shortenHomePath } from "../ui/format";
+import { shortenHomePath } from "@skillspp/cli-shared/ui/format";
 
 const SKILL_NAME_WIDTH = 32;
 const SKILL_DESC_WIDTH = 40;
@@ -116,23 +121,13 @@ type InstallationSummaryRow = {
   mode: "copy" | "symlink";
 };
 
-function buildAddSkillSelectionRows(
-  skills: Array<{ name: string; description: string }>,
-): SelectionRow[] {
-  return skills.map((skill) => ({
-    id: skill.name,
-    label: skill.name,
-    description: skill.description,
-  }));
-}
-
 function renderAddSkillsSection(options: {
   skills: Array<{ name: string; description: string }>;
   selectedNames: string[];
 }) {
   return manySelectionClosedSection(
     ADD_SKILLS_SELECTION_VIEW,
-    buildAddSkillSelectionRows(options.skills),
+    buildNamedAddSelectionRows(options.skills),
     options.selectedNames,
   );
 }
@@ -239,24 +234,7 @@ async function printAddListScreen(options: {
 async function resolveAddSkills<
   T extends { name: string; description: string },
 >(available: T[], merged: AddOptions, interactive: boolean): Promise<T[]> {
-  const filterByRequestedName = (items: T[], requested?: string[]): T[] => {
-    if (!requested || requested.length === 0) {
-      return items;
-    }
-
-    if (requested.includes("*")) {
-      return items;
-    }
-
-    const wanted = new Set(requested.map((item) => item.toLowerCase()));
-    return items.filter((item) => wanted.has(item.name.toLowerCase()));
-  };
-
-  if (merged.list) {
-    return filterByRequestedName(available, merged.skill);
-  }
-
-  const skillRows = buildAddSkillSelectionRows(
+  const skillRows = buildNamedAddSelectionRows(
     available.map((item) => ({
       name: item.name,
       description: item.description,
@@ -271,73 +249,21 @@ async function resolveAddSkills<
       selectedNames,
     });
 
-  if (merged.skill) {
-    const selected = filterByRequestedName(available, merged.skill);
-    if (selected.length > 0) {
-      await runManySelectionStep({
-        interactive,
-        rows: skillRows,
-        selectedIds: selected.map((item) => item.name),
-        shouldPrompt: false,
-        prompt: {
-          title: "Choose Skills",
-          required: true,
-          requiredMessage: "At least one skill must be selected",
-          searchable: true,
-          keyHints: ADD_SKILLS_KEY_HINTS,
-          view: ADD_SKILLS_SELECTION_VIEW,
-        },
-        renderClosed,
-      });
-    }
-    return selected;
-  }
-
-  if (available.length === 0) {
-    throw new Error("No skills available");
-  }
-
-  if (available.length === 1) {
-    await runManySelectionStep({
-      interactive,
-      rows: skillRows,
-      selectedIds: [available[0].name],
-      shouldPrompt: false,
-      prompt: {
-        title: "Choose Skills",
-        required: true,
-        requiredMessage: "At least one skill must be selected",
-        searchable: true,
-        keyHints: ADD_SKILLS_KEY_HINTS,
-        view: ADD_SKILLS_SELECTION_VIEW,
-      },
-      renderClosed,
-    });
-    return available;
-  }
-
-  if (!interactive) {
-    throw new Error(
-      "Multiple skills found. Use --skill <name> or run in TTY without --non-interactive.",
-    );
-  }
-
-  const selectedNames = await runManySelectionStep({
+  return resolveNamedAddSelection({
+    available,
     interactive,
+    listMode: merged.list,
+    requested: merged.skill,
     rows: skillRows,
-    shouldPrompt: true,
-    prompt: {
-      title: "Choose Skills",
-      required: true,
-      requiredMessage: "At least one skill must be selected",
-      searchable: true,
-      keyHints: ADD_SKILLS_KEY_HINTS,
-      view: ADD_SKILLS_SELECTION_VIEW,
-    },
+    keyHints: ADD_SKILLS_KEY_HINTS,
+    view: ADD_SKILLS_SELECTION_VIEW,
+    promptTitle: "Choose Skills",
+    requiredMessage: "At least one skill must be selected",
+    emptyMessage: "No skills available",
+    multipleInNonInteractiveMessage:
+      "Multiple skills found. Use --skill <name> or run in TTY without --non-interactive.",
     renderClosed,
   });
-  const wanted = new Set(selectedNames);
-  return available.filter((item) => wanted.has(item.name));
 }
 
 async function resolveAddAgents(
@@ -499,75 +425,30 @@ type AddCommanderOptions = {
   all?: boolean;
 };
 
-type AddOptionPresence = {
-  agentProvided?: boolean;
-  globalProvided?: boolean;
-  symlinkProvided?: boolean;
-};
-
-function parseLockFormatValue(value?: string): LockfileFormat | undefined {
-  if (!value) {
-    return undefined;
-  }
-  if (value !== "json" && value !== "yaml") {
-    throw new Error(`Invalid --lock-format value: ${value}`);
-  }
-  return value;
-}
-
 function toAddOptions(
   options: AddCommanderOptions,
   presence: AddOptionPresence = {},
 ): AddOptions {
-  const maxDownloadBytes = options.maxDownloadBytes
-    ? Number(options.maxDownloadBytes)
-    : undefined;
-  if (
-    typeof maxDownloadBytes === "number" &&
-    (!Number.isFinite(maxDownloadBytes) || maxDownloadBytes <= 0)
-  ) {
-    throw new Error(
-      `Invalid --max-download-bytes value: ${options.maxDownloadBytes}`,
-    );
-  }
-
-  const parsed: AddOptions = {
-    global: Boolean(options.global),
-    symlink: Boolean(options.symlink),
-    yaml: Boolean(options.yaml),
-    list: Boolean(options.list),
-    all: Boolean(options.all),
-    nonInteractive: Boolean(options.nonInteractive),
-    trustWellKnown: Boolean(options.trustWellKnown),
-    agent: normalizeAgentSelectionInput(options.agent),
-    skill: options.skill,
-    allowHost: options.allowHost?.map((item) => item.toLowerCase()),
-    denyHost: options.denyHost?.map((item) => item.toLowerCase()),
-    maxDownloadBytes,
-    policyMode: parsePolicyMode(options.policyMode),
-    lockFormat: parseLockFormatValue(options.lockFormat),
-    experimental: false,
-  };
-
-  if (parsed.agent && parsed.agent.length > 0) {
-    parsed.agentFlagProvided = true;
-  }
-  if (presence.agentProvided) {
-    parsed.agentFlagProvided = true;
-  }
-  if (presence.globalProvided) {
-    parsed.globalFlagProvided = true;
-  }
-  if (presence.symlinkProvided) {
-    parsed.symlinkFlagProvided = true;
-  }
-
-  if (parsed.all) {
-    parsed.skill = ["*"];
-    parsed.agent = ["*"];
-  }
-
-  return parsed;
+  return buildBaseAddOptions(
+    {
+      global: options.global,
+      symlink: options.symlink,
+      yaml: options.yaml,
+      list: options.list,
+      all: options.all,
+      nonInteractive: options.nonInteractive,
+      trustWellKnown: options.trustWellKnown,
+      agent: options.agent,
+      selectedNames: options.skill,
+      allowHost: options.allowHost,
+      denyHost: options.denyHost,
+      maxDownloadBytes: options.maxDownloadBytes,
+      policyMode: parsePolicyMode(options.policyMode),
+      lockFormat: options.lockFormat,
+      experimental: false,
+    },
+    presence,
+  );
 }
 
 async function executeAdd(
@@ -800,13 +681,7 @@ export async function runAdd(
         ...toAddOptions(options, presence),
         ...forcedOptions,
       };
-      if (Object.prototype.hasOwnProperty.call(forcedOptions, "global")) {
-        merged.globalFlagProvided = true;
-      }
-      if (Object.prototype.hasOwnProperty.call(forcedOptions, "symlink")) {
-        merged.symlinkFlagProvided = true;
-      }
-      await executeAdd(source, merged);
+      await executeAdd(source, applyForcedAddOptionFlags(merged, forcedOptions));
     },
   );
   await parseStandaloneCommand(command, args);

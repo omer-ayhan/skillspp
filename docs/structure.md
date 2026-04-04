@@ -45,7 +45,6 @@ Companion doc: see docs/agent-context.md for coding-agent focused guidance.
 apps/skillspp-cli/
 ├── src/
 │   ├── cli.ts
-│   ├── command-builder.ts
 │   ├── commands/
 │   │   ├── add.ts
 │   │   ├── check.ts
@@ -55,6 +54,7 @@ apps/skillspp-cli/
 │   │   ├── remove.ts
 │   │   ├── update.ts
 │   │   └── validate.ts
+│   ├── telemetry.ts
 │   ├── runtime/
 │   ├── ui/
 │   └── ...
@@ -78,6 +78,9 @@ Entry:
 
 ```text
 apps/pluginspp-cli/
+├── assets/
+│   └── ascii/
+│       └── logo/
 ├── src/
 │   ├── cli.ts
 │   ├── command-builder.ts
@@ -115,6 +118,9 @@ Entry:
 
 ```text
 apps/pluginspp-cli/
+├── assets/
+│   └── ascii/
+│       └── logo/
 ├── src/
 │   ├── cli.ts
 │   ├── command-builder.ts

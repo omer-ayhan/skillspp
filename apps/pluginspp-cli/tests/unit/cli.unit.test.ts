@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { Command } from "commander";
+import {
+  getAnimatedLogoFrames,
+  resetLogoCache,
+} from "@skillspp/cli-shared/ui/logo";
+import { configurePluginsppLogoAssetPaths } from "../../src/cli";
 import { registerAddCommand } from "../../src/commands/add";
 import { registerRemoveCommand } from "../../src/commands/remove";
 import { registerUpdateCommand } from "../../src/commands/update";
@@ -38,5 +43,12 @@ describe("pluginspp CLI program @unit", () => {
   it("registers exactly three subcommands @unit", () => {
     const program = buildTestProgram();
     expect(program.commands).toHaveLength(3);
+  });
+
+  it("configures cli-shared to load pluginspp logo assets @unit", () => {
+    configurePluginsppLogoAssetPaths();
+    resetLogoCache();
+    const animatedLogo = getAnimatedLogoFrames();
+    expect(animatedLogo?.frames.length ?? 0).toBeGreaterThan(0);
   });
 });

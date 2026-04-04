@@ -77,13 +77,77 @@ export function createCliCommandContext(
   };
 }
 
+export function applyExitOverride(command: Command): void {
+  command.exitOverride((error) => {
+    throw error;
+  });
+
+  for (const subcommand of command.commands) {
+    applyExitOverride(subcommand);
+  }
+}
+
+export function isGracefulCommanderExit(
+  error: unknown
+): error is CommanderError {
+  return (
+    error instanceof CommanderError &&
+    (error.code === "commander.helpDisplayed" ||
+      error.code === "commander.version")
+  );
+}
+
+type InferCommandSourceOptions = {
+  fallbackSource?: string;
+  valueFlags?: string[];
+};
+
+export function inferCommandSource(
+  argv: string[],
+  options: InferCommandSourceOptions = {}
+): string {
+  const valueFlags = new Set(options.valueFlags ?? []);
+
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i];
+    if (valueFlags.has(arg)) {
+      i += 1;
+      continue;
+    }
+    if (arg.startsWith("-")) {
+      continue;
+    }
+    return arg;
+  }
+
+  return options.fallbackSource ?? "cli";
+}
+
+export function emitCommanderParseErrorTelemetry(
+  emitter: TelemetryEmitter,
+  argv: string[],
+  error: CommanderError,
+  options: InferCommandSourceOptions = {}
+): void {
+  const source = inferCommandSource(argv, options);
+  emitLifecycleEvent(emitter, {
+    eventType: `${source}_failed`,
+    source,
+    reason: "commander_parse_error",
+    command: source,
+    status: "error",
+    error: error.message,
+    metadata: {
+      commanderCode: error.code,
+    },
+  });
+}
+
 export async function parseStandaloneCommand(
   command: Command,
   args: string[]
 ): Promise<void> {
-  command.exitOverride((error) => {
-    throw error;
-  });
+  applyExitOverride(command);
 
   try {
     await command.parseAsync(args, { from: "user" });

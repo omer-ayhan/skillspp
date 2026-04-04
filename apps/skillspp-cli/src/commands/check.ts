@@ -10,7 +10,7 @@ import { parsePolicyMode } from "../policy-mode";
 import {
   parseStandaloneCommand,
   type CliCommandContext,
-} from "../command-builder";
+} from "@skillspp/cli-shared/command-builder";
 import { runBackgroundTask } from "../runtime/background-runner";
 import {
   completedStepsSection,
@@ -21,8 +21,11 @@ import {
   renderStaticScreen,
   showLoader,
   sourceSection,
-} from "../ui/screens";
-import { formatDriftChips, shortenHomePath } from "../ui/format";
+} from "@skillspp/cli-shared/ui/screens";
+import {
+  formatDriftChips,
+  shortenHomePath,
+} from "@skillspp/cli-shared/ui/format";
 
 export type { DriftRecord, CheckOptions, SkillAssessment };
 export type DriftKind = DriftRecord["kind"];

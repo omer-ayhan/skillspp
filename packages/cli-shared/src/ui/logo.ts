@@ -1,6 +1,4 @@
 import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 type LogoCell = {
   x: number;
@@ -35,22 +33,38 @@ const EMPTY_TEXT_ONLY_LOGO: string[] = [];
 
 let animatedCache: AnimatedLogo | null | undefined;
 let staticCache: string[] | null | undefined;
+let configuredSessionPath: string | null = null;
+let configuredStaticPath: string | null = null;
 
-function resolveLogoDir(): string {
-  const dirname = path.dirname(fileURLToPath(import.meta.url));
-  return path.resolve(dirname, "../assets/ascii/logo");
+function normalizeConfiguredPath(filePath: string | null | undefined): string | null {
+  if (typeof filePath !== "string") {
+    return null;
+  }
+  const trimmed = filePath.trim();
+  return trimmed.length > 0 ? trimmed : null;
 }
 
-function resolveSessionPath(): string {
-  const customPath = process.env.SKILLSPP_LOGO_SESSION_PATH;
+export function configureLogoAssetPaths(paths: {
+  sessionPath?: string | null;
+  textPath?: string | null;
+}): void {
+  configuredSessionPath = normalizeConfiguredPath(paths.sessionPath);
+  configuredStaticPath = normalizeConfiguredPath(paths.textPath);
+  resetLogoCache();
+}
+
+function resolveSessionPath(): string | null {
   return (
-    customPath || path.join(resolveLogoDir(), "skillspp-logo.session.json")
+    normalizeConfiguredPath(process.env.SKILLSPP_LOGO_SESSION_PATH) ??
+    configuredSessionPath
   );
 }
 
-function resolveStaticPath(): string {
-  const customPath = process.env.SKILLSPP_LOGO_TEXT_PATH;
-  return customPath || path.join(resolveLogoDir(), "skillspp-logo.txt");
+function resolveStaticPath(): string | null {
+  return (
+    normalizeConfiguredPath(process.env.SKILLSPP_LOGO_TEXT_PATH) ??
+    configuredStaticPath
+  );
 }
 
 function trimOuterEmptyRows(lines: string[]): string[] {
