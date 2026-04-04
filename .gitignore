@@ -7,6 +7,7 @@ node_modules
 .DS_Store
 dist
 packages/*/dist
+.omx
 
 # Prevent accidental TypeScript emits into source trees
 packages/*/src/**/*.js

@@ -191,20 +191,6 @@
           "bgColor": "transparent"
         },
         {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#489cdd",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#4a9edf",
-          "bgColor": "transparent"
-        },
-        {
           "x": 3,
           "y": 3,
           "char": "█",
@@ -439,21 +425,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#4497d9",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
@@ -474,21 +460,21 @@
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#479adc",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
@@ -790,20 +776,6 @@
           "y": 6,
           "char": "█",
           "color": "#4093d5",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#4194d6",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#4396d8",
           "bgColor": "transparent"
         }
       ],
@@ -990,20 +962,6 @@
           "bgColor": "transparent"
         },
         {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#489cdd",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#4a9edf",
-          "bgColor": "transparent"
-        },
-        {
           "x": 3,
           "y": 3,
           "char": "█",
@@ -1238,21 +1196,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#4497d9",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
@@ -1273,21 +1231,21 @@
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#479adc",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
@@ -1590,20 +1548,6 @@
           "char": "█",
           "color": "#4093d5",
           "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#4194d6",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#4396d8",
-          "bgColor": "transparent"
         }
       ],
       "cellCount": 113
@@ -1786,20 +1730,6 @@
           "y": 2,
           "char": "█",
           "color": "#479bdc",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#489cdd",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#4a9edf",
           "bgColor": "transparent"
         },
         {
@@ -2037,21 +1967,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#4497d9",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
@@ -2072,21 +2002,21 @@
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#479adc",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
@@ -2389,20 +2319,6 @@
           "char": "█",
           "color": "#4093d5",
           "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#4194d6",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#4396d8",
-          "bgColor": "transparent"
         }
       ],
       "cellCount": 113
@@ -2585,20 +2501,6 @@
           "y": 2,
           "char": "█",
           "color": "#479bdc",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#489cdd",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#4a9edf",
           "bgColor": "transparent"
         },
         {
@@ -2836,21 +2738,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#4497d9",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
@@ -2871,21 +2773,21 @@
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#479adc",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
@@ -3188,20 +3090,6 @@
           "char": "█",
           "color": "#4093d5",
           "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#4194d6",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#4396d8",
-          "bgColor": "transparent"
         }
       ],
       "cellCount": 113
@@ -3384,20 +3272,6 @@
           "y": 2,
           "char": "█",
           "color": "#479bdc",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#489cdd",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#4a9edf",
           "bgColor": "transparent"
         },
         {
@@ -3635,21 +3509,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#4497d9",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
@@ -3670,21 +3544,21 @@
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#479adc",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
@@ -3987,20 +3861,6 @@
           "char": "█",
           "color": "#4093d5",
           "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#4194d6",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#4396d8",
-          "bgColor": "transparent"
         }
       ],
       "cellCount": 113
@@ -4183,20 +4043,6 @@
           "y": 2,
           "char": "█",
           "color": "#479bdc",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#489cdd",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#4a9edf",
           "bgColor": "transparent"
         },
         {
@@ -4434,21 +4280,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#4497d9",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
@@ -4469,21 +4315,21 @@
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#479adc",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
@@ -4786,20 +4632,6 @@
           "char": "█",
           "color": "#4093d5",
           "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#4194d6",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#4396d8",
-          "bgColor": "transparent"
         }
       ],
       "cellCount": 113
@@ -4982,20 +4814,6 @@
           "y": 2,
           "char": "█",
           "color": "#479bdc",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#489cdd",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#4a9edf",
           "bgColor": "transparent"
         },
         {
@@ -5233,21 +5051,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#4497d9",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
@@ -5268,21 +5086,21 @@
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#479adc",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
@@ -5585,20 +5403,6 @@
           "char": "█",
           "color": "#4093d5",
           "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#4194d6",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#4396d8",
-          "bgColor": "transparent"
         }
       ],
       "cellCount": 113
@@ -5781,20 +5585,6 @@
           "y": 2,
           "char": "█",
           "color": "#479bdc",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#489cdd",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#4a9edf",
           "bgColor": "transparent"
         },
         {
@@ -6032,21 +5822,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#4497d9",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
@@ -6067,21 +5857,21 @@
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#479adc",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
@@ -6384,20 +6174,6 @@
           "char": "█",
           "color": "#4093d5",
           "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#4194d6",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#4396d8",
-          "bgColor": "transparent"
         }
       ],
       "cellCount": 113
@@ -6580,20 +6356,6 @@
           "y": 2,
           "char": "█",
           "color": "#479bdc",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#489cdd",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#4a9edf",
           "bgColor": "transparent"
         },
         {
@@ -6831,21 +6593,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#4497d9",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
@@ -6866,21 +6628,21 @@
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#479adc",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
@@ -7183,20 +6945,6 @@
           "char": "█",
           "color": "#4093d5",
           "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#4194d6",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#4396d8",
-          "bgColor": "transparent"
         }
       ],
       "cellCount": 113
@@ -7379,20 +7127,6 @@
           "y": 2,
           "char": "█",
           "color": "#479bdc",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#489cdd",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#4a9edf",
           "bgColor": "transparent"
         },
         {
@@ -7630,21 +7364,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#4497d9",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
@@ -7665,21 +7399,21 @@
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#479adc",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
@@ -7982,20 +7716,6 @@
           "char": "█",
           "color": "#4093d5",
           "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#4194d6",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#4396d8",
-          "bgColor": "transparent"
         }
       ],
       "cellCount": 113
@@ -8178,20 +7898,6 @@
           "y": 2,
           "char": "█",
           "color": "#479bdc",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#489cdd",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#4a9edf",
           "bgColor": "transparent"
         },
         {
@@ -8429,21 +8135,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#4497d9",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
@@ -8464,21 +8170,21 @@
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#479adc",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
@@ -8781,20 +8487,6 @@
           "char": "█",
           "color": "#4093d5",
           "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#4194d6",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#4396d8",
-          "bgColor": "transparent"
         }
       ],
       "cellCount": 113
@@ -8977,20 +8669,6 @@
           "y": 2,
           "char": "█",
           "color": "#479bdc",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#489cdd",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#4a9edf",
           "bgColor": "transparent"
         },
         {
@@ -9228,21 +8906,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#4497d9",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
@@ -9263,21 +8941,21 @@
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#479adc",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
@@ -9580,20 +9258,6 @@
           "char": "█",
           "color": "#4093d5",
           "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#4194d6",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#4396d8",
-          "bgColor": "transparent"
         }
       ],
       "cellCount": 113
@@ -9776,20 +9440,6 @@
           "y": 2,
           "char": "█",
           "color": "#479bdc",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#489cdd",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#4a9edf",
           "bgColor": "transparent"
         },
         {
@@ -10027,21 +9677,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#4497d9",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
@@ -10062,21 +9712,21 @@
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#479adc",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
@@ -10379,20 +10029,6 @@
           "char": "█",
           "color": "#4093d5",
           "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#4194d6",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#4396d8",
-          "bgColor": "transparent"
         }
       ],
       "cellCount": 113
@@ -10575,20 +10211,6 @@
           "y": 2,
           "char": "█",
           "color": "#479bdc",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#489cdd",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#4a9edf",
           "bgColor": "transparent"
         },
         {
@@ -10826,21 +10448,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#4497d9",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
@@ -10861,21 +10483,21 @@
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#479adc",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
@@ -11178,20 +10800,6 @@
           "char": "█",
           "color": "#4093d5",
           "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#4194d6",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#4396d8",
-          "bgColor": "transparent"
         }
       ],
       "cellCount": 113
@@ -11374,20 +10982,6 @@
           "y": 2,
           "char": "█",
           "color": "#4a9ddd",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#489cdd",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#4a9edf",
           "bgColor": "transparent"
         },
         {
@@ -11625,21 +11219,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#4497d9",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
@@ -11660,21 +11254,21 @@
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#479adc",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
@@ -11977,20 +11571,6 @@
           "char": "█",
           "color": "#4395d6",
           "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#4194d6",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#4396d8",
-          "bgColor": "transparent"
         }
       ],
       "cellCount": 113
@@ -12173,20 +11753,6 @@
           "y": 2,
           "char": "█",
           "color": "#67b0e4",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#499ddd",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#4a9edf",
           "bgColor": "transparent"
         },
         {
@@ -12424,21 +11990,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#4c9ddb",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#499adb",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#4699da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
@@ -12459,21 +12025,21 @@
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#479adc",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
@@ -12776,20 +12342,6 @@
           "char": "█",
           "color": "#62aadf",
           "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#4295d6",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#4396d8",
-          "bgColor": "transparent"
         }
       ],
       "cellCount": 113
@@ -12972,20 +12524,6 @@
           "y": 2,
           "char": "█",
           "color": "#b9e6f9",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#5daae2",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#4a9edf",
           "bgColor": "transparent"
         },
         {
@@ -13223,21 +12761,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#84c2ea",
+          "color": "#50a0dd",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#6cb3e5",
+          "color": "#50a0dd",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#5ba7e0",
+          "color": "#50a0dd",
           "bgColor": "transparent"
         },
         {
@@ -13251,28 +12789,28 @@
           "x": 49,
           "y": 4,
           "char": "█",
-          "color": "#4a9cdb",
+          "color": "#50a0dd",
           "bgColor": "transparent"
         },
         {
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#479adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#479adc",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
@@ -13575,20 +13113,6 @@
           "char": "█",
           "color": "#b8e5f8",
           "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#58a3dd",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#4396d8",
-          "bgColor": "transparent"
         }
       ],
       "cellCount": 113
@@ -13771,20 +13295,6 @@
           "y": 2,
           "char": "█",
           "color": "#b9e6f9",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#a9dcf5",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#4da0e0",
           "bgColor": "transparent"
         },
         {
@@ -14022,21 +13532,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#cbf3fe",
+          "color": "#8dc9ed",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#bfeafb",
+          "color": "#8dc9ed",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#a8dbf5",
+          "color": "#8dc9ed",
           "bgColor": "transparent"
         },
         {
@@ -14050,28 +13560,28 @@
           "x": 49,
           "y": 4,
           "char": "█",
-          "color": "#74b8e7",
+          "color": "#8dc9ed",
           "bgColor": "transparent"
         },
         {
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#54a3df",
+          "color": "#489cdc",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#4c9edd",
+          "color": "#489cdc",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#4a9cdd",
+          "color": "#489cdc",
           "bgColor": "transparent"
         },
         {
@@ -14085,7 +13595,7 @@
           "x": 55,
           "y": 4,
           "char": "█",
-          "color": "#479bdc",
+          "color": "#489cdc",
           "bgColor": "transparent"
         },
         {
@@ -14374,20 +13884,6 @@
           "char": "█",
           "color": "#b8e5f8",
           "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#a7daf4",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#4698d9",
-          "bgColor": "transparent"
         }
       ],
       "cellCount": 113
@@ -14570,20 +14066,6 @@
           "y": 2,
           "char": "█",
           "color": "#67b0e4",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#c5eefc",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#6ab3e7",
           "bgColor": "transparent"
         },
         {
@@ -14821,21 +14303,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#96ceef",
+          "color": "#ccf3fe",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#b1e1f7",
+          "color": "#ccf3fe",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#c5eefc",
+          "color": "#ccf3fe",
           "bgColor": "transparent"
         },
         {
@@ -14849,28 +14331,28 @@
           "x": 49,
           "y": 4,
           "char": "█",
-          "color": "#c5eefc",
+          "color": "#ccf3fe",
           "bgColor": "transparent"
         },
         {
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#97d0f0",
+          "color": "#58a6e0",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#7cbee9",
+          "color": "#58a6e0",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#67b0e4",
+          "color": "#58a6e0",
           "bgColor": "transparent"
         },
         {
@@ -14884,7 +14366,7 @@
           "x": 55,
           "y": 4,
           "char": "█",
-          "color": "#4fa0de",
+          "color": "#58a6e0",
           "bgColor": "transparent"
         },
         {
@@ -15173,20 +14655,6 @@
           "char": "█",
           "color": "#62aadf",
           "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#c4eefc",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#64ade1",
-          "bgColor": "transparent"
         }
       ],
       "cellCount": 113
@@ -15369,20 +14837,6 @@
           "y": 2,
           "char": "█",
           "color": "#4a9ddd",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#76bae8",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#b9e7fa",
           "bgColor": "transparent"
         },
         {
@@ -15620,21 +15074,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#52a0dd",
+          "color": "#8dc9ed",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#60aae1",
+          "color": "#8dc9ed",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#74b7e7",
+          "color": "#8dc9ed",
           "bgColor": "transparent"
         },
         {
@@ -15648,28 +15102,28 @@
           "x": 49,
           "y": 4,
           "char": "█",
-          "color": "#a8dbf5",
+          "color": "#8dc9ed",
           "bgColor": "transparent"
         },
         {
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#cbf3fe",
+          "color": "#a0d6f3",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#c9f1fd",
+          "color": "#a0d6f3",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#b9e6f9",
+          "color": "#a0d6f3",
           "bgColor": "transparent"
         },
         {
@@ -15683,7 +15137,7 @@
           "x": 55,
           "y": 4,
           "char": "█",
-          "color": "#85c4ec",
+          "color": "#a0d6f3",
           "bgColor": "transparent"
         },
         {
@@ -15972,20 +15426,6 @@
           "char": "█",
           "color": "#4395d6",
           "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#71b5e4",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#b8e6f9",
-          "bgColor": "transparent"
         }
       ],
       "cellCount": 113
@@ -16168,20 +15608,6 @@
           "y": 2,
           "char": "█",
           "color": "#479bdc",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#4d9fde",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#b9e7fa",
           "bgColor": "transparent"
         },
         {
@@ -16419,21 +15845,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#4597d9",
+          "color": "#50a0dd",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#4799db",
+          "color": "#50a0dd",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#4a9bdb",
+          "color": "#50a0dd",
           "bgColor": "transparent"
         },
         {
@@ -16447,28 +15873,28 @@
           "x": 49,
           "y": 4,
           "char": "█",
-          "color": "#5ba8e0",
+          "color": "#50a0dd",
           "bgColor": "transparent"
         },
         {
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#85c4eb",
+          "color": "#c9f1fd",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#a0d6f3",
+          "color": "#c9f1fd",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#b9e6f9",
+          "color": "#c9f1fd",
           "bgColor": "transparent"
         },
         {
@@ -16482,7 +15908,7 @@
           "x": 55,
           "y": 4,
           "char": "█",
-          "color": "#cbf3fe",
+          "color": "#c9f1fd",
           "bgColor": "transparent"
         },
         {
@@ -16771,20 +16197,6 @@
           "char": "█",
           "color": "#4093d5",
           "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#4697d7",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#b8e6f9",
-          "bgColor": "transparent"
         }
       ],
       "cellCount": 113
@@ -16967,20 +16379,6 @@
           "y": 2,
           "char": "█",
           "color": "#479bdc",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#489cdd",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#6ab3e7",
           "bgColor": "transparent"
         },
         {
@@ -17218,21 +16616,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#4497d9",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
@@ -17246,28 +16644,28 @@
           "x": 49,
           "y": 4,
           "char": "█",
-          "color": "#469ada",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#4ea0dd",
+          "color": "#7dbfea",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#57a6e0",
+          "color": "#7dbfea",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#67b0e4",
+          "color": "#7dbfea",
           "bgColor": "transparent"
         },
         {
@@ -17281,7 +16679,7 @@
           "x": 55,
           "y": 4,
           "char": "█",
-          "color": "#97d0f1",
+          "color": "#7dbfea",
           "bgColor": "transparent"
         },
         {
@@ -17570,20 +16968,6 @@
           "char": "█",
           "color": "#4093d5",
           "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#4194d6",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#64ade1",
-          "bgColor": "transparent"
         }
       ],
       "cellCount": 113
@@ -17766,20 +17150,6 @@
           "y": 2,
           "char": "█",
           "color": "#479bdc",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#489cdd",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#4da0e0",
           "bgColor": "transparent"
         },
         {
@@ -18017,21 +17387,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#4497d9",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
@@ -18052,21 +17422,21 @@
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#4d9fde",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#479bdb",
+          "color": "#4d9fde",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#4a9cdd",
+          "color": "#4d9fde",
           "bgColor": "transparent"
         },
         {
@@ -18080,7 +17450,7 @@
           "x": 55,
           "y": 4,
           "char": "█",
-          "color": "#55a4e0",
+          "color": "#4d9fde",
           "bgColor": "transparent"
         },
         {
@@ -18369,20 +17739,6 @@
           "char": "█",
           "color": "#4093d5",
           "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#4194d6",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#4698d9",
-          "bgColor": "transparent"
         }
       ],
       "cellCount": 113
@@ -18565,20 +17921,6 @@
           "y": 2,
           "char": "█",
           "color": "#479bdc",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 2,
-          "char": "█",
-          "color": "#489cdd",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 2,
-          "char": "█",
-          "color": "#4a9edf",
           "bgColor": "transparent"
         },
         {
@@ -18816,21 +18158,21 @@
           "x": 45,
           "y": 4,
           "char": "█",
-          "color": "#4497d9",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 46,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
           "x": 47,
           "y": 4,
           "char": "█",
-          "color": "#4598da",
+          "color": "#4599da",
           "bgColor": "transparent"
         },
         {
@@ -18851,21 +18193,21 @@
           "x": 51,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 52,
           "y": 4,
           "char": "█",
-          "color": "#469adb",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
           "x": 53,
           "y": 4,
           "char": "█",
-          "color": "#479adc",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
@@ -18879,7 +18221,7 @@
           "x": 55,
           "y": 4,
           "char": "█",
-          "color": "#489bdc",
+          "color": "#479bdc",
           "bgColor": "transparent"
         },
         {
@@ -19167,20 +18509,6 @@
           "y": 6,
           "char": "█",
           "color": "#4093d5",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 47,
-          "y": 6,
-          "char": "█",
-          "color": "#4194d6",
-          "bgColor": "transparent"
-        },
-        {
-          "x": 53,
-          "y": 6,
-          "char": "█",
-          "color": "#4396d8",
           "bgColor": "transparent"
         }
       ],
