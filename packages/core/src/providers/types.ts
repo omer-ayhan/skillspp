@@ -12,6 +12,15 @@ export type RemoteSkill = {
   files: Map<string, string>;
 };
 
+export type RemotePlugin = {
+  name: string;
+  description: string;
+  installName: string;
+  sourceUrl: string;
+  sourceType: "well-known" | "catalog";
+  files: Map<string, string>;
+};
+
 export type WellKnownFetchOptions = {
   allowHosts?: string[];
   denyHosts?: string[];
@@ -33,6 +42,11 @@ export interface WellKnownProvider extends HostProvider {
     url: string,
     options?: WellKnownFetchOptions
   ): Promise<RemoteSkill[]>;
+
+  fetchAllPlugins(
+    url: string,
+    options?: WellKnownFetchOptions
+  ): Promise<RemotePlugin[]>;
 }
 
 export interface RemoteSkillsProvider extends HostProvider {
@@ -40,4 +54,9 @@ export interface RemoteSkillsProvider extends HostProvider {
     url: string,
     options?: WellKnownFetchOptions
   ): Promise<RemoteSkill[]>;
+
+  fetchAllPlugins(
+    url: string,
+    options?: WellKnownFetchOptions
+  ): Promise<RemotePlugin[]>;
 }

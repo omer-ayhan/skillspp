@@ -1,10 +1,12 @@
 {
   "files": [],
   "references": [
+    { "path": "packages/cli-shared" },
     { "path": "packages/core" },
     { "path": "packages/platform-node" },
     { "path": "packages/test-kit" },
     { "path": "apps/skillspp-cli" },
-    { "path": "apps/skillspp-mcp" }
+    { "path": "apps/skillspp-mcp" },
+    { "path": "apps/pluginspp-cli" }
   ]
 }

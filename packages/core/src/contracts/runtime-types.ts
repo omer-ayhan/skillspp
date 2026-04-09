@@ -44,6 +44,8 @@ export type AgentInfo = {
   displayName: string;
   projectSkillsDir: string;
   globalSkillsDir: string;
+  projectPluginsDir: string;
+  globalPluginsDir: string;
   installMarkers?: string[];
 };
 
@@ -55,6 +57,12 @@ export type ParsedSource =
   | { type: "catalog"; url: string };
 
 export type Skill = {
+  name: string;
+  description: string;
+  path: string;
+};
+
+export type Plugin = {
   name: string;
   description: string;
   path: string;

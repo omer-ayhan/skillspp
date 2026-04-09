@@ -1,5 +1,6 @@
 import type {
   ProviderMatch,
+  RemotePlugin,
   RemoteSkill,
   RemoteSkillsProvider,
   WellKnownFetchOptions,
@@ -7,12 +8,24 @@ import type {
 
 type CatalogIndexEntry = {
   name: string;
-  description: string;
+  description?: string;
   files: string[];
 };
 
-type CatalogIndex = {
-  skills: CatalogIndexEntry[];
+type ResourceKind = "skills" | "plugins";
+
+type ResourceConfig<TResult> = {
+  kind: ResourceKind;
+  indexLabel: string;
+  resolveIndexUrl: (parsed: URL) => string;
+  requireDescription: boolean;
+  missingManifestMessage: (name: string) => string;
+  hasRequiredManifest: (filePath: string) => boolean;
+  buildRemoteResult: (options: {
+    entry: CatalogIndexEntry;
+    files: Map<string, string>;
+    sourceUrl: string;
+  }) => TResult;
 };
 
 const DEFAULT_OPTIONS = {
@@ -45,8 +58,80 @@ export class HttpCatalogProvider implements RemoteSkillsProvider {
 
   async fetchAllSkills(
     url: string,
-    options: WellKnownFetchOptions = {}
+    options: WellKnownFetchOptions = {},
   ): Promise<RemoteSkill[]> {
+    return this.fetchAllResources(url, options, {
+      kind: "skills",
+      indexLabel: "catalog skills",
+      resolveIndexUrl(parsed) {
+        return parsed.pathname.endsWith(".json")
+          ? parsed.toString()
+          : new URL(
+              "index.json",
+              parsed.toString().endsWith("/")
+                ? parsed.toString()
+                : `${parsed.toString()}/`,
+            ).toString();
+      },
+      requireDescription: true,
+      missingManifestMessage: (name) => `Catalog skill '${name}' is missing SKILL.md`,
+      hasRequiredManifest(filePath) {
+        return filePath.toLowerCase() === "skill.md";
+      },
+      buildRemoteResult({ entry, files, sourceUrl }) {
+        return {
+          name: entry.name,
+          description: entry.description || "",
+          installName: entry.name,
+          sourceUrl,
+          sourceType: "catalog",
+          files,
+        };
+      },
+    });
+  }
+
+  async fetchAllPlugins(
+    url: string,
+    options: WellKnownFetchOptions = {},
+  ): Promise<RemotePlugin[]> {
+    return this.fetchAllResources(url, options, {
+      kind: "plugins",
+      indexLabel: "catalog plugins",
+      resolveIndexUrl(parsed) {
+        return parsed.pathname.endsWith(".json")
+          ? parsed.toString()
+          : new URL(
+              "plugins/index.json",
+              parsed.toString().endsWith("/")
+                ? parsed.toString()
+                : `${parsed.toString()}/`,
+            ).toString();
+      },
+      requireDescription: false,
+      missingManifestMessage: (name) =>
+        `Catalog plugin '${name}' is missing plugin.json`,
+      hasRequiredManifest(filePath) {
+        return filePath.split("/").at(-1)?.toLowerCase() === "plugin.json";
+      },
+      buildRemoteResult({ entry, files, sourceUrl }) {
+        return {
+          name: entry.name,
+          description: entry.description || "",
+          installName: entry.name,
+          sourceUrl,
+          sourceType: "catalog",
+          files,
+        };
+      },
+    });
+  }
+
+  private async fetchAllResources<TResult>(
+    url: string,
+    options: WellKnownFetchOptions,
+    config: ResourceConfig<TResult>,
+  ): Promise<TResult[]> {
     const parsed = new URL(url);
     if (parsed.protocol !== "https:") {
       throw new Error("Catalog provider requires HTTPS URLs");
@@ -60,28 +145,22 @@ export class HttpCatalogProvider implements RemoteSkillsProvider {
     const maxSkillFileBytes =
       options.maxSkillFileBytes ?? DEFAULT_OPTIONS.maxSkillFileBytes;
 
-    const indexUrl = parsed.pathname.endsWith(".json")
-      ? parsed.toString()
-      : new URL(
-          "index.json",
-          parsed.toString().endsWith("/")
-            ? parsed.toString()
-            : `${parsed.toString()}/`
-        ).toString();
+    const indexUrl = config.resolveIndexUrl(parsed);
     const indexText = await this.fetchTextWithLimit(
       indexUrl,
       Math.min(maxDownloadBytes, maxSkillFileBytes),
-      timeoutMs
+      timeoutMs,
     );
     const index = this.validateIndex(
       JSON.parse(indexText) as unknown,
-      maxFilesPerSkill
+      maxFilesPerSkill,
+      config,
     );
 
-    const out: RemoteSkill[] = [];
+    const out: TResult[] = [];
     let remaining = maxDownloadBytes - indexText.length;
     const indexBase = indexUrl.slice(0, indexUrl.lastIndexOf("/") + 1);
-    for (const row of index.skills) {
+    for (const row of index) {
       const files = new Map<string, string>();
       for (const rel of row.files) {
         this.assertSafeRelativePath(rel);
@@ -92,19 +171,21 @@ export class HttpCatalogProvider implements RemoteSkillsProvider {
         const text = await this.fetchTextWithLimit(
           fileUrl,
           Math.min(remaining, maxSkillFileBytes),
-          timeoutMs
+          timeoutMs,
         );
         remaining -= text.length;
         files.set(rel, text);
       }
-      out.push({
-        name: row.name,
-        description: row.description,
-        installName: row.name,
-        sourceUrl: new URL(`${row.name}/SKILL.md`, indexBase).toString(),
-        sourceType: "catalog",
-        files,
-      });
+      out.push(
+        config.buildRemoteResult({
+          entry: row,
+          files,
+          sourceUrl: new URL(
+            `${row.name}/${this.pickPrimaryManifestPath(row.files, config)}`,
+            indexBase,
+          ).toString(),
+        }),
+      );
     }
     return out;
   }
@@ -133,41 +214,75 @@ export class HttpCatalogProvider implements RemoteSkillsProvider {
     }
   }
 
-  private validateIndex(raw: unknown, maxFilesPerSkill: number): CatalogIndex {
+  private validateIndex(
+    raw: unknown,
+    maxFilesPerSkill: number,
+    config: ResourceConfig<unknown>,
+  ): CatalogIndexEntry[] {
     if (!raw || typeof raw !== "object") {
       throw new Error("Invalid catalog index: expected object");
     }
     const data = raw as Record<string, unknown>;
-    if (!Array.isArray(data.skills)) {
-      throw new Error("Invalid catalog index: 'skills' must be an array");
+    const rows = data[config.kind];
+    if (!Array.isArray(rows)) {
+      throw new Error(`Invalid catalog index: '${config.kind}' must be an array`);
     }
-    const skills: CatalogIndexEntry[] = data.skills.map((item, idx) => {
+    return rows.map((item, idx) => {
       if (!item || typeof item !== "object") {
         throw new Error(`Invalid catalog index entry[${idx}]`);
       }
       const row = item as Record<string, unknown>;
       const name = String(row.name || "").trim();
-      const description = String(row.description || "").trim();
+      const description =
+        typeof row.description === "string" ? row.description.trim() : undefined;
       const files = Array.isArray(row.files)
         ? row.files.map((x) => String(x))
         : [];
-      if (!name || !description || files.length === 0) {
+      if (!name || files.length === 0) {
         throw new Error(
-          `Invalid catalog index entry[${idx}]: missing required fields`
+          `Invalid catalog index entry[${idx}]: missing required fields`,
+        );
+      }
+      if (config.requireDescription && !description) {
+        throw new Error(
+          `Invalid catalog index entry[${idx}]: missing required fields`,
         );
       }
       if (files.length > maxFilesPerSkill) {
-        throw new Error(`Too many files in catalog skill '${name}'`);
+        throw new Error(
+          `Too many files in catalog ${config.kind.slice(0, -1)} '${name}'`,
+        );
       }
-      if (!files.some((f) => f.toLowerCase() === "skill.md")) {
-        throw new Error(`Catalog skill '${name}' is missing SKILL.md`);
+      if (!files.some((filePath) => config.hasRequiredManifest(filePath))) {
+        throw new Error(config.missingManifestMessage(name));
       }
       for (const file of files) {
         this.assertSafeRelativePath(file);
       }
       return { name, description, files };
     });
-    return { skills };
+  }
+
+  private pickPrimaryManifestPath(
+    filePaths: string[],
+    config: ResourceConfig<unknown>,
+  ): string {
+    const manifests = filePaths
+      .filter((filePath) => config.hasRequiredManifest(filePath))
+      .sort((left, right) => {
+        const leftDepth = left.split("/").length;
+        const rightDepth = right.split("/").length;
+        if (leftDepth !== rightDepth) {
+          return leftDepth - rightDepth;
+        }
+        return left.localeCompare(right);
+      });
+
+    const manifestPath = manifests[0];
+    if (!manifestPath) {
+      throw new Error("Catalog entry is missing required manifest");
+    }
+    return manifestPath;
   }
 
   private assertSafeRelativePath(filePath: string): void {

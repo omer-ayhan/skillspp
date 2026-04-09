@@ -2,15 +2,18 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 async function callMcpTool(input: object): Promise<any> {
-  const appRoot = process.cwd();
-  const workspaceRoot = path.resolve(appRoot, "../..");
+  const appRoot = path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    "../.."
+  );
   const child = spawn(
     process.execPath,
     [
-      path.resolve(workspaceRoot, "node_modules/tsx/dist/cli.mjs"),
+      path.resolve(appRoot, "node_modules/tsx/dist/cli.mjs"),
       path.resolve(appRoot, "src/index.ts"),
     ],
     {

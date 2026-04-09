@@ -430,7 +430,7 @@ function renderSectionToText(section: UiSection): string {
       return renderPanelText(section);
     }
     case "source":
-      return finalizeUiBlock(`  Skills source: ${section.source}`);
+      return finalizeUiBlock(`  ${section.source}`);
     case "lines":
       return finalizeUiBlock(section.lines.join("\n"));
     case "text":
@@ -811,8 +811,11 @@ export function failedStepsSection(steps: string[]): UiSection {
   );
 }
 
-export function sourceSection(source: string): UiSection {
-  return { type: "source", source };
+export function sourceSection(
+  source: string,
+  label: string = "Skills source",
+): UiSection {
+  return { type: "source", source: `${label}: ${source}` };
 }
 
 export function textSection(text: string): UiSection {
@@ -891,16 +894,18 @@ export function installationSummarySection(options: {
 
 export function uninstallSummarySection(options: {
   globalInstall: boolean;
-  skillNames: string[];
+  itemNames: string[];
+  itemLabel?: string;
   agentDisplayNames: string[];
 }): UiSection {
+  const itemLabel = options.itemLabel || "Skills";
   return panelSection({
     title: "Uninstall Summary",
     lines: [
       `Scope: ${options.globalInstall ? "global" : "current project"}`,
       "",
-      `Skills (${options.skillNames.length}):`,
-      ...options.skillNames.map((name) => `  - ${name}`),
+      `${itemLabel} (${options.itemNames.length}):`,
+      ...options.itemNames.map((name) => `  - ${name}`),
       "",
       `Agents (${options.agentDisplayNames.length}): ${compactAgentDisplayNames(
         [...options.agentDisplayNames].sort((a, b) => a.localeCompare(b)),
