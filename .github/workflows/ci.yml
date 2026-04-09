@@ -22,10 +22,10 @@ jobs:
         run: |
           if [ "${BASE_REF}" = "development" ]; then
             case "${HEAD_REF}" in
-              feature/*|fix/*|chore/*)
+              feature/*|feat/*|bugfix/*|fix/*|hotfix/*|chore/*)
                 ;;
               *)
-                echo "PRs to development must come from feature/*, fix/*, or chore/* branches."
+                echo "PRs to development must come from feature/*, feat/*, bugfix/*, fix/*, hotfix/*, or chore/* branches."
                 echo "Current head branch: ${HEAD_REF}"
                 exit 1
                 ;;
