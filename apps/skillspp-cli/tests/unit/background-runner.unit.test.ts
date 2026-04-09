@@ -1,11 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
-const createBackgroundTaskRunner = vi.fn();
-const runBackgroundTaskImpl = vi.fn(async () => ({ durationMs: 123 }));
-createBackgroundTaskRunner.mockReturnValue(runBackgroundTaskImpl);
+const runBackgroundTaskInPlatform = vi.fn(async () => ({ durationMs: 123 }));
 
-vi.mock("@skillspp/cli-shared/runtime/background-runner", () => ({
-  createBackgroundTaskRunner,
+vi.mock("@skillspp/platform-node", () => ({
+  runBackgroundTask: runBackgroundTaskInPlatform,
 }));
 
 const { runBackgroundTask } =
@@ -27,8 +25,10 @@ describe("CLI background runner adapter @unit", () => {
       },
     );
 
-    expect(createBackgroundTaskRunner).toHaveBeenCalledTimes(1);
-    expect(runBackgroundTaskImpl).toHaveBeenCalled();
+    expect(runBackgroundTaskInPlatform).toHaveBeenCalled();
+    const secondArg = (runBackgroundTaskInPlatform.mock.calls[0] as any)?.[1];
+    expect(typeof secondArg?.executorModule).toBe("string");
+    expect(secondArg.executorModule).toContain("background-executor");
     expect(response).toEqual({ durationMs: 123 });
   });
 });
