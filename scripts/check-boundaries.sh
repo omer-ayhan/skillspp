@@ -12,9 +12,9 @@ search_matches() {
   shift
 
   if [ "$SEARCH_WITH_RG" -eq 1 ]; then
-    rg -n --glob '!**/dist/**' -- "$pattern" "$@"
+    rg -n --glob '!**/dist/**' --glob '!**/node_modules/**' -- "$pattern" "$@"
   else
-    grep -RInE --exclude-dir=dist -- "$pattern" "$@"
+    grep -RInE --exclude-dir=dist --exclude-dir=node_modules -- "$pattern" "$@"
   fi
 }
 
@@ -22,9 +22,9 @@ list_files() {
   local target="$1"
 
   if [ "$SEARCH_WITH_RG" -eq 1 ]; then
-    rg --files "$target"
+    rg --files "$target" --glob '!**/node_modules/**'
   else
-    find "$target" -type f | sed 's#^\./##'
+    find "$target" -type d \( -name node_modules -o -name dist \) -prune -o -type f -print | sed 's#^\./##'
   fi
 }
 
