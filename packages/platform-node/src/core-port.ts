@@ -60,16 +60,11 @@ function extractFrontmatter(content: string): string {
   return lines.slice(1, end).join("\n");
 }
 
-function addDiagnostic(
-  diagnostics: ValidationDiagnostic[],
-  item: ValidationDiagnostic
-): void {
+function addDiagnostic(diagnostics: ValidationDiagnostic[], item: ValidationDiagnostic): void {
   diagnostics.push(item);
 }
 
-async function runValidate(
-  command: ValidateSkillCommand
-): Promise<ValidationReport> {
+async function runValidate(command: ValidateSkillCommand): Promise<ValidationReport> {
   const diagnostics: ValidationDiagnostic[] = [];
 
   const roots = command.ci
@@ -77,8 +72,8 @@ async function runValidate(
       ? command.roots
       : [process.cwd()]
     : command.source
-    ? [command.source]
-    : [];
+      ? [command.source]
+      : [];
 
   if (roots.length === 0) {
     throw new CoreError({
@@ -138,9 +133,7 @@ async function runValidate(
         continue;
       }
 
-      const nameLine = frontmatter
-        .split(/\r?\n/)
-        .find((line) => line.trim().startsWith("name:"));
+      const nameLine = frontmatter.split(/\r?\n/).find((line) => line.trim().startsWith("name:"));
       const descriptionLine = frontmatter
         .split(/\r?\n/)
         .find((line) => line.trim().startsWith("description:"));

@@ -10,10 +10,7 @@ type RunResult = {
 };
 
 function runCommand(cwd: string, args: string[]): Promise<RunResult> {
-  const appRoot = path.resolve(
-    path.dirname(fileURLToPath(import.meta.url)),
-    "../..",
-  );
+  const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
   const tsxPath = path.resolve(appRoot, "node_modules/tsx/dist/cli.mjs");
   const cliEntry = path.resolve(appRoot, "src/cli.ts");
 
@@ -34,9 +31,7 @@ function runCommand(cwd: string, args: string[]): Promise<RunResult> {
     child.once("close", (code) => {
       resolve({
         code: code ?? 1,
-        output: `${Buffer.concat(out).toString("utf8")}${Buffer.concat(
-          err,
-        ).toString("utf8")}`,
+        output: `${Buffer.concat(out).toString("utf8")}${Buffer.concat(err).toString("utf8")}`,
       });
     });
   });
@@ -65,9 +60,7 @@ function runGit(cwd: string, args: string[]): string {
 
 describe("skills CLI critical workflows @e2e", () => {
   it("covers init/add/list/find/check/update/validate/remove end-to-end @e2e @critical", async () => {
-    const workdir = fs.mkdtempSync(
-      path.join(process.cwd(), "tmp-skillspp-cli-"),
-    );
+    const workdir = fs.mkdtempSync(path.join(process.cwd(), "tmp-skillspp-cli-"));
     try {
       const projectDir = path.join(workdir, "project");
       fs.mkdirSync(projectDir, { recursive: true });
@@ -105,21 +98,9 @@ describe("skills CLI critical workflows @e2e", () => {
       ]);
       assertContains(addOut.output, "Installed 1 skill");
       expect(
-        fs.existsSync(
-          path.join(
-            projectDir,
-            ".claude",
-            "skills",
-            skillName,
-            "skillspp-lock.json",
-          ),
-        ),
+        fs.existsSync(path.join(projectDir, ".claude", "skills", skillName, "skillspp-lock.json")),
       ).toBe(true);
-      expect(
-        fs.existsSync(
-          path.join(projectDir, ".agents", "skills", skillName),
-        ),
-      ).toBe(false);
+      expect(fs.existsSync(path.join(projectDir, ".agents", "skills", skillName))).toBe(false);
 
       const listOut = await runCommand(projectDir, [
         "list",
@@ -129,11 +110,7 @@ describe("skills CLI critical workflows @e2e", () => {
       ]);
       assertContains(listOut.output, "Installed Skills");
 
-      const findOut = await runCommand(projectDir, [
-        "find",
-        sourceRoot,
-        "installer",
-      ]);
+      const findOut = await runCommand(projectDir, ["find", sourceRoot, "installer"]);
       assertContains(findOut.output, "Matching Skills");
 
       const checkOut = await runCommand(projectDir, ["check"]);
@@ -145,24 +122,14 @@ describe("skills CLI critical workflows @e2e", () => {
         "utf8",
       );
 
-      const updateOut = await runCommand(projectDir, [
-        "update",
-        "--non-interactive",
-      ]);
+      const updateOut = await runCommand(projectDir, ["update", "--non-interactive"]);
       assertContains(updateOut.output, "Updated 1 skills.");
 
-      const validateOut = await runCommand(projectDir, [
-        "validate",
-        sourceRoot,
-      ]);
+      const validateOut = await runCommand(projectDir, ["validate", sourceRoot]);
       assertContains(validateOut.output, "Validation Summary");
       assertContains(validateOut.output, "Errors: 0");
 
-      const validateJsonOut = await runCommand(projectDir, [
-        "validate",
-        sourceRoot,
-        "--json",
-      ]);
+      const validateJsonOut = await runCommand(projectDir, ["validate", sourceRoot, "--json"]);
       expect(validateJsonOut.output).toMatch(/"ok"\s*:\s*true/);
       assertNotContains(validateJsonOut.output, "SKILLS · VALIDATE FLOW");
 
@@ -186,15 +153,7 @@ describe("skills CLI critical workflows @e2e", () => {
       ]);
       assertContains(addGooseOut.output, "Installed 1 skill");
       expect(
-        fs.existsSync(
-          path.join(
-            projectDir,
-            ".goose",
-            "skills",
-            skillName,
-            "skillspp-lock.json",
-          ),
-        ),
+        fs.existsSync(path.join(projectDir, ".goose", "skills", skillName, "skillspp-lock.json")),
       ).toBe(true);
 
       const removeGooseOut = await runCommand(projectDir, [
@@ -213,9 +172,7 @@ describe("skills CLI critical workflows @e2e", () => {
   }, 120_000);
 
   it("enforces migrate-required check/update flow and allows add reinstall from new source @e2e @critical", async () => {
-    const workdir = fs.mkdtempSync(
-      path.join(process.cwd(), "tmp-skillspp-cli-migrate-"),
-    );
+    const workdir = fs.mkdtempSync(path.join(process.cwd(), "tmp-skillspp-cli-migrate-"));
     try {
       const projectDir = path.join(workdir, "project");
       fs.mkdirSync(projectDir, { recursive: true });
@@ -254,10 +211,7 @@ describe("skills CLI critical workflows @e2e", () => {
 
       const checkOut = await runCommand(projectDir, ["check"]);
       assertContains(checkOut.output, "migrate-required");
-      assertContains(
-        checkOut.output,
-        `skillspp update ${skillName} --migrate <new-skill-source>`,
-      );
+      assertContains(checkOut.output, `skillspp update ${skillName} --migrate <new-skill-source>`);
 
       const migrateOut = await runCommand(projectDir, [
         "update",
@@ -293,13 +247,7 @@ describe("skills CLI critical workflows @e2e", () => {
       expect(reinstalledSkill).toContain("third source");
       const rewrittenLock = JSON.parse(
         fs.readFileSync(
-          path.join(
-            projectDir,
-            ".claude",
-            "skills",
-            skillName,
-            "skillspp-lock.json",
-          ),
+          path.join(projectDir, ".claude", "skills", skillName, "skillspp-lock.json"),
           "utf8",
         ),
       );
@@ -310,9 +258,7 @@ describe("skills CLI critical workflows @e2e", () => {
   }, 120_000);
 
   it("detects git remote changes via check/update and refreshes pinnedRef @e2e @critical", async () => {
-    const workdir = fs.mkdtempSync(
-      path.join(process.cwd(), "tmp-skillspp-cli-remote-git-"),
-    );
+    const workdir = fs.mkdtempSync(path.join(process.cwd(), "tmp-skillspp-cli-remote-git-"));
     try {
       const projectDir = path.join(workdir, "project");
       const remoteRepo = path.join(workdir, "remote-repo");
@@ -347,13 +293,7 @@ describe("skills CLI critical workflows @e2e", () => {
       ]);
       assertContains(addOut.output, "Installed 1 skill");
 
-      const lockPath = path.join(
-        projectDir,
-        ".claude",
-        "skills",
-        skillName,
-        "skillspp-lock.json",
-      );
+      const lockPath = path.join(projectDir, ".claude", "skills", skillName, "skillspp-lock.json");
       const firstLock = JSON.parse(fs.readFileSync(lockPath, "utf8"));
       expect(firstLock.entry?.source?.pinnedRef).toBe(firstRef);
 
@@ -371,10 +311,7 @@ describe("skills CLI critical workflows @e2e", () => {
       assertContains(checkOut.output, "changed-source");
       assertNotContains(checkOut.output, "migrate-required");
 
-      const updateOut = await runCommand(projectDir, [
-        "update",
-        "--non-interactive",
-      ]);
+      const updateOut = await runCommand(projectDir, ["update", "--non-interactive"]);
       assertContains(updateOut.output, "Updated 1 skills.");
 
       const installedSkillText = fs.readFileSync(

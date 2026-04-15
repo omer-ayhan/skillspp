@@ -9,15 +9,8 @@ import {
   getAgentSkillsDir,
   resolveAgents,
 } from "./agents";
-import {
-  assessLockEntries,
-  type CheckOptions,
-  type SkillAssessment,
-} from "./check-analysis";
-import {
-  assessPluginLockEntries,
-  type PluginAssessment,
-} from "./plugin-check-analysis";
+import { assessLockEntries, type CheckOptions, type SkillAssessment } from "./check-analysis";
+import { assessPluginLockEntries, type PluginAssessment } from "./plugin-check-analysis";
 import { runValidateAnalysis } from "./validate-analysis";
 import type {
   AddOptions,
@@ -57,10 +50,7 @@ import {
   resolveSourceLabel,
   stageRemoteSkillFilesToTempDir,
 } from "../sources/skills";
-import {
-  discoverPluginsAsync,
-  stageRemotePluginFilesToTempDir,
-} from "../sources/plugins";
+import { discoverPluginsAsync, stageRemotePluginFilesToTempDir } from "../sources/plugins";
 import {
   resolveCatalogPlugins,
   resolveCatalogSkills,
@@ -97,9 +87,7 @@ import type {
 type ProgressReporter = (label: string) => Promise<void> | void;
 
 function serializeAssessments(
-  assessments: Array<
-    Pick<SkillAssessment | PluginAssessment, "entry" | "drift">
-  >,
+  assessments: Array<Pick<SkillAssessment | PluginAssessment, "entry" | "drift">>,
 ): UpdateAssessTaskResult["assessments"] {
   return assessments.map((assessment) => ({
     entry: assessment.entry,
@@ -156,9 +144,7 @@ function canonicalSourceIdentity(options: {
     return options.wellKnownSourceUrl || options.parsedSource.url;
   }
   if (options.parsedSource.type === "github") {
-    const suffix = options.parsedSource.subpath
-      ? `#${options.parsedSource.subpath}`
-      : "";
+    const suffix = options.parsedSource.subpath ? `#${options.parsedSource.subpath}` : "";
     return `${options.parsedSource.repoUrl}${suffix}`;
   }
   return options.parsedSource.repoUrl;
@@ -248,11 +234,7 @@ function writeLockEntryAfterInstall(options: {
 }): void {
   const installedHash = hashDirectory(options.outcome.canonicalDir);
   const resourceKind = options.resourceKind || "skill";
-  const lock = readResourceLockfile(
-    resourceKind,
-    options.globalInstall,
-    options.cwd,
-  );
+  const lock = readResourceLockfile(resourceKind, options.globalInstall, options.cwd);
   const entry = {
     skillName: options.outcome.skillName,
     global: options.globalInstall,
@@ -289,9 +271,7 @@ function writeLockEntryAfterInstall(options: {
   const selectedFormat = options.lockFormat || "json";
   propagateLockfileVisibility({
     canonicalDir: options.outcome.canonicalDir,
-    targetDirs: options.outcome.installedTo.map(
-      (destination) => destination.path,
-    ),
+    targetDirs: options.outcome.installedTo.map((destination) => destination.path),
     lockFormat: selectedFormat,
   });
 
@@ -334,15 +314,10 @@ async function buildRemotePlugin(remote: {
   installName: string;
   files: Map<string, string>;
 }): Promise<StagedRemotePlugin> {
-  const staged = stageRemotePluginFilesToTempDir(
-    remote.installName,
-    remote.files,
-  );
+  const staged = stageRemotePluginFilesToTempDir(remote.installName, remote.files);
 
   try {
-    const plugins = await discoverPluginsAsync(staged.path, [
-      remote.installName,
-    ]);
+    const plugins = await discoverPluginsAsync(staged.path, [remote.installName]);
     const plugin = plugins[0];
     if (!plugin) {
       throw new Error(`Plugin '${remote.installName}' is missing plugin.json`);
@@ -373,8 +348,7 @@ async function runCheckScanTask(
 
   await emitProgress("checking transitive conflicts");
   const transitiveCandidates = discoverTransitiveSkillCandidates(cwd);
-  const transitiveConflicts =
-    detectTransitiveSkillConflicts(transitiveCandidates);
+  const transitiveConflicts = detectTransitiveSkillConflicts(transitiveCandidates);
 
   return {
     drift: assessed.drift,
@@ -413,9 +387,7 @@ async function runPluginUpdateAssessTask(
 }
 
 function createBackupDir(skillName: string, sourceDir: string): string {
-  const backupRoot = fs.mkdtempSync(
-    path.join(os.tmpdir(), "skillspp-update-backup-"),
-  );
+  const backupRoot = fs.mkdtempSync(path.join(os.tmpdir(), "skillspp-update-backup-"));
   const backupDir = path.join(backupRoot, skillName);
   fs.mkdirSync(backupDir, { recursive: true });
   fs.cpSync(sourceDir, backupDir, { recursive: true, force: true });
@@ -437,15 +409,11 @@ async function applyEntryUpdate(
   const backupDir = createBackupDir(entry.skillName, entry.canonicalDir);
 
   try {
-    const preparedInstaller = await prepareInstallerArtifacts(
-      resolved.skill.path,
-      cwd,
-      {
-        sourceType: entry.source.type,
-        policyMode: options.policyMode || "enforce",
-        trustWellKnown: Boolean(options.trustWellKnown),
-      },
-    );
+    const preparedInstaller = await prepareInstallerArtifacts(resolved.skill.path, cwd, {
+      sourceType: entry.source.type,
+      policyMode: options.policyMode || "enforce",
+      trustWellKnown: Boolean(options.trustWellKnown),
+    });
 
     const outcome = installSkill(resolved.skill, entry.agents as AgentType[], {
       mode: entry.installMode,
@@ -465,20 +433,15 @@ async function applyEntryUpdate(
       ...entry,
       source: {
         ...entry.source,
-        canonical:
-          assessment.refreshedSource?.canonical ?? entry.source.canonical,
-        pinnedRef:
-          assessment.refreshedSource?.pinnedRef ?? entry.source.pinnedRef,
-        resolvedPath:
-          assessment.refreshedSource?.resolvedPath ?? entry.source.resolvedPath,
+        canonical: assessment.refreshedSource?.canonical ?? entry.source.canonical,
+        pinnedRef: assessment.refreshedSource?.pinnedRef ?? entry.source.pinnedRef,
+        resolvedPath: assessment.refreshedSource?.resolvedPath ?? entry.source.resolvedPath,
         isSymlinkSource:
-          assessment.refreshedSource?.isSymlinkSource ??
-          entry.source.isSymlinkSource,
+          assessment.refreshedSource?.isSymlinkSource ?? entry.source.isSymlinkSource,
         selector: {
           ...entry.source.selector,
           relativePath:
-            assessment.refreshedSource?.sourceSkillPath ??
-            entry.source.selector.relativePath,
+            assessment.refreshedSource?.sourceSkillPath ?? entry.source.selector.relativePath,
           wellKnownSourceUrl:
             assessment.refreshedSource?.wellKnownSourceUrl ??
             entry.source.selector.wellKnownSourceUrl,
@@ -526,25 +489,17 @@ async function applyPluginEntryUpdate(
   const backupDir = createBackupDir(entry.skillName, entry.canonicalDir);
 
   try {
-    const preparedInstaller = await prepareInstallerArtifacts(
-      resolved.plugin.path,
-      cwd,
-      {
-        sourceType: entry.source.type,
-        policyMode: options.policyMode || "enforce",
-        trustWellKnown: Boolean(options.trustWellKnown),
-      },
-    );
+    const preparedInstaller = await prepareInstallerArtifacts(resolved.plugin.path, cwd, {
+      sourceType: entry.source.type,
+      policyMode: options.policyMode || "enforce",
+      trustWellKnown: Boolean(options.trustWellKnown),
+    });
 
-    const outcome = installPlugin(
-      resolved.plugin,
-      entry.agents as AgentType[],
-      {
-        mode: entry.installMode,
-        globalInstall: entry.global,
-        cwd,
-      },
-    );
+    const outcome = installPlugin(resolved.plugin, entry.agents as AgentType[], {
+      mode: entry.installMode,
+      globalInstall: entry.global,
+      cwd,
+    });
 
     try {
       await applyInstallerArtifacts(outcome.canonicalDir, preparedInstaller);
@@ -558,20 +513,15 @@ async function applyPluginEntryUpdate(
       ...entry,
       source: {
         ...entry.source,
-        canonical:
-          assessment.refreshedSource?.canonical ?? entry.source.canonical,
-        pinnedRef:
-          assessment.refreshedSource?.pinnedRef ?? entry.source.pinnedRef,
-        resolvedPath:
-          assessment.refreshedSource?.resolvedPath ?? entry.source.resolvedPath,
+        canonical: assessment.refreshedSource?.canonical ?? entry.source.canonical,
+        pinnedRef: assessment.refreshedSource?.pinnedRef ?? entry.source.pinnedRef,
+        resolvedPath: assessment.refreshedSource?.resolvedPath ?? entry.source.resolvedPath,
         isSymlinkSource:
-          assessment.refreshedSource?.isSymlinkSource ??
-          entry.source.isSymlinkSource,
+          assessment.refreshedSource?.isSymlinkSource ?? entry.source.isSymlinkSource,
         selector: {
           ...entry.source.selector,
           relativePath:
-            assessment.refreshedSource?.sourcePluginPath ??
-            entry.source.selector.relativePath,
+            assessment.refreshedSource?.sourcePluginPath ?? entry.source.selector.relativePath,
           wellKnownSourceUrl:
             assessment.refreshedSource?.wellKnownSourceUrl ??
             entry.source.selector.wellKnownSourceUrl,
@@ -622,8 +572,7 @@ async function runUpdateApplyTask(
     (assessment) =>
       !assessment.drift.some((item) => item.kind === "migrate-required") &&
       assessment.drift.some(
-        (item) =>
-          item.kind === "changed-source" || item.kind === "local-modified",
+        (item) => item.kind === "changed-source" || item.kind === "local-modified",
       ),
   );
 
@@ -636,30 +585,18 @@ async function runUpdateApplyTask(
   try {
     for (const assessment of ordered) {
       await emitProgress(`updating ${assessment.entry.skillName}`);
-      const updated = await applyEntryUpdate(
-        assessment,
-        payload.options,
-        payload.cwd,
-      );
+      const updated = await applyEntryUpdate(assessment, payload.options, payload.cwd);
       updatedEntries.push(updated);
       nextLock = upsertLockEntry(nextLock, updated);
     }
 
     await emitProgress("writing lockfile");
-    writeLockfile(
-      Boolean(payload.options.global),
-      payload.cwd,
-      nextLock,
-      payload.lockFormat,
-    );
+    writeLockfile(Boolean(payload.options.global), payload.cwd, nextLock, payload.lockFormat);
     for (const updated of updatedEntries) {
       const targetDirs = Array.from(
         new Set(
           updated.agents.map((agent) =>
-            path.join(
-              getAgentSkillsDir(agent, updated.global, payload.cwd),
-              updated.skillName,
-            ),
+            path.join(getAgentSkillsDir(agent, updated.global, payload.cwd), updated.skillName),
           ),
         ),
       );
@@ -671,9 +608,7 @@ async function runUpdateApplyTask(
     }
 
     return {
-      updatedSkillNames: ordered.map(
-        (assessment) => assessment.entry.skillName,
-      ),
+      updatedSkillNames: ordered.map((assessment) => assessment.entry.skillName),
     };
   } finally {
     for (const assessment of assessed.assessments) {
@@ -702,16 +637,11 @@ async function runPluginUpdateApplyTask(
     (assessment) =>
       !assessment.drift.some((item) => item.kind === "migrate-required") &&
       assessment.drift.some(
-        (item) =>
-          item.kind === "changed-source" || item.kind === "local-modified",
+        (item) => item.kind === "changed-source" || item.kind === "local-modified",
       ),
   );
 
-  let nextLock = readResourceLockfile(
-    "plugin",
-    Boolean(payload.options.global),
-    payload.cwd,
-  );
+  let nextLock = readResourceLockfile("plugin", Boolean(payload.options.global), payload.cwd);
   const updatedEntries: LockEntry[] = [];
   const ordered = [...candidateAssessments].sort((a, b) =>
     a.entry.skillName.localeCompare(b.entry.skillName),
@@ -720,11 +650,7 @@ async function runPluginUpdateApplyTask(
   try {
     for (const assessment of ordered) {
       await emitProgress(`updating ${assessment.entry.skillName}`);
-      const updated = await applyPluginEntryUpdate(
-        assessment,
-        payload.options,
-        payload.cwd,
-      );
+      const updated = await applyPluginEntryUpdate(assessment, payload.options, payload.cwd);
       updatedEntries.push(updated);
       nextLock = upsertResourceLockEntry(nextLock, updated);
     }
@@ -741,10 +667,7 @@ async function runPluginUpdateApplyTask(
       const targetDirs = Array.from(
         new Set(
           updated.agents.map((agent) =>
-            path.join(
-              getAgentPluginsDir(agent, updated.global, payload.cwd),
-              updated.skillName,
-            ),
+            path.join(getAgentPluginsDir(agent, updated.global, payload.cwd), updated.skillName),
           ),
         ),
       );
@@ -756,9 +679,7 @@ async function runPluginUpdateApplyTask(
     }
 
     return {
-      updatedPluginNames: ordered.map(
-        (assessment) => assessment.entry.skillName,
-      ),
+      updatedPluginNames: ordered.map((assessment) => assessment.entry.skillName),
     };
   } finally {
     for (const assessment of assessed.assessments) {
@@ -807,13 +728,9 @@ async function resolveMigrationSource(options: {
       parsedSource.type === "well-known"
         ? await resolveWellKnownSkills(parsedSource.url, options.addOptions)
         : await resolveCatalogSkills(parsedSource.url, options.addOptions);
-    const remote = remoteSkills.find(
-      (item) => item.installName === options.skillName,
-    );
+    const remote = remoteSkills.find((item) => item.installName === options.skillName);
     if (!remote) {
-      throw new Error(
-        `Skill '${options.skillName}' not found in migration source`,
-      );
+      throw new Error(`Skill '${options.skillName}' not found in migration source`);
     }
     const staged = buildRemoteSkill(remote);
     const sourceHash = hashDirectory(staged.skill.path);
@@ -838,9 +755,7 @@ async function resolveMigrationSource(options: {
     const skills = await discoverSkillsAsync(prepared.basePath);
     const skill = skills.find((item) => item.name === options.skillName);
     if (!skill) {
-      throw new Error(
-        `Skill '${options.skillName}' not found in migration source`,
-      );
+      throw new Error(`Skill '${options.skillName}' not found in migration source`);
     }
     const sourceHash = sourceHashForInstalledSkill({
       parsedSource,
@@ -858,13 +773,9 @@ async function resolveMigrationSource(options: {
       sourceCanonical: canonicalSourceIdentity({ parsedSource }),
       sourcePinnedRef,
       sourceResolvedPath:
-        parsedSource.type === "local"
-          ? resolveSafeRealPath(skill.path)
-          : undefined,
+        parsedSource.type === "local" ? resolveSafeRealPath(skill.path) : undefined,
       sourceIsSymlink:
-        parsedSource.type === "local"
-          ? isLocalSymlinkSource(parsedSource.localPath)
-          : undefined,
+        parsedSource.type === "local" ? isLocalSymlinkSource(parsedSource.localPath) : undefined,
       cleanup: prepared.cleanup,
     };
   } catch (error) {
@@ -887,13 +798,9 @@ async function resolvePluginMigrationSource(options: {
       parsedSource.type === "well-known"
         ? await resolveWellKnownPlugins(parsedSource.url, options.addOptions)
         : await resolveCatalogPlugins(parsedSource.url, options.addOptions);
-    const remote = remotePlugins.find(
-      (item) => item.installName === options.pluginName,
-    );
+    const remote = remotePlugins.find((item) => item.installName === options.pluginName);
     if (!remote) {
-      throw new Error(
-        `Plugin '${options.pluginName}' not found in migration source`,
-      );
+      throw new Error(`Plugin '${options.pluginName}' not found in migration source`);
     }
     const staged = await buildRemotePlugin(remote);
     const sourceHash = hashDirectory(staged.plugin.path);
@@ -915,14 +822,10 @@ async function resolvePluginMigrationSource(options: {
     parsedSource as Exclude<ParsedSource, { type: "well-known" | "catalog" }>,
   );
   try {
-    const plugins = await discoverPluginsAsync(prepared.basePath, [
-      options.pluginName,
-    ]);
+    const plugins = await discoverPluginsAsync(prepared.basePath, [options.pluginName]);
     const plugin = plugins.find((item) => item.name === options.pluginName);
     if (!plugin) {
-      throw new Error(
-        `Plugin '${options.pluginName}' not found in migration source`,
-      );
+      throw new Error(`Plugin '${options.pluginName}' not found in migration source`);
     }
     const sourceHash = sourceHashForInstalledSkill({
       parsedSource,
@@ -940,95 +843,9 @@ async function resolvePluginMigrationSource(options: {
       sourceCanonical: canonicalSourceIdentity({ parsedSource }),
       sourcePinnedRef,
       sourceResolvedPath:
-        parsedSource.type === "local"
-          ? resolveSafeRealPath(plugin.path)
-          : undefined,
+        parsedSource.type === "local" ? resolveSafeRealPath(plugin.path) : undefined,
       sourceIsSymlink:
-        parsedSource.type === "local"
-          ? isLocalSymlinkSource(parsedSource.localPath)
-          : undefined,
-      cleanup: prepared.cleanup,
-    };
-  } catch (error) {
-    if (prepared.cleanup) {
-      prepared.cleanup();
-    }
-    throw error;
-  }
-}
-
-async function resolvePluginMigrationSource(options: {
-  sourceInput: string;
-  pluginName: string;
-  addOptions: AddOptions;
-}): Promise<ResolvedPluginMigrationSource> {
-  const parsedSource = parseSource(options.sourceInput);
-
-  if (parsedSource.type === "well-known" || parsedSource.type === "catalog") {
-    const remotePlugins =
-      parsedSource.type === "well-known"
-        ? await resolveWellKnownPlugins(parsedSource.url, options.addOptions)
-        : await resolveCatalogPlugins(parsedSource.url, options.addOptions);
-    const remote = remotePlugins.find(
-      (item) => item.installName === options.pluginName,
-    );
-    if (!remote) {
-      throw new Error(
-        `Plugin '${options.pluginName}' not found in migration source`,
-      );
-    }
-    const staged = await buildRemotePlugin(remote);
-    const sourceHash = hashDirectory(staged.plugin.path);
-    return {
-      parsedSource,
-      plugin: staged.plugin,
-      sourceHash,
-      sourceCanonical: canonicalSourceIdentity({
-        parsedSource,
-        wellKnownSourceUrl: remote.sourceUrl,
-      }),
-      sourcePinnedRef: sourceHash,
-      wellKnownSourceUrl: remote.sourceUrl,
-      cleanup: staged.cleanup,
-    };
-  }
-
-  const prepared = await prepareSourceDirAsync(
-    parsedSource as Exclude<ParsedSource, { type: "well-known" | "catalog" }>,
-  );
-  try {
-    const plugins = await discoverPluginsAsync(prepared.basePath, [
-      options.pluginName,
-    ]);
-    const plugin = plugins.find((item) => item.name === options.pluginName);
-    if (!plugin) {
-      throw new Error(
-        `Plugin '${options.pluginName}' not found in migration source`,
-      );
-    }
-    const sourceHash = sourceHashForInstalledSkill({
-      parsedSource,
-      skillPath: plugin.path,
-    });
-    const sourcePinnedRef =
-      parsedSource.type === "github" || parsedSource.type === "git"
-        ? await resolveGitHeadRefAsync(prepared.basePath)
-        : undefined;
-    return {
-      parsedSource,
-      plugin,
-      sourcePluginPath: path.relative(prepared.basePath, plugin.path) || ".",
-      sourceHash,
-      sourceCanonical: canonicalSourceIdentity({ parsedSource }),
-      sourcePinnedRef,
-      sourceResolvedPath:
-        parsedSource.type === "local"
-          ? resolveSafeRealPath(plugin.path)
-          : undefined,
-      sourceIsSymlink:
-        parsedSource.type === "local"
-          ? isLocalSymlinkSource(parsedSource.localPath)
-          : undefined,
+        parsedSource.type === "local" ? isLocalSymlinkSource(parsedSource.localPath) : undefined,
       cleanup: prepared.cleanup,
     };
   } catch (error) {
@@ -1045,9 +862,7 @@ async function runUpdateMigrateTask(
 ): Promise<UpdateMigrateTaskResult> {
   await emitProgress("resolving migration source");
   const lock = readLockfile(Boolean(payload.options.global), payload.cwd);
-  const entry = lock.entries.find(
-    (item) => item.skillName === payload.skillName,
-  );
+  const entry = lock.entries.find((item) => item.skillName === payload.skillName);
   if (!entry) {
     throw new Error(`Unknown skill for migration: ${payload.skillName}`);
   }
@@ -1061,15 +876,11 @@ async function runUpdateMigrateTask(
 
   try {
     await emitProgress(`migrating ${entry.skillName}`);
-    const preparedInstaller = await prepareInstallerArtifacts(
-      source.skill.path,
-      payload.cwd,
-      {
-        sourceType: source.parsedSource.type,
-        policyMode: payload.options.policyMode || "enforce",
-        trustWellKnown: Boolean(payload.options.trustWellKnown),
-      },
-    );
+    const preparedInstaller = await prepareInstallerArtifacts(source.skill.path, payload.cwd, {
+      sourceType: source.parsedSource.type,
+      policyMode: payload.options.policyMode || "enforce",
+      trustWellKnown: Boolean(payload.options.trustWellKnown),
+    });
     const outcome = installSkill(source.skill, entry.agents as AgentType[], {
       mode: entry.installMode,
       globalInstall: entry.global,
@@ -1127,14 +938,8 @@ async function runPluginUpdateMigrateTask(
   emitProgress: ProgressReporter,
 ): Promise<PluginUpdateMigrateTaskResult> {
   await emitProgress("resolving migration source");
-  const lock = readResourceLockfile(
-    "plugin",
-    Boolean(payload.options.global),
-    payload.cwd,
-  );
-  const entry = lock.entries.find(
-    (item) => item.skillName === payload.pluginName,
-  );
+  const lock = readResourceLockfile("plugin", Boolean(payload.options.global), payload.cwd);
+  const entry = lock.entries.find((item) => item.skillName === payload.pluginName);
   if (!entry) {
     throw new Error(`Unknown plugin for migration: ${payload.pluginName}`);
   }
@@ -1148,15 +953,11 @@ async function runPluginUpdateMigrateTask(
 
   try {
     await emitProgress(`migrating ${entry.skillName}`);
-    const preparedInstaller = await prepareInstallerArtifacts(
-      source.plugin.path,
-      payload.cwd,
-      {
-        sourceType: source.parsedSource.type,
-        policyMode: payload.options.policyMode || "enforce",
-        trustWellKnown: Boolean(payload.options.trustWellKnown),
-      },
-    );
+    const preparedInstaller = await prepareInstallerArtifacts(source.plugin.path, payload.cwd, {
+      sourceType: source.parsedSource.type,
+      policyMode: payload.options.policyMode || "enforce",
+      trustWellKnown: Boolean(payload.options.trustWellKnown),
+    });
     const outcome = installPlugin(source.plugin, entry.agents as AgentType[], {
       mode: entry.installMode,
       globalInstall: entry.global,
@@ -1226,15 +1027,10 @@ async function runListScanInventoryTask(
   payload: BackgroundTaskRequest<"list.scanInventory">["payload"],
   emitProgress: ProgressReporter,
 ): Promise<ListScanInventoryTaskResult> {
-  const grouped = new Map<
-    string,
-    { name: string; resolvedPath: string; agents: Set<string> }
-  >();
+  const grouped = new Map<string, { name: string; resolvedPath: string; agents: Set<string> }>();
 
   for (const agent of payload.agents) {
-    await emitProgress(
-      `scanning installed skills (${AGENTS[agent].displayName})`,
-    );
+    await emitProgress(`scanning installed skills (${AGENTS[agent].displayName})`);
     const dir = getAgentSkillsDir(agent, payload.globalInstall, payload.cwd);
     if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) {
       continue;
@@ -1340,9 +1136,7 @@ async function resolveAddSourcePlugins(
 
     const selectedRemotePlugins =
       requestedPlugins && !requestedPlugins.includes("*")
-        ? remotePlugins.filter((remote) =>
-            requestedPlugins.includes(remote.installName),
-          )
+        ? remotePlugins.filter((remote) => requestedPlugins.includes(remote.installName))
         : remotePlugins;
 
     const discoveredPlugins: Plugin[] = [];
@@ -1371,10 +1165,7 @@ async function resolveAddSourcePlugins(
     parsed as Exclude<ParsedSource, { type: "well-known" | "catalog" }>,
   );
   try {
-    const plugins = await discoverPluginsAsync(
-      prepared.basePath,
-      requestedPlugins,
-    );
+    const plugins = await discoverPluginsAsync(prepared.basePath, requestedPlugins);
     if (plugins.length === 0) {
       throw new Error("No plugins found in source");
     }
@@ -1405,9 +1196,7 @@ async function installSelectedAddSkills(
       parsedSource.type === "well-known"
         ? await resolveWellKnownSkills(parsedSource.url, payload.options)
         : await resolveCatalogSkills(parsedSource.url, payload.options);
-    const remoteByName = new Map(
-      remoteSkills.map((remote) => [remote.installName, remote]),
-    );
+    const remoteByName = new Map(remoteSkills.map((remote) => [remote.installName, remote]));
 
     const tempCleanups: Array<() => void> = [];
     const stagedSelected: Skill[] = [];
@@ -1422,10 +1211,7 @@ async function installSelectedAddSkills(
         const staged = buildRemoteSkill(remote);
         tempCleanups.push(staged.cleanup);
         stagedSelected.push(staged.skill);
-        sourceHashesBefore.set(
-          staged.skill.path,
-          hashDirectory(staged.skill.path),
-        );
+        sourceHashesBefore.set(staged.skill.path, hashDirectory(staged.skill.path));
       }
 
       const missingInstallerSkillDirs = listSkillsMissingInstallerConfig(
@@ -1436,10 +1222,7 @@ async function installSelectedAddSkills(
         missingInstallerSkillDirs.length,
       );
       if (scaffoldFormat) {
-        scaffoldInstallerConfigForSkills(
-          missingInstallerSkillDirs,
-          scaffoldFormat,
-        );
+        scaffoldInstallerConfigForSkills(missingInstallerSkillDirs, scaffoldFormat);
       }
 
       for (const localSkill of stagedSelected) {
@@ -1451,38 +1234,26 @@ async function installSelectedAddSkills(
         }
 
         const sourceHash =
-          sourceHashesBefore.get(localSkill.path) ||
-          hashDirectory(localSkill.path);
+          sourceHashesBefore.get(localSkill.path) || hashDirectory(localSkill.path);
         const sourceCanonical = canonicalSourceIdentity({
           parsedSource,
           wellKnownSourceUrl: remote.sourceUrl,
         });
 
         await emitProgress(`installing ${localSkill.name}`);
-        const preparedInstaller = await prepareInstallerArtifacts(
-          localSkill.path,
-          payload.cwd,
-          {
-            sourceType: parsedSource.type,
-            policyMode: payload.options.policyMode || "enforce",
-            trustWellKnown: Boolean(payload.options.trustWellKnown),
-          },
-        );
-        const outcome = installSkill(
-          localSkill,
-          payload.agents as AgentType[],
-          {
-            mode,
-            globalInstall,
-            cwd: payload.cwd,
-          },
-        );
+        const preparedInstaller = await prepareInstallerArtifacts(localSkill.path, payload.cwd, {
+          sourceType: parsedSource.type,
+          policyMode: payload.options.policyMode || "enforce",
+          trustWellKnown: Boolean(payload.options.trustWellKnown),
+        });
+        const outcome = installSkill(localSkill, payload.agents as AgentType[], {
+          mode,
+          globalInstall,
+          cwd: payload.cwd,
+        });
 
         try {
-          await applyInstallerArtifacts(
-            outcome.canonicalDir,
-            preparedInstaller,
-          );
+          await applyInstallerArtifacts(outcome.canonicalDir, preparedInstaller);
           writeLockEntryAfterInstall({
             resourceKind: "plugin",
             globalInstall,
@@ -1526,13 +1297,9 @@ async function installSelectedAddSkills(
         ? await resolveGitHeadRefAsync(prepared.basePath)
         : undefined;
     const sourceIsSymlink =
-      parsedSource.type === "local"
-        ? isLocalSymlinkSource(parsedSource.localPath)
-        : undefined;
+      parsedSource.type === "local" ? isLocalSymlinkSource(parsedSource.localPath) : undefined;
     const skills = await discoverSkillsAsync(prepared.basePath);
-    const selected = skills.filter((skill) =>
-      payload.selectedSkillNames.includes(skill.name),
-    );
+    const selected = skills.filter((skill) => payload.selectedSkillNames.includes(skill.name));
     if (selected.length === 0) {
       throw new Error("No matching skills found in source");
     }
@@ -1548,30 +1315,20 @@ async function installSelectedAddSkills(
       missingInstallerSkillDirs.length,
     );
     if (scaffoldFormat) {
-      scaffoldInstallerConfigForSkills(
-        missingInstallerSkillDirs,
-        scaffoldFormat,
-      );
+      scaffoldInstallerConfigForSkills(missingInstallerSkillDirs, scaffoldFormat);
     }
 
     for (const skill of selected) {
       const sourceResolvedPath =
-        parsedSource.type === "local"
-          ? resolveSafeRealPath(skill.path)
-          : undefined;
+        parsedSource.type === "local" ? resolveSafeRealPath(skill.path) : undefined;
 
       await emitProgress(`installing ${skill.name}`);
-      const sourceSkillPath =
-        path.relative(prepared.basePath, skill.path) || ".";
-      const preparedInstaller = await prepareInstallerArtifacts(
-        skill.path,
-        payload.cwd,
-        {
-          sourceType: parsedSource.type,
-          policyMode: payload.options.policyMode || "enforce",
-          trustWellKnown: Boolean(payload.options.trustWellKnown),
-        },
-      );
+      const sourceSkillPath = path.relative(prepared.basePath, skill.path) || ".";
+      const preparedInstaller = await prepareInstallerArtifacts(skill.path, payload.cwd, {
+        sourceType: parsedSource.type,
+        policyMode: payload.options.policyMode || "enforce",
+        trustWellKnown: Boolean(payload.options.trustWellKnown),
+      });
       const outcome = installSkill(skill, payload.agents as AgentType[], {
         mode,
         globalInstall,
@@ -1631,9 +1388,7 @@ async function installSelectedAddPlugins(
       parsedSource.type === "well-known"
         ? await resolveWellKnownPlugins(parsedSource.url, payload.options)
         : await resolveCatalogPlugins(parsedSource.url, payload.options);
-    const remoteByName = new Map(
-      remotePlugins.map((remote) => [remote.installName, remote]),
-    );
+    const remoteByName = new Map(remotePlugins.map((remote) => [remote.installName, remote]));
 
     const tempCleanups: Array<() => void> = [];
     const stagedSelected: Plugin[] = [];
@@ -1648,10 +1403,7 @@ async function installSelectedAddPlugins(
         const staged = await buildRemotePlugin(remote);
         tempCleanups.push(staged.cleanup);
         stagedSelected.push(staged.plugin);
-        sourceHashesBefore.set(
-          staged.plugin.path,
-          hashDirectory(staged.plugin.path),
-        );
+        sourceHashesBefore.set(staged.plugin.path, hashDirectory(staged.plugin.path));
       }
 
       const missingInstallerPluginDirs = listSkillsMissingInstallerConfig(
@@ -1662,10 +1414,7 @@ async function installSelectedAddPlugins(
         missingInstallerPluginDirs.length,
       );
       if (scaffoldFormat) {
-        scaffoldInstallerConfigForSkills(
-          missingInstallerPluginDirs,
-          scaffoldFormat,
-        );
+        scaffoldInstallerConfigForSkills(missingInstallerPluginDirs, scaffoldFormat);
       }
 
       for (const localPlugin of stagedSelected) {
@@ -1677,38 +1426,26 @@ async function installSelectedAddPlugins(
         }
 
         const sourceHash =
-          sourceHashesBefore.get(localPlugin.path) ||
-          hashDirectory(localPlugin.path);
+          sourceHashesBefore.get(localPlugin.path) || hashDirectory(localPlugin.path);
         const sourceCanonical = canonicalSourceIdentity({
           parsedSource,
           wellKnownSourceUrl: remote.sourceUrl,
         });
 
         await emitProgress(`installing ${localPlugin.name}`);
-        const preparedInstaller = await prepareInstallerArtifacts(
-          localPlugin.path,
-          payload.cwd,
-          {
-            sourceType: parsedSource.type,
-            policyMode: payload.options.policyMode || "enforce",
-            trustWellKnown: Boolean(payload.options.trustWellKnown),
-          },
-        );
-        const outcome = installPlugin(
-          localPlugin,
-          payload.agents as AgentType[],
-          {
-            mode,
-            globalInstall,
-            cwd: payload.cwd,
-          },
-        );
+        const preparedInstaller = await prepareInstallerArtifacts(localPlugin.path, payload.cwd, {
+          sourceType: parsedSource.type,
+          policyMode: payload.options.policyMode || "enforce",
+          trustWellKnown: Boolean(payload.options.trustWellKnown),
+        });
+        const outcome = installPlugin(localPlugin, payload.agents as AgentType[], {
+          mode,
+          globalInstall,
+          cwd: payload.cwd,
+        });
 
         try {
-          await applyInstallerArtifacts(
-            outcome.canonicalDir,
-            preparedInstaller,
-          );
+          await applyInstallerArtifacts(outcome.canonicalDir, preparedInstaller);
           writeLockEntryAfterInstall({
             globalInstall,
             cwd: payload.cwd,
@@ -1751,13 +1488,8 @@ async function installSelectedAddPlugins(
         ? await resolveGitHeadRefAsync(prepared.basePath)
         : undefined;
     const sourceIsSymlink =
-      parsedSource.type === "local"
-        ? isLocalSymlinkSource(parsedSource.localPath)
-        : undefined;
-    const selected = await discoverPluginsAsync(
-      prepared.basePath,
-      payload.selectedPluginNames,
-    );
+      parsedSource.type === "local" ? isLocalSymlinkSource(parsedSource.localPath) : undefined;
+    const selected = await discoverPluginsAsync(prepared.basePath, payload.selectedPluginNames);
     if (selected.length === 0) {
       throw new Error("No matching plugins found in source");
     }
@@ -1773,30 +1505,20 @@ async function installSelectedAddPlugins(
       missingInstallerPluginDirs.length,
     );
     if (scaffoldFormat) {
-      scaffoldInstallerConfigForSkills(
-        missingInstallerPluginDirs,
-        scaffoldFormat,
-      );
+      scaffoldInstallerConfigForSkills(missingInstallerPluginDirs, scaffoldFormat);
     }
 
     for (const plugin of selected) {
       const sourceResolvedPath =
-        parsedSource.type === "local"
-          ? resolveSafeRealPath(plugin.path)
-          : undefined;
+        parsedSource.type === "local" ? resolveSafeRealPath(plugin.path) : undefined;
 
       await emitProgress(`installing ${plugin.name}`);
-      const sourceSkillPath =
-        path.relative(prepared.basePath, plugin.path) || ".";
-      const preparedInstaller = await prepareInstallerArtifacts(
-        plugin.path,
-        payload.cwd,
-        {
-          sourceType: parsedSource.type,
-          policyMode: payload.options.policyMode || "enforce",
-          trustWellKnown: Boolean(payload.options.trustWellKnown),
-        },
-      );
+      const sourceSkillPath = path.relative(prepared.basePath, plugin.path) || ".";
+      const preparedInstaller = await prepareInstallerArtifacts(plugin.path, payload.cwd, {
+        sourceType: parsedSource.type,
+        policyMode: payload.options.policyMode || "enforce",
+        trustWellKnown: Boolean(payload.options.trustWellKnown),
+      });
       const outcome = installPlugin(plugin, payload.agents as AgentType[], {
         mode,
         globalInstall,
@@ -1853,10 +1575,7 @@ async function runFindFetchInventoryTask(
   await emitProgress("fetching skill inventory");
   if (parsedSource.type === "well-known" || parsedSource.type === "catalog") {
     if (parsedSource.type === "catalog") {
-      assertExperimentalFeatureEnabled(
-        "catalog",
-        Boolean(options.experimental),
-      );
+      assertExperimentalFeatureEnabled("catalog", Boolean(options.experimental));
     }
 
     const remoteSkills =
@@ -1924,17 +1643,9 @@ export async function executeBackgroundTask(
 ): Promise<BackgroundTaskResult> {
   switch (request.kind) {
     case "check.scan":
-      return await runCheckScanTask(
-        request.payload.cwd,
-        request.payload.options,
-        emitProgress,
-      );
+      return await runCheckScanTask(request.payload.cwd, request.payload.options, emitProgress);
     case "update.assess":
-      return await runUpdateAssessTask(
-        request.payload.cwd,
-        request.payload.options,
-        emitProgress,
-      );
+      return await runUpdateAssessTask(request.payload.cwd, request.payload.options, emitProgress);
     case "plugin.update.assess":
       return await runPluginUpdateAssessTask(
         request.payload.cwd,

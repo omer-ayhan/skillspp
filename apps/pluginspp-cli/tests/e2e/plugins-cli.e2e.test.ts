@@ -22,10 +22,7 @@ function runCli(
   args: string[],
   envOverrides: NodeJS.ProcessEnv = {},
 ): Promise<RunResult> {
-  const appRoot = path.resolve(
-    path.dirname(fileURLToPath(import.meta.url)),
-    "../..",
-  );
+  const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
   const tsxPath = path.resolve(appRoot, "node_modules/tsx/dist/cli.mjs");
   const cliEntry = path.resolve(appRoot, "src/cli.ts");
 
@@ -66,18 +63,11 @@ function createPluginSourceRepo(
     const pluginDir = path.join(pluginsRoot, fixture.folderName);
     fs.mkdirSync(pluginDir, { recursive: true });
     if (fixture.writeManifest === false) {
-      fs.writeFileSync(
-        path.join(pluginDir, "README.md"),
-        "placeholder",
-        "utf8",
-      );
+      fs.writeFileSync(path.join(pluginDir, "README.md"), "placeholder", "utf8");
       continue;
     }
 
-    const manifestPath = path.join(
-      pluginDir,
-      fixture.manifestPath || "agents/codex/plugin.json",
-    );
+    const manifestPath = path.join(pluginDir, fixture.manifestPath || "agents/codex/plugin.json");
     fs.mkdirSync(path.dirname(manifestPath), { recursive: true });
     fs.writeFileSync(
       manifestPath,
@@ -109,9 +99,7 @@ function readUtf8(filePath: string): string {
 
 describe("pluginspp binary @e2e", () => {
   it("resolves and returns help output in a clean temp directory @e2e", async () => {
-    const workdir = fs.mkdtempSync(
-      path.join(process.cwd(), "tmp-plugins-cli-"),
-    );
+    const workdir = fs.mkdtempSync(path.join(process.cwd(), "tmp-plugins-cli-"));
     try {
       const result = await runCli(workdir, ["--help"]);
       expect(result.code).toBe(0);
@@ -125,51 +113,33 @@ describe("pluginspp binary @e2e", () => {
   }, 30_000);
 
   it("lists plugins without installing them @e2e", async () => {
-    const workdir = fs.mkdtempSync(
-      path.join(process.cwd(), "tmp-plugins-cli-list-"),
-    );
+    const workdir = fs.mkdtempSync(path.join(process.cwd(), "tmp-plugins-cli-list-"));
     try {
       const { repoRoot } = createPluginSourceRepo(workdir, [
         { folderName: "plugin-alpha", description: "alpha plugin" },
         { folderName: "plugin-beta", description: "beta plugin" },
       ]);
 
-      const result = await runCli(workdir, [
-        "add",
-        repoRoot,
-        "--list",
-        "--non-interactive",
-      ]);
+      const result = await runCli(workdir, ["add", repoRoot, "--list", "--non-interactive"]);
 
       expect(result.code).toBe(0);
       expect(result.output).toContain("plugin-alpha");
       expect(result.output).toContain("plugin-beta");
-      expect(
-        fs.existsSync(path.join(workdir, ".agents", "plugins", "cache")),
-      ).toBe(false);
-      expect(
-        fs.existsSync(path.join(workdir, ".claude", "plugins", "cache")),
-      ).toBe(false);
+      expect(fs.existsSync(path.join(workdir, ".agents", "plugins", "cache"))).toBe(false);
+      expect(fs.existsSync(path.join(workdir, ".claude", "plugins", "cache"))).toBe(false);
     } finally {
       fs.rmSync(workdir, { recursive: true, force: true });
     }
   }, 30_000);
 
   it("accepts the plugins directory itself as the source @e2e", async () => {
-    const workdir = fs.mkdtempSync(
-      path.join(process.cwd(), "tmp-plugins-cli-list-dir-"),
-    );
+    const workdir = fs.mkdtempSync(path.join(process.cwd(), "tmp-plugins-cli-list-dir-"));
     try {
       const { pluginsRoot } = createPluginSourceRepo(workdir, [
         { folderName: "plugin-alpha", description: "alpha plugin" },
       ]);
 
-      const result = await runCli(workdir, [
-        "add",
-        pluginsRoot,
-        "--list",
-        "--non-interactive",
-      ]);
+      const result = await runCli(workdir, ["add", pluginsRoot, "--list", "--non-interactive"]);
 
       expect(result.code).toBe(0);
       expect(result.output).toContain("plugin-alpha");
@@ -179,9 +149,7 @@ describe("pluginspp binary @e2e", () => {
   }, 30_000);
 
   it("installs the selected plugin into plugin cache directories only @e2e", async () => {
-    const workdir = fs.mkdtempSync(
-      path.join(process.cwd(), "tmp-plugins-cli-install-"),
-    );
+    const workdir = fs.mkdtempSync(path.join(process.cwd(), "tmp-plugins-cli-install-"));
     try {
       const { repoRoot } = createPluginSourceRepo(workdir, [
         { folderName: "plugin-alpha", description: "alpha plugin" },
@@ -203,48 +171,26 @@ describe("pluginspp binary @e2e", () => {
       expect(result.output).toContain("Installed 1 plugin across 2 agents.");
       expect(
         fs.existsSync(
-          path.join(
-            workdir,
-            ".agents",
-            "plugins",
-            "cache",
-            "plugin-alpha",
-            "skillspp-lock.json",
-          ),
+          path.join(workdir, ".agents", "plugins", "cache", "plugin-alpha", "skillspp-lock.json"),
         ),
       ).toBe(true);
       expect(
         fs.existsSync(
-          path.join(
-            workdir,
-            ".claude",
-            "plugins",
-            "cache",
-            "plugin-alpha",
-            "skillspp-lock.json",
-          ),
+          path.join(workdir, ".claude", "plugins", "cache", "plugin-alpha", "skillspp-lock.json"),
         ),
       ).toBe(true);
-      expect(
-        fs.existsSync(path.join(workdir, ".agents", "skills", "plugin-alpha")),
-      ).toBe(false);
-      expect(
-        fs.existsSync(path.join(workdir, ".claude", "skills", "plugin-alpha")),
-      ).toBe(false);
-      expect(
-        fs.existsSync(
-          path.join(workdir, ".agents", "plugins", "cache", "plugin-beta"),
-        ),
-      ).toBe(false);
+      expect(fs.existsSync(path.join(workdir, ".agents", "skills", "plugin-alpha"))).toBe(false);
+      expect(fs.existsSync(path.join(workdir, ".claude", "skills", "plugin-alpha"))).toBe(false);
+      expect(fs.existsSync(path.join(workdir, ".agents", "plugins", "cache", "plugin-beta"))).toBe(
+        false,
+      );
     } finally {
       fs.rmSync(workdir, { recursive: true, force: true });
     }
   }, 30_000);
 
   it("removes an explicit plugin from an explicit agent without touching skills @e2e", async () => {
-    const workdir = fs.mkdtempSync(
-      path.join(process.cwd(), "tmp-plugins-cli-remove-explicit-"),
-    );
+    const workdir = fs.mkdtempSync(path.join(process.cwd(), "tmp-plugins-cli-remove-explicit-"));
     try {
       const { repoRoot } = createPluginSourceRepo(workdir, [
         { folderName: "plugin-alpha", description: "alpha plugin" },
@@ -292,31 +238,21 @@ describe("pluginspp binary @e2e", () => {
       expect(removeResult.code).toBe(0);
       expect(removeResult.output).toContain("Plugins (1):");
       expect(removeResult.output).toContain("Total removed: 1");
-      expect(
-        fs.existsSync(
-          path.join(workdir, ".agents", "plugins", "cache", "plugin-alpha"),
-        ),
-      ).toBe(false);
-      expect(
-        fs.existsSync(
-          path.join(workdir, ".claude", "plugins", "cache", "plugin-alpha"),
-        ),
-      ).toBe(true);
-      expect(
-        fs.existsSync(path.join(workdir, ".agents", "skills", "plugin-alpha")),
-      ).toBe(true);
-      expect(
-        fs.existsSync(path.join(workdir, ".claude", "skills", "plugin-alpha")),
-      ).toBe(true);
+      expect(fs.existsSync(path.join(workdir, ".agents", "plugins", "cache", "plugin-alpha"))).toBe(
+        false,
+      );
+      expect(fs.existsSync(path.join(workdir, ".claude", "plugins", "cache", "plugin-alpha"))).toBe(
+        true,
+      );
+      expect(fs.existsSync(path.join(workdir, ".agents", "skills", "plugin-alpha"))).toBe(true);
+      expect(fs.existsSync(path.join(workdir, ".claude", "skills", "plugin-alpha"))).toBe(true);
     } finally {
       fs.rmSync(workdir, { recursive: true, force: true });
     }
   }, 30_000);
 
   it("removes the only installed plugin for an explicit agent in non-interactive mode @e2e", async () => {
-    const workdir = fs.mkdtempSync(
-      path.join(process.cwd(), "tmp-plugins-cli-remove-single-"),
-    );
+    const workdir = fs.mkdtempSync(path.join(process.cwd(), "tmp-plugins-cli-remove-single-"));
     try {
       const { repoRoot } = createPluginSourceRepo(workdir, [
         { folderName: "plugin-alpha", description: "alpha plugin" },
@@ -343,11 +279,9 @@ describe("pluginspp binary @e2e", () => {
 
       expect(removeResult.code).toBe(0);
       expect(removeResult.output).toContain("Total removed: 1");
-      expect(
-        fs.existsSync(
-          path.join(workdir, ".agents", "plugins", "cache", "plugin-alpha"),
-        ),
-      ).toBe(false);
+      expect(fs.existsSync(path.join(workdir, ".agents", "plugins", "cache", "plugin-alpha"))).toBe(
+        false,
+      );
     } finally {
       fs.rmSync(workdir, { recursive: true, force: true });
     }
@@ -423,11 +357,7 @@ describe("pluginspp binary @e2e", () => {
 
       expect(addResult.code).toBe(0);
 
-      const removeResult = await runCli(workdir, [
-        "remove",
-        "plugin-alpha",
-        "--non-interactive",
-      ]);
+      const removeResult = await runCli(workdir, ["remove", "plugin-alpha", "--non-interactive"]);
 
       expect(removeResult.code).toBe(1);
       expect(removeResult.output).toContain(
@@ -439,9 +369,7 @@ describe("pluginspp binary @e2e", () => {
   }, 30_000);
 
   it("uses detected agents for wildcard installs in global mode @e2e", async () => {
-    const workdir = fs.mkdtempSync(
-      path.join(process.cwd(), "tmp-plugins-cli-global-"),
-    );
+    const workdir = fs.mkdtempSync(path.join(process.cwd(), "tmp-plugins-cli-global-"));
     try {
       const homeDir = path.join(workdir, "home");
       fs.mkdirSync(path.join(homeDir, ".codex"), { recursive: true });
@@ -469,30 +397,22 @@ describe("pluginspp binary @e2e", () => {
       );
 
       expect(result.code).toBe(0);
-      expect(
-        fs.existsSync(
-          path.join(homeDir, ".claude", "plugins", "cache", "plugin-alpha"),
-        ),
-      ).toBe(true);
-      expect(
-        fs.existsSync(
-          path.join(homeDir, ".codex", "plugins", "cache", "plugin-alpha"),
-        ),
-      ).toBe(true);
-      expect(
-        fs.existsSync(
-          path.join(homeDir, ".cursor", "plugins", "cache", "plugin-alpha"),
-        ),
-      ).toBe(false);
+      expect(fs.existsSync(path.join(homeDir, ".claude", "plugins", "cache", "plugin-alpha"))).toBe(
+        true,
+      );
+      expect(fs.existsSync(path.join(homeDir, ".codex", "plugins", "cache", "plugin-alpha"))).toBe(
+        true,
+      );
+      expect(fs.existsSync(path.join(homeDir, ".cursor", "plugins", "cache", "plugin-alpha"))).toBe(
+        false,
+      );
     } finally {
       fs.rmSync(workdir, { recursive: true, force: true });
     }
   }, 30_000);
 
   it("removes only global plugin installs when --global is set @e2e", async () => {
-    const workdir = fs.mkdtempSync(
-      path.join(process.cwd(), "tmp-plugins-cli-remove-global-"),
-    );
+    const workdir = fs.mkdtempSync(path.join(process.cwd(), "tmp-plugins-cli-remove-global-"));
     try {
       const homeDir = path.join(workdir, "home");
       fs.mkdirSync(path.join(homeDir, ".codex"), { recursive: true });
@@ -520,34 +440,18 @@ describe("pluginspp binary @e2e", () => {
 
       expect(addResult.code).toBe(0);
 
-      fs.mkdirSync(
-        path.join(workdir, ".agents", "plugins", "cache", "plugin-alpha"),
-        { recursive: true },
-      );
+      fs.mkdirSync(path.join(workdir, ".agents", "plugins", "cache", "plugin-alpha"), {
+        recursive: true,
+      });
       fs.writeFileSync(
-        path.join(
-          workdir,
-          ".agents",
-          "plugins",
-          "cache",
-          "plugin-alpha",
-          "sentinel.txt",
-        ),
+        path.join(workdir, ".agents", "plugins", "cache", "plugin-alpha", "sentinel.txt"),
         "keep local\n",
         "utf8",
       );
 
       const removeResult = await runCli(
         workdir,
-        [
-          "remove",
-          "--plugin",
-          "plugin-alpha",
-          "--agent",
-          "codex",
-          "--global",
-          "--non-interactive",
-        ],
+        ["remove", "--plugin", "plugin-alpha", "--agent", "codex", "--global", "--non-interactive"],
         {
           HOME: homeDir,
         },
@@ -555,25 +459,19 @@ describe("pluginspp binary @e2e", () => {
 
       expect(removeResult.code).toBe(0);
       expect(removeResult.output).toContain("Total removed: 1");
-      expect(
-        fs.existsSync(
-          path.join(homeDir, ".codex", "plugins", "cache", "plugin-alpha"),
-        ),
-      ).toBe(false);
-      expect(
-        fs.existsSync(
-          path.join(workdir, ".agents", "plugins", "cache", "plugin-alpha"),
-        ),
-      ).toBe(true);
+      expect(fs.existsSync(path.join(homeDir, ".codex", "plugins", "cache", "plugin-alpha"))).toBe(
+        false,
+      );
+      expect(fs.existsSync(path.join(workdir, ".agents", "plugins", "cache", "plugin-alpha"))).toBe(
+        true,
+      );
     } finally {
       fs.rmSync(workdir, { recursive: true, force: true });
     }
   }, 30_000);
 
   it("fails in non-interactive mode when plugin selection is ambiguous @e2e", async () => {
-    const workdir = fs.mkdtempSync(
-      path.join(process.cwd(), "tmp-plugins-cli-noninteractive-"),
-    );
+    const workdir = fs.mkdtempSync(path.join(process.cwd(), "tmp-plugins-cli-noninteractive-"));
     try {
       const { repoRoot } = createPluginSourceRepo(workdir, [
         { folderName: "plugin-alpha", description: "alpha plugin" },
@@ -598,9 +496,7 @@ describe("pluginspp binary @e2e", () => {
   }, 30_000);
 
   it("fails when the selected plugin folder has no plugin.json @e2e", async () => {
-    const workdir = fs.mkdtempSync(
-      path.join(process.cwd(), "tmp-plugins-cli-missing-manifest-"),
-    );
+    const workdir = fs.mkdtempSync(path.join(process.cwd(), "tmp-plugins-cli-missing-manifest-"));
     try {
       const { repoRoot } = createPluginSourceRepo(workdir, [
         { folderName: "plugin-alpha", writeManifest: false },
@@ -617,18 +513,14 @@ describe("pluginspp binary @e2e", () => {
       ]);
 
       expect(result.code).toBe(1);
-      expect(result.output).toContain(
-        "Plugin 'plugin-alpha' is missing plugin.json",
-      );
+      expect(result.output).toContain("Plugin 'plugin-alpha' is missing plugin.json");
     } finally {
       fs.rmSync(workdir, { recursive: true, force: true });
     }
   }, 30_000);
 
   it("fails when plugin.json name does not match the plugin folder @e2e", async () => {
-    const workdir = fs.mkdtempSync(
-      path.join(process.cwd(), "tmp-plugins-cli-name-mismatch-"),
-    );
+    const workdir = fs.mkdtempSync(path.join(process.cwd(), "tmp-plugins-cli-name-mismatch-"));
     try {
       const { repoRoot } = createPluginSourceRepo(workdir, [
         {
@@ -658,9 +550,7 @@ describe("pluginspp binary @e2e", () => {
   }, 30_000);
 
   it("updates a locally sourced plugin in place @e2e", async () => {
-    const workdir = fs.mkdtempSync(
-      path.join(process.cwd(), "tmp-plugins-cli-update-local-"),
-    );
+    const workdir = fs.mkdtempSync(path.join(process.cwd(), "tmp-plugins-cli-update-local-"));
     try {
       const { repoRoot } = createPluginSourceRepo(workdir, [
         { folderName: "plugin-alpha", description: "alpha plugin" },
@@ -690,11 +580,7 @@ describe("pluginspp binary @e2e", () => {
 
       writePluginFile(repoRoot, "plugin-alpha", "README.md", "alpha v2\n");
 
-      const updateResult = await runCli(workdir, [
-        "update",
-        "plugin-alpha",
-        "--non-interactive",
-      ]);
+      const updateResult = await runCli(workdir, ["update", "plugin-alpha", "--non-interactive"]);
 
       expect(updateResult.code).toBe(0);
       expect(updateResult.output).toContain("Updated 1 plugins.");
@@ -705,9 +591,7 @@ describe("pluginspp binary @e2e", () => {
   }, 30_000);
 
   it("does not mutate installed plugins during dry-run update @e2e", async () => {
-    const workdir = fs.mkdtempSync(
-      path.join(process.cwd(), "tmp-plugins-cli-update-dry-run-"),
-    );
+    const workdir = fs.mkdtempSync(path.join(process.cwd(), "tmp-plugins-cli-update-dry-run-"));
     try {
       const { repoRoot } = createPluginSourceRepo(workdir, [
         { folderName: "plugin-alpha", description: "alpha plugin" },
@@ -743,9 +627,7 @@ describe("pluginspp binary @e2e", () => {
       ]);
 
       expect(updateResult.code).toBe(0);
-      expect(updateResult.output).toContain(
-        "Dry-run mode: no changes applied.",
-      );
+      expect(updateResult.output).toContain("Dry-run mode: no changes applied.");
       expect(readUtf8(installedReadme)).toBe("alpha v1\n");
     } finally {
       fs.rmSync(workdir, { recursive: true, force: true });
@@ -776,9 +658,7 @@ describe("pluginspp binary @e2e", () => {
   }, 30_000);
 
   it("updates only global plugin installs when --global is set @e2e", async () => {
-    const workdir = fs.mkdtempSync(
-      path.join(process.cwd(), "tmp-plugins-cli-update-global-"),
-    );
+    const workdir = fs.mkdtempSync(path.join(process.cwd(), "tmp-plugins-cli-update-global-"));
     try {
       const homeDir = path.join(workdir, "home");
       fs.mkdirSync(path.join(homeDir, ".codex"), { recursive: true });
@@ -841,9 +721,7 @@ describe("pluginspp binary @e2e", () => {
   }, 30_000);
 
   it("updates all drifted plugins in non-interactive mode without prompting @e2e", async () => {
-    const workdir = fs.mkdtempSync(
-      path.join(process.cwd(), "tmp-plugins-cli-update-all-"),
-    );
+    const workdir = fs.mkdtempSync(path.join(process.cwd(), "tmp-plugins-cli-update-all-"));
     try {
       const { repoRoot } = createPluginSourceRepo(workdir, [
         { folderName: "plugin-alpha", description: "alpha plugin" },
@@ -867,36 +745,15 @@ describe("pluginspp binary @e2e", () => {
       writePluginFile(repoRoot, "plugin-alpha", "README.md", "alpha v2\n");
       writePluginFile(repoRoot, "plugin-beta", "README.md", "beta v2\n");
 
-      const updateResult = await runCli(workdir, [
-        "update",
-        "--non-interactive",
-      ]);
+      const updateResult = await runCli(workdir, ["update", "--non-interactive"]);
 
       expect(updateResult.code).toBe(0);
       expect(updateResult.output).toContain("Updated 2 plugins.");
       expect(
-        readUtf8(
-          path.join(
-            workdir,
-            ".agents",
-            "plugins",
-            "cache",
-            "plugin-alpha",
-            "README.md",
-          ),
-        ),
+        readUtf8(path.join(workdir, ".agents", "plugins", "cache", "plugin-alpha", "README.md")),
       ).toBe("alpha v2\n");
       expect(
-        readUtf8(
-          path.join(
-            workdir,
-            ".agents",
-            "plugins",
-            "cache",
-            "plugin-beta",
-            "README.md",
-          ),
-        ),
+        readUtf8(path.join(workdir, ".agents", "plugins", "cache", "plugin-beta", "README.md")),
       ).toBe("beta v2\n");
     } finally {
       fs.rmSync(workdir, { recursive: true, force: true });

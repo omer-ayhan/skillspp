@@ -62,16 +62,14 @@ describe("createCliCommandContext @unit", () => {
 describe("commander helpers @unit", () => {
   it("applyExitOverride cascades to subcommands @unit", async () => {
     const program = new Command("root");
-    const child = new Command("child")
-      .requiredOption("--required <value>")
-      .action(() => undefined);
+    const child = new Command("child").requiredOption("--required <value>").action(() => undefined);
     program.addCommand(child);
 
     applyExitOverride(program);
 
-    await expect(
-      program.parseAsync(["child"], { from: "user" }),
-    ).rejects.toBeInstanceOf(CommanderError);
+    await expect(program.parseAsync(["child"], { from: "user" })).rejects.toBeInstanceOf(
+      CommanderError,
+    );
   });
 
   it("inferCommandSource skips option values and falls back to cli @unit", () => {
@@ -113,19 +111,13 @@ describe("commander helpers @unit", () => {
   });
 
   it("detects help/version exits without swallowing real commander errors @unit", () => {
-    expect(
-      isGracefulCommanderExit(
-        new CommanderError(0, "commander.helpDisplayed", "help"),
-      ),
-    ).toBe(true);
-    expect(
-      isGracefulCommanderExit(new CommanderError(0, "commander.version", "1")),
-    ).toBe(true);
-    expect(
-      isGracefulCommanderExit(
-        new CommanderError(1, "commander.unknownOption", "bad"),
-      ),
-    ).toBe(false);
+    expect(isGracefulCommanderExit(new CommanderError(0, "commander.helpDisplayed", "help"))).toBe(
+      true,
+    );
+    expect(isGracefulCommanderExit(new CommanderError(0, "commander.version", "1"))).toBe(true);
+    expect(isGracefulCommanderExit(new CommanderError(1, "commander.unknownOption", "bad"))).toBe(
+      false,
+    );
   });
 });
 
@@ -141,9 +133,7 @@ describe("parseStandaloneCommand @unit", () => {
 
   it("swallows helpDisplayed commander error @unit", async () => {
     const cmd = new Command("test").helpOption("-h, --help");
-    await expect(
-      parseStandaloneCommand(cmd, ["--help"]),
-    ).resolves.toBeUndefined();
+    await expect(parseStandaloneCommand(cmd, ["--help"])).resolves.toBeUndefined();
   });
 
   it("converts other CommanderError to Error @unit", async () => {

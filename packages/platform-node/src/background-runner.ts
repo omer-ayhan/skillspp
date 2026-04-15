@@ -77,23 +77,18 @@ export async function runBackgroundTask<TResult>(
       typeof request === "object" &&
       request !== null &&
       "payload" in (request as Record<string, unknown>) &&
-      typeof (request as { payload?: { cwd?: unknown } }).payload?.cwd ===
-        "string"
+      typeof (request as { payload?: { cwd?: unknown } }).payload?.cwd === "string"
         ? (request as { payload: { cwd: string } }).payload.cwd
         : process.cwd();
 
-    const child = spawn(
-      process.execPath,
-      [...process.execArgv, resolveWorkerEntry()],
-      {
-        cwd: childCwd,
-        env: {
-          ...process.env,
-          SKILLSPP_BG_EXECUTOR: options.executorModule,
-        },
-        stdio: ["ignore", "pipe", "pipe", "ipc"],
+    const child = spawn(process.execPath, [...process.execArgv, resolveWorkerEntry()], {
+      cwd: childCwd,
+      env: {
+        ...process.env,
+        SKILLSPP_BG_EXECUTOR: options.executorModule,
       },
-    );
+      stdio: ["ignore", "pipe", "pipe", "ipc"],
+    });
 
     activeChildren.add(child);
 

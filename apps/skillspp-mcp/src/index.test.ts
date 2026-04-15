@@ -22,7 +22,7 @@ describe("skillspp-mcp request contracts @contract", () => {
 
     expect(response.error).toBeUndefined();
     expect((response.result as { tools: Array<{ name: string }> }).tools[0]?.name).toBe(
-      "skills.validate"
+      "skills.validate",
     );
   });
 
@@ -54,9 +54,7 @@ describe("skillspp-mcp request contracts @contract", () => {
 
     expect(validateExecute).toHaveBeenCalledWith({ source: "/tmp/source", json: true });
     expect(response.error).toBeUndefined();
-    expect(Array.isArray((response.result as { diagnostics: unknown[] }).diagnostics)).toBe(
-      true
-    );
+    expect(Array.isArray((response.result as { diagnostics: unknown[] }).diagnostics)).toBe(true);
   });
 
   it("returns method error for unknown rpc method @contract", async () => {

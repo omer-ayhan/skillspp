@@ -11,12 +11,7 @@ const packageRoot = path.resolve(__dirname, "..");
 const distDir = path.join(packageRoot, "dist");
 const cliOutFile = path.join(distDir, "cli.js");
 const workerOutFile = path.join(distDir, "background-worker.js");
-const executorEntry = path.join(
-  packageRoot,
-  "src",
-  "runtime",
-  "background-executor.ts",
-);
+const executorEntry = path.join(packageRoot, "src", "runtime", "background-executor.ts");
 const executorOutFile = path.join(distDir, "background-executor.js");
 
 function createBuildOptions(entryPoint, outfile, banner) {
@@ -46,10 +41,7 @@ async function runBuild() {
 
   await build(
     createBuildOptions(
-      path.resolve(
-        packageRoot,
-        "../../packages/platform-node/src/background-worker.ts",
-      ),
+      path.resolve(packageRoot, "../../packages/platform-node/src/background-worker.ts"),
       workerOutFile,
     ),
   );

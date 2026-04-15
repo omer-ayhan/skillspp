@@ -36,9 +36,7 @@ let staticCache: string[] | null | undefined;
 let configuredSessionPath: string | null = null;
 let configuredStaticPath: string | null = null;
 
-function normalizeConfiguredPath(
-  filePath: string | null | undefined,
-): string | null {
+function normalizeConfiguredPath(filePath: string | null | undefined): string | null {
   if (typeof filePath !== "string") {
     return null;
   }
@@ -56,17 +54,11 @@ export function configureLogoAssetPaths(paths: {
 }
 
 function resolveSessionPath(): string | null {
-  return (
-    normalizeConfiguredPath(process.env.SKILLSPP_LOGO_SESSION_PATH) ??
-    configuredSessionPath
-  );
+  return normalizeConfiguredPath(process.env.SKILLSPP_LOGO_SESSION_PATH) ?? configuredSessionPath;
 }
 
 function resolveStaticPath(): string | null {
-  return (
-    normalizeConfiguredPath(process.env.SKILLSPP_LOGO_TEXT_PATH) ??
-    configuredStaticPath
-  );
+  return normalizeConfiguredPath(process.env.SKILLSPP_LOGO_TEXT_PATH) ?? configuredStaticPath;
 }
 
 function trimOuterEmptyRows(lines: string[]): string[] {
@@ -157,9 +149,7 @@ function colorizeChar(char: string, hexColor: string | null): string {
   return `\x1b[38;2;${rgb.r};${rgb.g};${rgb.b}m${char}\x1b[0m`;
 }
 
-function parseHexColor(
-  color: string,
-): { r: number; g: number; b: number } | null {
+function parseHexColor(color: string): { r: number; g: number; b: number } | null {
   const value = color.trim();
   const short = /^#([0-9a-fA-F]{3})$/;
   const full = /^#([0-9a-fA-F]{6})$/;

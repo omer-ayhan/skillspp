@@ -6,8 +6,7 @@ vi.mock("@skillspp/platform-node", () => ({
   runBackgroundTask: runBackgroundTaskInPlatform,
 }));
 
-const { runBackgroundTask } =
-  await import("../../src/runtime/background-runner");
+const { runBackgroundTask } = await import("../../src/runtime/background-runner");
 
 describe("CLI background runner adapter @unit", () => {
   it("uses the colocated background executor module @unit", async () => {

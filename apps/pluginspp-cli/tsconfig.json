@@ -8,33 +8,17 @@
       "@skillspp/cli-shared": ["../../packages/cli-shared/src/index.ts"],
       "@skillspp/cli-shared/*": ["../../packages/cli-shared/src/*"],
       "@skillspp/core": ["../../packages/core/src/index.ts"],
-      "@skillspp/core/lockfile": [
-        "../../packages/core/src/runtime/lockfile.ts"
-      ],
-      "@skillspp/core/telemetry": [
-        "../../packages/core/src/runtime/telemetry.ts"
-      ],
+      "@skillspp/core/lockfile": ["../../packages/core/src/runtime/lockfile.ts"],
+      "@skillspp/core/telemetry": ["../../packages/core/src/runtime/telemetry.ts"],
       "@skillspp/core/policy": ["../../packages/core/src/runtime/policy.ts"],
       "@skillspp/core/agents": ["../../packages/core/src/runtime/agents.ts"],
-      "@skillspp/core/source-parser": [
-        "../../packages/core/src/sources/source-parser.ts"
-      ],
-      "@skillspp/core/source-resolution": [
-        "../../packages/core/src/sources/source-resolution.ts"
-      ],
+      "@skillspp/core/source-parser": ["../../packages/core/src/sources/source-parser.ts"],
+      "@skillspp/core/source-resolution": ["../../packages/core/src/sources/source-resolution.ts"],
       "@skillspp/core/skills": ["../../packages/core/src/sources/skills.ts"],
-      "@skillspp/core/commands": [
-        "../../packages/core/src/contracts/commands.ts"
-      ],
-      "@skillspp/core/results": [
-        "../../packages/core/src/contracts/results.ts"
-      ],
-      "@skillspp/core/errors": [
-        "../../packages/core/src/contracts/errors/core-error.ts"
-      ],
-      "@skillspp/core/events": [
-        "../../packages/core/src/contracts/events/lifecycle-event.ts"
-      ],
+      "@skillspp/core/commands": ["../../packages/core/src/contracts/commands.ts"],
+      "@skillspp/core/results": ["../../packages/core/src/contracts/results.ts"],
+      "@skillspp/core/errors": ["../../packages/core/src/contracts/errors/core-error.ts"],
+      "@skillspp/core/events": ["../../packages/core/src/contracts/events/lifecycle-event.ts"],
       "@skillspp/core/contracts/*": ["../../packages/core/src/contracts/*"],
       "@skillspp/core/sources/*": ["../../packages/core/src/sources/*"],
       "@skillspp/core/runtime/*": ["../../packages/core/src/runtime/*"],

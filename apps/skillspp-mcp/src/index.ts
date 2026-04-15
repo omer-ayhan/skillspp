@@ -1,9 +1,5 @@
 import { pathToFileURL } from "node:url";
-import {
-  handleRequest,
-  type JsonRpcRequest,
-  type JsonRpcResponse,
-} from "./request-handler";
+import { handleRequest, type JsonRpcRequest, type JsonRpcResponse } from "./request-handler";
 
 export async function runSelfTest(): Promise<void> {
   const list = await handleRequest({

@@ -10,9 +10,7 @@ describe("CLI background runner orchestration @integration", () => {
     const startedAt = Date.now();
     let lastProgressLabel: string | undefined;
 
-    const executorDir = fs.mkdtempSync(
-      path.join(os.tmpdir(), "skillspp-bg-executor-"),
-    );
+    const executorDir = fs.mkdtempSync(path.join(os.tmpdir(), "skillspp-bg-executor-"));
     const executorPath = path.join(executorDir, "executor.mjs");
     fs.writeFileSync(
       executorPath,

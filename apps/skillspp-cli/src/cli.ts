@@ -25,8 +25,7 @@ import { fileURLToPath } from "node:url";
 
 const require = createRequire(import.meta.url);
 const packageJson = require("../package.json") as { version?: unknown };
-const CLI_VERSION =
-  typeof packageJson.version === "string" ? packageJson.version : "0.1.0";
+const CLI_VERSION = typeof packageJson.version === "string" ? packageJson.version : "0.1.0";
 
 function resolveSkillsppLogoDir(): string {
   const moduleDir = path.dirname(fileURLToPath(import.meta.url));
@@ -51,10 +50,7 @@ function formatCliError(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-function createProgram(
-  emitter: TelemetryEmitter,
-  experimental: boolean,
-): Command {
+function createProgram(emitter: TelemetryEmitter, experimental: boolean): Command {
   const program = new Command()
     .name("skillspp")
     .usage("<command> [options]")

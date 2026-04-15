@@ -1,7 +1,4 @@
-import {
-  createTelemetryEmitter,
-  type TelemetryEmitter,
-} from "@skillspp/core/telemetry";
+import { createTelemetryEmitter, type TelemetryEmitter } from "@skillspp/core/telemetry";
 
 export type TelemetrySink = "stdout-json";
 
@@ -15,9 +12,7 @@ export function parseTelemetrySink(value?: string): TelemetrySink | undefined {
   throw new Error(`Invalid --telemetry value: ${value}`);
 }
 
-export function createCliTelemetryEmitter(
-  sink?: TelemetrySink
-): TelemetryEmitter {
+export function createCliTelemetryEmitter(sink?: TelemetrySink): TelemetryEmitter {
   const emitter = createTelemetryEmitter();
   if (sink === "stdout-json") {
     emitter.subscribe((event) => {

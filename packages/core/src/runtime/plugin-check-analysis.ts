@@ -1,16 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import type {
-  AddOptions,
-  Plugin,
-  ParsedSource,
-} from "../contracts/runtime-types";
+import type { AddOptions, Plugin, ParsedSource } from "../contracts/runtime-types";
 import type { DriftRecord } from "../contracts/results";
 import type { RemotePlugin } from "../providers";
-import {
-  discoverPluginsAsync,
-  stageRemotePluginFilesToTempDir,
-} from "../sources/plugins";
+import { discoverPluginsAsync, stageRemotePluginFilesToTempDir } from "../sources/plugins";
 import { resolveCatalogPlugins, resolveWellKnownPlugins } from "../sources/source-resolution";
 import { parseSource } from "../sources/source-parser";
 import { prepareSourceDirAsync, resolveGitHeadRefAsync } from "../sources/git";
@@ -160,10 +153,7 @@ function unwrapAsyncResult<T>(result: AsyncResult<T>): T {
   throw (result as { ok: false; error: unknown }).error;
 }
 
-async function loadCachedSource(
-  entry: LockEntry,
-  options: AddOptions,
-): Promise<CachedSource> {
+async function loadCachedSource(entry: LockEntry, options: AddOptions): Promise<CachedSource> {
   const sourceInput = resolveSourceLoadInput(entry.source);
   const parsed = parseSource(sourceInput);
 
@@ -262,15 +252,10 @@ function resolveCandidateFromCachedSource(
       (item) => item.installName === entry.source.selector.skillName,
     );
     if (!matched) {
-      throw new Error(
-        `Plugin '${entry.source.selector.skillName}' not found in well-known source`,
-      );
+      throw new Error(`Plugin '${entry.source.selector.skillName}' not found in well-known source`);
     }
 
-    const staged = stageRemotePluginFilesToTempDir(
-      matched.installName,
-      matched.files,
-    );
+    const staged = stageRemotePluginFilesToTempDir(matched.installName, matched.files);
     return {
       plugin: {
         name: matched.installName,
@@ -286,18 +271,12 @@ function resolveCandidateFromCachedSource(
     ? cachedSource.plugins.find(
         (item) =>
           path.resolve(item.path) ===
-          path.resolve(
-            path.join(cachedSource.basePath, entry.source.selector.relativePath!),
-          ),
+          path.resolve(path.join(cachedSource.basePath, entry.source.selector.relativePath!)),
       )
-    : cachedSource.plugins.find(
-        (item) => item.name === entry.source.selector.skillName,
-      );
+    : cachedSource.plugins.find((item) => item.name === entry.source.selector.skillName);
 
   if (!matched) {
-    throw new Error(
-      `Plugin '${entry.source.selector.skillName}' not found in source`,
-    );
+    throw new Error(`Plugin '${entry.source.selector.skillName}' not found in source`);
   }
 
   return {
@@ -317,9 +296,7 @@ export async function assessPluginLockEntries(
   assessments: PluginAssessment[];
 }> {
   const lock = readResourceLockfile("plugin", Boolean(options.global), cwd);
-  const entries = lock.entries.filter((entry) =>
-    includeByPlugin(entry, options.plugin),
-  );
+  const entries = lock.entries.filter((entry) => includeByPlugin(entry, options.plugin));
   const drift: DriftRecord[] = [];
   const assessments: PluginAssessment[] = [];
   const sourceOptions: AddOptions = {
@@ -351,10 +328,7 @@ export async function assessPluginLockEntries(
         drift: [],
       };
 
-      if (
-        !fs.existsSync(entry.canonicalDir) ||
-        !fs.statSync(entry.canonicalDir).isDirectory()
-      ) {
+      if (!fs.existsSync(entry.canonicalDir) || !fs.statSync(entry.canonicalDir).isDirectory()) {
         const row: DriftRecord = {
           skillName: entry.skillName,
           kind: "local-modified",
@@ -394,14 +368,8 @@ export async function assessPluginLockEntries(
 
       let resolved: PluginSourceCandidate | undefined;
       try {
-        const cachedSource = unwrapAsyncResult(
-          await toAsyncResult(getCachedSource(entry)),
-        );
-        resolved = resolveCandidateFromCachedSource(
-          entry,
-          cachedSource,
-          behavior.keepResolved,
-        );
+        const cachedSource = unwrapAsyncResult(await toAsyncResult(getCachedSource(entry)));
+        resolved = resolveCandidateFromCachedSource(entry, cachedSource, behavior.keepResolved);
 
         if (entry.source.type === "local") {
           const currentResolvedPath = fs.realpathSync(resolved.plugin.path);
@@ -447,8 +415,7 @@ export async function assessPluginLockEntries(
         const asText = error instanceof Error ? error.message : String(error);
         const migrateRequired =
           entry.source.type === "local" &&
-          (asText.includes("Local source not found") ||
-            asText.includes("not found in source"));
+          (asText.includes("Local source not found") || asText.includes("not found in source"));
         const row: DriftRecord = {
           skillName: entry.skillName,
           kind: migrateRequired ? "migrate-required" : "missing-source",
@@ -467,11 +434,7 @@ export async function assessPluginLockEntries(
       assessments.push(assessment);
     }
 
-    const canonical = listCanonicalResourceDirs(
-      "plugin",
-      Boolean(options.global),
-      cwd,
-    );
+    const canonical = listCanonicalResourceDirs("plugin", Boolean(options.global), cwd);
     const lockNames = new Set(lock.entries.map((item) => item.skillName));
     for (const pluginName of canonical) {
       if (

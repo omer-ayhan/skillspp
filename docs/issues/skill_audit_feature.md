@@ -1,10 +1,13 @@
 ## Feature summary
+
 Add a **skill audit** command that can analyze either:
+
 - a local **skills folder**,
 - an entire **skill repository**, or
 - a **single skill file**.
 
 ## Requirements / Features
+
 1. **Target selection**
    - Support auditing a folder, repo, or single file.
    - Scan and select target files based on audit conditions/requirements.
@@ -22,6 +25,7 @@ Add a **skill audit** command that can analyze either:
    - If no agents are selected, use a **universal** default.
 
 ## Acceptance criteria
+
 - Running the audit command against each target type (folder, repo, single file) produces a consistent report.
 - Invalid skill files cause the audit to fail fast with actionable error output.
 - A successful audit includes both scores and improvement recommendations.

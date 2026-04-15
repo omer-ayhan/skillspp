@@ -34,9 +34,7 @@ export const tools = [
   },
 ];
 
-export async function handleRequest(
-  request: JsonRpcRequest
-): Promise<JsonRpcResponse> {
+export async function handleRequest(request: JsonRpcRequest): Promise<JsonRpcResponse> {
   if (request.method === "tools/list") {
     return {
       jsonrpc: "2.0",

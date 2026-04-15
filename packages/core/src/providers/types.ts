@@ -38,25 +38,13 @@ export interface HostProvider {
 }
 
 export interface WellKnownProvider extends HostProvider {
-  fetchAllSkills(
-    url: string,
-    options?: WellKnownFetchOptions
-  ): Promise<RemoteSkill[]>;
+  fetchAllSkills(url: string, options?: WellKnownFetchOptions): Promise<RemoteSkill[]>;
 
-  fetchAllPlugins(
-    url: string,
-    options?: WellKnownFetchOptions
-  ): Promise<RemotePlugin[]>;
+  fetchAllPlugins(url: string, options?: WellKnownFetchOptions): Promise<RemotePlugin[]>;
 }
 
 export interface RemoteSkillsProvider extends HostProvider {
-  fetchAllSkills(
-    url: string,
-    options?: WellKnownFetchOptions
-  ): Promise<RemoteSkill[]>;
+  fetchAllSkills(url: string, options?: WellKnownFetchOptions): Promise<RemoteSkill[]>;
 
-  fetchAllPlugins(
-    url: string,
-    options?: WellKnownFetchOptions
-  ): Promise<RemotePlugin[]>;
+  fetchAllPlugins(url: string, options?: WellKnownFetchOptions): Promise<RemotePlugin[]>;
 }

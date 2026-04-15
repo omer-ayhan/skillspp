@@ -50,14 +50,14 @@ export function createTelemetryEmitter(): TelemetryEmitter {
 
 export function subscribeLifecycleEvents(
   emitter: TelemetryEmitter,
-  listener: TelemetryListener
+  listener: TelemetryListener,
 ): () => void {
   return emitter.subscribe(listener);
 }
 
 export function emitLifecycleEvent(
   emitter: TelemetryEmitter,
-  event: Omit<LifecycleEvent, "eventSchemaVersion" | "runId" | "timestamp">
+  event: Omit<LifecycleEvent, "eventSchemaVersion" | "runId" | "timestamp">,
 ): void {
   const row: LifecycleEvent = {
     eventSchemaVersion: 1,

@@ -17,7 +17,7 @@ describe("platform-node background runner @integration", () => {
         "  return { echoed: request?.payload?.value ?? null };",
         "}",
       ].join("\n"),
-      "utf8"
+      "utf8",
     );
 
     let progressLabel: string | undefined;
@@ -33,7 +33,7 @@ describe("platform-node background runner @integration", () => {
         onProgress: (label) => {
           progressLabel = label;
         },
-      }
+      },
     );
 
     expect(progressLabel).toBe("progress-label");

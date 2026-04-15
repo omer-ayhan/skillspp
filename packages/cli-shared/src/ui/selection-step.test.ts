@@ -29,12 +29,8 @@ const rows: SelectableRowState[] = [
 describe("CLI selection and screen rendering helpers @unit", () => {
   it("applies selection helpers deterministically @unit", () => {
     expect(filterSelectionRowIndexes(rows, "be")).toEqual([1]);
-    expect(toggleSelectionAtVisibleIndex(rows, [0, 1, 2], 0)[0]?.selected).toBe(
-      true,
-    );
-    expect(setAllRowsSelected(rows, true).every((row) => row.selected)).toBe(
-      true,
-    );
+    expect(toggleSelectionAtVisibleIndex(rows, [0, 1, 2], 0)[0]?.selected).toBe(true);
+    expect(setAllRowsSelected(rows, true).every((row) => row.selected)).toBe(true);
     expect(invertRowsSelection(rows)[0]?.selected).toBe(true);
     expect(invertRowsSelection(rows)[1]?.selected).toBe(false);
     expect(clampActiveVisibleIndex(-1, 3)).toBe(0);
@@ -181,9 +177,7 @@ describe("CLI selection and screen rendering helpers @unit", () => {
   });
 
   it("falls back from session-logo to txt to title banner @unit", () => {
-    const tmpDir = fs.mkdtempSync(
-      path.join(os.tmpdir(), "skillspp-logo-test-"),
-    );
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "skillspp-logo-test-"));
     const sessionPath = path.join(tmpDir, "skillspp-logo.session.json");
     const textPath = path.join(tmpDir, "skillspp-logo.txt");
 
@@ -195,9 +189,7 @@ describe("CLI selection and screen rendering helpers @unit", () => {
           index: 0,
           name: "frame-1",
           duration: 100,
-          cells: [
-            { x: 0, y: 1, char: "@", color: "#ffffff", bgColor: "transparent" },
-          ],
+          cells: [{ x: 0, y: 1, char: "@", color: "#ffffff", bgColor: "transparent" }],
           cellCount: 1,
         },
       ],
@@ -215,9 +207,7 @@ describe("CLI selection and screen rendering helpers @unit", () => {
 
     fs.writeFileSync(sessionPath, "{invalid json", "utf8");
     resetLogoCache();
-    const bannerFromTxtFallback = composeUiSections([
-      bannerSection("LOGO TEST"),
-    ]);
+    const bannerFromTxtFallback = composeUiSections([bannerSection("LOGO TEST")]);
     expect(bannerFromTxtFallback).toContain("#####");
 
     fs.unlinkSync(textPath);

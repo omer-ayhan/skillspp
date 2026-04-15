@@ -8,9 +8,7 @@ export type BackgroundTaskProgressEvent = {
   label: string;
 };
 
-export type BackgroundTaskResultEvent<
-  TKind extends BackgroundTaskKind = BackgroundTaskKind,
-> = {
+export type BackgroundTaskResultEvent<TKind extends BackgroundTaskKind = BackgroundTaskKind> = {
   type: "result";
   kind: TKind;
   result: BackgroundTaskResultMap[TKind];

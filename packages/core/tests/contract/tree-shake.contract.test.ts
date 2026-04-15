@@ -3,9 +3,7 @@ import { build } from "esbuild";
 import { describe, expect, it } from "vitest";
 
 function assertNoRuntimeInputs(inputs: string[], label: string): void {
-  const runtimeInputs = inputs.filter((input) =>
-    input.includes("packages/core/src/runtime/")
-  );
+  const runtimeInputs = inputs.filter((input) => input.includes("packages/core/src/runtime/"));
 
   expect(runtimeInputs, `Tree-shake smoke failed (${label})`).toHaveLength(0);
 }

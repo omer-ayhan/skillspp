@@ -17,11 +17,8 @@ describe("test-kit exports and helpers @unit", () => {
 
     fs.writeFileSync(
       scriptPath,
-      [
-        "process.stdout.write('hello-out');",
-        "process.stderr.write('hello-err');",
-      ].join("\n"),
-      "utf8"
+      ["process.stdout.write('hello-out');", "process.stderr.write('hello-err');"].join("\n"),
+      "utf8",
     );
 
     const result = await runProcess(process.execPath, [scriptPath], dir);

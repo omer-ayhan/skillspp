@@ -14,8 +14,7 @@ const APP_BACKGROUND_RUNNERS = [
   },
   {
     label: "pluginspp",
-    modulePath:
-      "../../../../apps/pluginspp-cli/src/runtime/background-runner.ts",
+    modulePath: "../../../../apps/pluginspp-cli/src/runtime/background-runner.ts",
   },
 ] as const;
 

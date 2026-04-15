@@ -31,16 +31,12 @@ type FindCommanderOptions = {
 };
 
 function toFindOptions(options: FindCommanderOptions): FindOptions {
-  const maxDownloadBytes = options.maxDownloadBytes
-    ? Number(options.maxDownloadBytes)
-    : undefined;
+  const maxDownloadBytes = options.maxDownloadBytes ? Number(options.maxDownloadBytes) : undefined;
   if (
     typeof maxDownloadBytes === "number" &&
     (!Number.isFinite(maxDownloadBytes) || maxDownloadBytes <= 0)
   ) {
-    throw new Error(
-      `Invalid --max-download-bytes value: ${options.maxDownloadBytes}`
-    );
+    throw new Error(`Invalid --max-download-bytes value: ${options.maxDownloadBytes}`);
   }
 
   return {
@@ -56,11 +52,7 @@ type FindInventoryItem = {
   description: string;
 };
 
-function matchesQuery(
-  name: string,
-  description: string,
-  query?: string
-): boolean {
+function matchesQuery(name: string, description: string, query?: string): boolean {
   if (!query) {
     return true;
   }
@@ -70,13 +62,11 @@ function matchesQuery(
     return true;
   }
 
-  return (
-    name.toLowerCase().includes(q) || description.toLowerCase().includes(q)
-  );
+  return name.toLowerCase().includes(q) || description.toLowerCase().includes(q);
 }
 
 function resolveFindSourceTypeLabel(
-  sourceType: "local" | "github" | "git" | "well-known" | "catalog"
+  sourceType: "local" | "github" | "git" | "well-known" | "catalog",
 ): string {
   switch (sourceType) {
     case "local":
@@ -96,7 +86,7 @@ function resolveFindSourceTypeLabel(
 async function executeFind(
   source: string,
   query: string | undefined,
-  options: FindOptions
+  options: FindOptions,
 ): Promise<void> {
   try {
     showLoader("loading");
@@ -122,7 +112,7 @@ async function executeFind(
             }
             showLoader(label);
           },
-        }
+        },
       );
     } catch (error) {
       hideLoader();
@@ -140,19 +130,13 @@ async function executeFind(
         .sort((a, b) => a.name.localeCompare(b.name));
     } catch (error) {
       hideLoader();
-      await renderStaticScreen([
-        failedStepsSection(["failed to apply query filter"]),
-      ]);
+      await renderStaticScreen([failedStepsSection(["failed to apply query filter"])]);
       throw error;
     }
     hideLoader();
 
     const flowSections = [
-      completedStepsSection([
-        "source parsed",
-        "skill inventory fetched",
-        "query filter applied",
-      ]),
+      completedStepsSection(["source parsed", "skill inventory fetched", "query filter applied"]),
       sourceSection(shortenHomePath(inventory.sourceLabel)),
     ];
 
@@ -168,7 +152,7 @@ async function executeFind(
           ],
           style: "square",
           minWidth: 74,
-        })
+        }),
       );
     }
 
@@ -181,21 +165,19 @@ async function executeFind(
         ],
         style: "square",
         minWidth: 74,
-      })
+      }),
     );
 
     flowSections.push(
       panelSection({
         title: "Match Summary",
         lines: [
-          `Found ${filtered.length} matching skill${
-            filtered.length === 1 ? "" : "s"
-          }`,
+          `Found ${filtered.length} matching skill${filtered.length === 1 ? "" : "s"}`,
           "Sorted by install name",
         ],
         style: "square",
         minWidth: 74,
-      })
+      }),
     );
 
     if (filtered.length > 0) {
@@ -214,7 +196,7 @@ async function executeFind(
           lines,
           style: "square",
           minWidth: 74,
-        })
+        }),
       );
 
       const suggestedSkill = filtered[0].name;
@@ -224,7 +206,7 @@ async function executeFind(
           lines: [`  skills add ${source} --skill ${suggestedSkill}`],
           style: "square",
           minWidth: 74,
-        })
+        }),
       );
     }
 
@@ -250,8 +232,8 @@ function configureFindCommand(
   action: (
     source: string,
     query: string | undefined,
-    options: FindCommanderOptions
-  ) => Promise<void>
+    options: FindCommanderOptions,
+  ) => Promise<void>,
 ): Command {
   return command
     .description("Find skills in a source by optional query")
@@ -263,25 +245,18 @@ function configureFindCommand(
     .action(action);
 }
 
-export function registerFindCommand(
-  program: Command,
-  ctx: CliCommandContext
-): void {
+export function registerFindCommand(program: Command, ctx: CliCommandContext): void {
   configureFindCommand(
     program.command("find"),
     ctx.wrapAction(
       "find",
-      async (
-        source: string,
-        query: string | undefined,
-        options: FindCommanderOptions
-      ) => {
+      async (source: string, query: string | undefined, options: FindCommanderOptions) => {
         await executeFind(source, query, {
           ...toFindOptions(options),
           experimental: ctx.experimental,
         });
-      }
-    )
+      },
+    ),
   );
 }
 
@@ -290,7 +265,7 @@ export async function runFind(args: string[]): Promise<void> {
     new Command().name("find"),
     async (source, query, options) => {
       await executeFind(source, query, toFindOptions(options));
-    }
+    },
   );
   await parseStandaloneCommand(command, args);
 }

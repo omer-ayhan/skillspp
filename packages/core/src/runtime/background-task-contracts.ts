@@ -1,16 +1,9 @@
-import type {
-  AddOptions,
-  AgentType,
-  ListOptions,
-} from "../contracts/runtime-types";
+import type { AddOptions, AgentType, ListOptions } from "../contracts/runtime-types";
 import type { DriftRecord, ListInventoryRow } from "../contracts/results";
 import type { CheckOptions } from "./check-analysis";
 import type { ValidateDiagnostic, ValidateOptions } from "./validate-analysis";
 import type { LockEntry, LockfileFormat } from "./lockfile";
-import type {
-  ScannerConflict,
-  TransitiveSkillConflict,
-} from "../sources/scanner";
+import type { ScannerConflict, TransitiveSkillConflict } from "../sources/scanner";
 
 export type FindOptions = {
   allowHost?: string[];
@@ -219,27 +212,23 @@ export type BackgroundTaskResultMap = {
 
 export type BackgroundTaskKind = keyof BackgroundTaskRequestMap;
 
-export type BackgroundTaskRequest<
-  TKind extends BackgroundTaskKind = BackgroundTaskKind
-> = TKind extends BackgroundTaskKind
-  ? {
-      kind: TKind;
-      payload: BackgroundTaskRequestMap[TKind];
-    }
-  : never;
+export type BackgroundTaskRequest<TKind extends BackgroundTaskKind = BackgroundTaskKind> =
+  TKind extends BackgroundTaskKind
+    ? {
+        kind: TKind;
+        payload: BackgroundTaskRequestMap[TKind];
+      }
+    : never;
 
-export type BackgroundTaskResult<
-  TKind extends BackgroundTaskKind = BackgroundTaskKind
-> = BackgroundTaskResultMap[TKind];
+export type BackgroundTaskResult<TKind extends BackgroundTaskKind = BackgroundTaskKind> =
+  BackgroundTaskResultMap[TKind];
 
 export type BackgroundTaskProgressEvent = {
   type: "progress";
   label: string;
 };
 
-export type BackgroundTaskResultEvent<
-  TKind extends BackgroundTaskKind = BackgroundTaskKind
-> = {
+export type BackgroundTaskResultEvent<TKind extends BackgroundTaskKind = BackgroundTaskKind> = {
   type: "result";
   kind: TKind;
   result: BackgroundTaskResultMap[TKind];

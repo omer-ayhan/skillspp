@@ -53,13 +53,7 @@ function makeEntry(name: string, canonicalDir: string): LockEntry {
 describe("plugin lockfile discovery @unit", () => {
   it("reads plugin lockfiles from plugin cache directories only @unit", () => {
     const root = makeTempDir("skillspp-plugin-lockfile-");
-    const pluginDir = path.join(
-      root,
-      ".agents",
-      "plugins",
-      "cache",
-      "plugin-alpha",
-    );
+    const pluginDir = path.join(root, ".agents", "plugins", "cache", "plugin-alpha");
     fs.mkdirSync(pluginDir, { recursive: true });
     writeResourceLockfile(
       "plugin",
@@ -89,11 +83,7 @@ describe("plugin lockfile discovery @unit", () => {
 
     const lock = readResourceLockfile("plugin", false, root);
 
-    expect(lock.entries.map((entry) => entry.skillName)).toEqual([
-      "plugin-alpha",
-    ]);
-    expect(listCanonicalResourceDirs("plugin", false, root)).toEqual([
-      "plugin-alpha",
-    ]);
+    expect(lock.entries.map((entry) => entry.skillName)).toEqual(["plugin-alpha"]);
+    expect(listCanonicalResourceDirs("plugin", false, root)).toEqual(["plugin-alpha"]);
   });
 });

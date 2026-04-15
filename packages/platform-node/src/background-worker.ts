@@ -70,9 +70,7 @@ async function loadExecutor(): Promise<TaskExecutorModule> {
 
   const loaded = (await import(modulePath)) as Partial<TaskExecutorModule>;
   if (!loaded.executeBackgroundTask) {
-    throw new Error(
-      `Executor module does not export executeBackgroundTask: ${modulePath}`,
-    );
+    throw new Error(`Executor module does not export executeBackgroundTask: ${modulePath}`);
   }
 
   return loaded as TaskExecutorModule;

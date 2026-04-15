@@ -14,14 +14,8 @@ import {
   loadInstallerConfig,
   prepareInstallerArtifacts,
 } from "@skillspp/core/runtime/skill-installer";
-import {
-  evaluateInstallerLocalDependencyPolicy,
-  type PolicyMode,
-} from "@skillspp/core/policy";
-import {
-  resolveCatalogSkills,
-  resolveWellKnownSkills,
-} from "@skillspp/core/source-resolution";
+import { evaluateInstallerLocalDependencyPolicy, type PolicyMode } from "@skillspp/core/policy";
+import { resolveCatalogSkills, resolveWellKnownSkills } from "@skillspp/core/source-resolution";
 import type { AddOptions } from "@skillspp/core/contracts/runtime-types";
 import { parsePolicyMode } from "../policy-mode";
 import {
@@ -112,10 +106,7 @@ function toValidateOptions(
   options: ValidateCommanderOptions,
 ): ValidateOptions {
   const maxLines = options.maxLines ? Number(options.maxLines) : undefined;
-  if (
-    typeof maxLines === "number" &&
-    (!Number.isFinite(maxLines) || maxLines <= 0)
-  ) {
+  if (typeof maxLines === "number" && (!Number.isFinite(maxLines) || maxLines <= 0)) {
     throw new Error(`Invalid --max-lines value: ${options.maxLines}`);
   }
 
@@ -126,21 +117,15 @@ function toValidateOptions(
     typeof maxDescriptionChars === "number" &&
     (!Number.isFinite(maxDescriptionChars) || maxDescriptionChars <= 0)
   ) {
-    throw new Error(
-      `Invalid --max-description-chars value: ${options.maxDescriptionChars}`,
-    );
+    throw new Error(`Invalid --max-description-chars value: ${options.maxDescriptionChars}`);
   }
 
-  const maxDownloadBytes = options.maxDownloadBytes
-    ? Number(options.maxDownloadBytes)
-    : undefined;
+  const maxDownloadBytes = options.maxDownloadBytes ? Number(options.maxDownloadBytes) : undefined;
   if (
     typeof maxDownloadBytes === "number" &&
     (!Number.isFinite(maxDownloadBytes) || maxDownloadBytes <= 0)
   ) {
-    throw new Error(
-      `Invalid --max-download-bytes value: ${options.maxDownloadBytes}`,
-    );
+    throw new Error(`Invalid --max-download-bytes value: ${options.maxDownloadBytes}`);
   }
 
   return {
@@ -172,24 +157,16 @@ function loadRepoValidateConfig(cwd: string): RepoValidateConfig {
   return parsed.validate || {};
 }
 
-function resolveThresholds(
-  options: ValidateOptions,
-  cwd: string,
-): ValidateThresholds {
+function resolveThresholds(options: ValidateOptions, cwd: string): ValidateThresholds {
   const config = loadRepoValidateConfig(cwd);
   return {
     maxLines: options.maxLines || config.maxLines || DEFAULT_MAX_LINES,
     maxDescriptionChars:
-      options.maxDescriptionChars ||
-      config.maxDescriptionChars ||
-      DEFAULT_MAX_DESCRIPTION,
+      options.maxDescriptionChars || config.maxDescriptionChars || DEFAULT_MAX_DESCRIPTION,
   };
 }
 
-function addDiagnostic(
-  list: ValidateDiagnostic[],
-  diagnostic: ValidateDiagnostic,
-): void {
+function addDiagnostic(list: ValidateDiagnostic[], diagnostic: ValidateDiagnostic): void {
   list.push(diagnostic);
 }
 
@@ -220,10 +197,7 @@ const typeRules: TypeRule[] = [
     when: (frontmatter) => frontmatter.type === "framework",
     validate: ({ skillDir, skillName, diagnostics }) => {
       const referencesDir = path.join(skillDir, "references");
-      if (
-        !fs.existsSync(referencesDir) ||
-        !fs.statSync(referencesDir).isDirectory()
-      ) {
+      if (!fs.existsSync(referencesDir) || !fs.statSync(referencesDir).isDirectory()) {
         addDiagnostic(diagnostics, {
           severity: "error",
           skill: skillName,
@@ -242,9 +216,7 @@ async function validateInstallerDependencies(
   diagnostics: ValidateDiagnostic[],
   skillName: string,
 ): Promise<void> {
-  const installerConfigPath = fs.existsSync(
-    path.join(skillDir, "skill-installer.yaml"),
-  )
+  const installerConfigPath = fs.existsSync(path.join(skillDir, "skill-installer.yaml"))
     ? path.join(skillDir, "skill-installer.yaml")
     : path.join(skillDir, "skill-installer.json");
 
@@ -283,8 +255,7 @@ async function validateInstallerDependencies(
           accepted = true;
           break;
         } else {
-          securityViolation =
-            "violation" in evaluated ? evaluated.violation : undefined;
+          securityViolation = "violation" in evaluated ? evaluated.violation : undefined;
         }
       }
 
@@ -304,15 +275,9 @@ async function validateInstallerDependencies(
       return;
     }
 
-    const tempSkillDir = fs.mkdtempSync(
-      path.join(os.tmpdir(), "skillspp-validate-installer-"),
-    );
+    const tempSkillDir = fs.mkdtempSync(path.join(os.tmpdir(), "skillspp-validate-installer-"));
     try {
-      const filesToCopy = [
-        "SKILL.md",
-        "skill-installer.yaml",
-        "skill-installer.json",
-      ];
+      const filesToCopy = ["SKILL.md", "skill-installer.yaml", "skill-installer.json"];
       for (const fileName of filesToCopy) {
         const src = path.join(skillDir, fileName);
         if (fs.existsSync(src) && fs.statSync(src).isFile()) {
@@ -351,8 +316,7 @@ async function validateInstallerDependencies(
             securityError = error;
             break;
           }
-          const message =
-            error instanceof Error ? error.message : String(error);
+          const message = error instanceof Error ? error.message : String(error);
           if (message.includes("(local) source not found")) {
             lastMissingSourceError = error;
             continue;
@@ -445,8 +409,7 @@ async function validateSkillDir(
       skill: skillName,
       file: skillMd,
       rule: "invalid-frontmatter",
-      message:
-        error instanceof Error ? error.message : "frontmatter parsing failed",
+      message: error instanceof Error ? error.message : "frontmatter parsing failed",
     });
     return;
   }
@@ -523,12 +486,7 @@ async function validateSkillDir(
     }
   }
 
-  await validateInstallerDependencies(
-    skillDir,
-    sourceRoot,
-    diagnostics,
-    skillName,
-  );
+  await validateInstallerDependencies(skillDir, sourceRoot, diagnostics, skillName);
 }
 
 function discoverFallbackRoots(cwd: string): string[] {
@@ -584,10 +542,7 @@ async function stageAndValidateLocalRoot(
   emitProgress?: (label: string) => Promise<void> | void,
 ): Promise<void> {
   const resolvedRoot = path.resolve(rootPath);
-  if (
-    !fs.existsSync(resolvedRoot) ||
-    !fs.statSync(resolvedRoot).isDirectory()
-  ) {
+  if (!fs.existsSync(resolvedRoot) || !fs.statSync(resolvedRoot).isDirectory()) {
     addDiagnostic(diagnostics, {
       severity: "error",
       skill: path.basename(resolvedRoot),
@@ -618,13 +573,7 @@ async function stageAndValidateLocalRoot(
     }
     seenSkillPaths.add(resolvedSkillPath);
     await emitProgress?.(`validating ${skill.name}`);
-    await validateSkillDir(
-      skill.path,
-      dependencyRoot,
-      diagnostics,
-      strict,
-      thresholds,
-    );
+    await validateSkillDir(skill.path, dependencyRoot, diagnostics, strict, thresholds);
   }
 }
 
@@ -671,9 +620,7 @@ async function stageAndValidateSource(
     const tempRoots: string[] = [];
     try {
       for (const remoteSkill of remote) {
-        const tmp = fs.mkdtempSync(
-          path.join(os.tmpdir(), "skillspp-validate-"),
-        );
+        const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "skillspp-validate-"));
         tempRoots.push(tmp);
 
         for (const [relativePath, content] of remoteSkill.files.entries()) {
@@ -683,13 +630,7 @@ async function stageAndValidateSource(
         }
 
         await emitProgress?.(`validating ${remoteSkill.installName}`);
-        await validateSkillDir(
-          tmp,
-          tmp,
-          diagnostics,
-          Boolean(options.strict),
-          thresholds,
-        );
+        await validateSkillDir(tmp, tmp, diagnostics, Boolean(options.strict), thresholds);
       }
     } finally {
       for (const tmp of tempRoots) {
@@ -730,9 +671,7 @@ export async function runValidateAnalysis(
   if (options.ci) {
     await emitProgress?.("staging source");
     const roots =
-      options.roots && options.roots.length > 0
-        ? options.roots
-        : discoverCiRoots(process.cwd());
+      options.roots && options.roots.length > 0 ? options.roots : discoverCiRoots(process.cwd());
     if (roots.length === 0) {
       throw new Error("No CI roots found to validate");
     }
@@ -750,12 +689,7 @@ export async function runValidateAnalysis(
       );
     }
   } else {
-    await stageAndValidateSource(
-      options,
-      diagnostics,
-      thresholds,
-      emitProgress,
-    );
+    await stageAndValidateSource(options, diagnostics, thresholds, emitProgress);
   }
 
   await emitProgress?.("collecting diagnostics");
@@ -785,17 +719,13 @@ function formatDiagnosticLine(row: ValidateDiagnostic): string {
   return `${row.skill} · ${row.rule}: ${row.message}`;
 }
 
-function buildDiagnosticsPanelLines(
-  diagnostics: ValidateDiagnostic[],
-): string[] {
+function buildDiagnosticsPanelLines(diagnostics: ValidateDiagnostic[]): string[] {
   if (diagnostics.length === 0) {
     return [colorToken("No diagnostics found.", "success")];
   }
 
   const sorted = [...diagnostics].sort((a, b) =>
-    `${a.severity}:${a.skill}:${a.rule}`.localeCompare(
-      `${b.severity}:${b.skill}:${b.rule}`,
-    ),
+    `${a.severity}:${a.skill}:${a.rule}`.localeCompare(`${b.severity}:${b.skill}:${b.rule}`),
   );
 
   return sorted.map((row) => {
@@ -878,11 +808,7 @@ async function executeValidate(options: ValidateOptions): Promise<void> {
   const validatingSteps = [...runtimeSteps]
     .filter((step) => step.startsWith("validating "))
     .sort((a, b) => a.localeCompare(b));
-  const runStepLines = [
-    "staging source",
-    ...validatingSteps,
-    "collecting diagnostics",
-  ];
+  const runStepLines = ["staging source", ...validatingSteps, "collecting diagnostics"];
 
   await renderStaticScreen([
     completedStepsSection([
@@ -890,27 +816,16 @@ async function executeValidate(options: ValidateOptions): Promise<void> {
       "candidate skills discovered",
       "validation session ready",
     ]),
-    linesSection([
-      `  Validation target: ${resolveValidateTargetLabel(options)}`,
-    ]),
+    linesSection([`  Validation target: ${resolveValidateTargetLabel(options)}`]),
     panelSection({
       title: "Checks Included",
       lines: [
-        `  ${colorToken(
-          "●",
-          "primary",
-        )} SKILL.md exists + frontmatter parseability`,
+        `  ${colorToken("●", "primary")} SKILL.md exists + frontmatter parseability`,
         `  ${colorToken("●", "primary")} required fields: name, description`,
         `  ${colorToken("●", "primary")} name ↔ directory consistency`,
         `  ${colorToken("●", "primary")} markdown reference existence`,
-        `  ${colorToken(
-          "●",
-          "primary",
-        )} type-specific rules (framework references dir)`,
-        `  ${colorToken(
-          "●",
-          "primary",
-        )} installer dependency security + preflight`,
+        `  ${colorToken("●", "primary")} type-specific rules (framework references dir)`,
+        `  ${colorToken("●", "primary")} installer dependency security + preflight`,
         `  ${colorToken("●", "primary")} line/description budget thresholds`,
       ],
       style: "square",
@@ -947,10 +862,7 @@ async function executeValidate(options: ValidateOptions): Promise<void> {
 
 function configureValidateCommand(
   command: Command,
-  action: (
-    source: string | undefined,
-    options: ValidateCommanderOptions,
-  ) => Promise<void>,
+  action: (source: string | undefined, options: ValidateCommanderOptions) => Promise<void>,
 ): Command {
   return command
     .description("Validate skill source structure and references")
@@ -960,10 +872,7 @@ function configureValidateCommand(
     .option("--strict", "Escalate warnings to errors")
     .option("--json", "Emit JSON output")
     .option("--max-lines <n>", "SKILL.md line budget threshold")
-    .option(
-      "--max-description-chars <n>",
-      "Description length budget threshold",
-    )
+    .option("--max-description-chars <n>", "Description length budget threshold")
     .option("--allow-host <hosts...>", "Restrict well-known hosts to allowlist")
     .option("--deny-host <hosts...>", "Block specific well-known hosts")
     .option("--max-download-bytes <n>", "Set well-known download budget")
@@ -971,10 +880,7 @@ function configureValidateCommand(
     .action(action);
 }
 
-export function registerValidateCommand(
-  program: Command,
-  ctx: CliCommandContext,
-): void {
+export function registerValidateCommand(program: Command, ctx: CliCommandContext): void {
   configureValidateCommand(
     program.command("validate"),
     ctx.wrapAction(

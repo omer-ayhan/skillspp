@@ -5,16 +5,7 @@ module.exports = {
     "scope-enum": [
       2,
       "always",
-      [
-        "cli",
-        "mcp",
-        "core",
-        "platform-node",
-        "test-kit",
-        "release",
-        "docs",
-        "github",
-      ],
+      ["cli", "mcp", "core", "platform-node", "test-kit", "release", "docs", "github"],
     ],
   },
 };

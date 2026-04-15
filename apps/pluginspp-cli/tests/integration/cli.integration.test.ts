@@ -9,10 +9,7 @@ type RunResult = {
 };
 
 function runCli(args: string[]): Promise<RunResult> {
-  const appRoot = path.resolve(
-    path.dirname(fileURLToPath(import.meta.url)),
-    "../..",
-  );
+  const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
   const tsxPath = path.resolve(appRoot, "node_modules/tsx/dist/cli.mjs");
   const cliEntry = path.resolve(appRoot, "src/cli.ts");
 

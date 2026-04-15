@@ -12,16 +12,12 @@ import {
   isGracefulCommanderExit,
 } from "@skillspp/cli-shared/command-builder";
 import { configureLogoAssetPaths } from "@skillspp/cli-shared/ui/logo";
-import {
-  createTelemetryEmitter,
-  type TelemetryEmitter,
-} from "@skillspp/core/telemetry";
+import { createTelemetryEmitter, type TelemetryEmitter } from "@skillspp/core/telemetry";
 import picocolors from "picocolors";
 
 const require = createRequire(import.meta.url);
 const packageJson = require("../package.json") as { version?: unknown };
-const CLI_VERSION =
-  typeof packageJson.version === "string" ? packageJson.version : "0.1.0";
+const CLI_VERSION = typeof packageJson.version === "string" ? packageJson.version : "0.1.0";
 
 function resolvePluginsppLogoDir(): string {
   const moduleDir = path.dirname(fileURLToPath(import.meta.url));

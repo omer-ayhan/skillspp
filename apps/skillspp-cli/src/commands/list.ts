@@ -1,8 +1,5 @@
 import { Command } from "commander";
-import type {
-  AgentType,
-  ListOptions,
-} from "@skillspp/core/contracts/runtime-types";
+import type { AgentType, ListOptions } from "@skillspp/core/contracts/runtime-types";
 import { AGENTS, normalizeAgentSelectionInput } from "@skillspp/core/agents";
 import { canUseInteractive } from "@skillspp/cli-shared/interactive";
 import {
@@ -69,10 +66,7 @@ function buildListAgentSelectionRows(agents: AgentType[]): SelectionRow[] {
   }));
 }
 
-function renderListAgentsPanel(options: {
-  agents: AgentType[];
-  selectedAgents: AgentType[];
-}) {
+function renderListAgentsPanel(options: { agents: AgentType[]; selectedAgents: AgentType[] }) {
   return manySelectionClosedSection(
     LIST_AGENTS_SELECTION_VIEW,
     buildListAgentSelectionRows(options.agents),
@@ -80,10 +74,7 @@ function renderListAgentsPanel(options: {
   );
 }
 
-function renderListScopePanel(options: {
-  globalInstall: boolean;
-  agentFilter: string;
-}) {
+function renderListScopePanel(options: { globalInstall: boolean; agentFilter: string }) {
   return panelSection({
     title: "List Scope",
     lines: [
@@ -98,10 +89,7 @@ function renderListScopePanel(options: {
 function renderListInventorySummary(skillCount: number) {
   return panelSection({
     title: "Inventory Summary",
-    lines: [
-      `${skillCount} unique skills found`,
-      "Grouped by (skill name + resolved path)",
-    ],
+    lines: [`${skillCount} unique skills found`, "Grouped by (skill name + resolved path)"],
     style: "square",
     minWidth: 74,
   });
@@ -118,18 +106,13 @@ function renderListInstalledSkillsPanel(
     return a.resolvedPath.localeCompare(b.resolvedPath);
   });
   const uniqueSkillCount = new Set(sortedRows.map((row) => row.name)).size;
-  const targetCount = sortedRows.reduce(
-    (count, row) => count + row.agents.length,
-    0,
-  );
+  const targetCount = sortedRows.reduce((count, row) => count + row.agents.length, 0);
 
   const lines: string[] = [];
   lines.push(
     `${bold("Skills:")} ${dim(uniqueSkillCount.toString())}   ${bold(
       "Entries:",
-    )} ${dim(sortedRows.length.toString())}   ${bold("Targets:")} ${dim(
-      targetCount.toString(),
-    )}`,
+    )} ${dim(sortedRows.length.toString())}   ${bold("Targets:")} ${dim(targetCount.toString())}`,
   );
   lines.push("");
   lines.push("Targets");
@@ -143,11 +126,7 @@ function renderListInstalledSkillsPanel(
     }
     const agents = [...row.agents].sort((a, b) => a.localeCompare(b));
     for (const agent of agents) {
-      lines.push(
-        `    - ${agent.padEnd(16, " ")} ${dim(
-          shortenHomePath(row.resolvedPath),
-        )}`,
-      );
+      lines.push(`    - ${agent.padEnd(16, " ")} ${dim(shortenHomePath(row.resolvedPath))}`);
     }
   }
 
@@ -205,8 +184,7 @@ async function executeList(options: ListOptions): Promise<void> {
       interactive,
       rows: buildListAgentSelectionRows(agents),
       selectedIds: agents,
-      shouldPrompt:
-        !options.agentFlagProvided && agents.length > 1 && interactive,
+      shouldPrompt: !options.agentFlagProvided && agents.length > 1 && interactive,
       prompt: {
         title: "Choose Agents",
         required: true,
@@ -288,10 +266,7 @@ function configureListCommand(
     .action(action);
 }
 
-export function registerListCommand(
-  program: Command,
-  ctx: CliCommandContext,
-): void {
+export function registerListCommand(program: Command, ctx: CliCommandContext): void {
   configureListCommand(
     program.command("list").alias("ls"),
     ctx.wrapAction("list", async (options: ListCommanderOptions) => {
@@ -301,11 +276,8 @@ export function registerListCommand(
 }
 
 export async function runList(args: string[]): Promise<void> {
-  const command = configureListCommand(
-    new Command().name("list"),
-    async (options) => {
-      await executeList(toListOptions(options));
-    },
-  );
+  const command = configureListCommand(new Command().name("list"), async (options) => {
+    await executeList(toListOptions(options));
+  });
   await parseStandaloneCommand(command, args);
 }

@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  createNodeCoreCommandPort,
-  createNodeCoreServices,
-  runBackgroundTask,
-} from "./index";
+import { createNodeCoreCommandPort, createNodeCoreServices, runBackgroundTask } from "./index";
 
 describe("platform-node root exports @unit", () => {
   it("exposes transport/runtime entrypoints @unit", () => {

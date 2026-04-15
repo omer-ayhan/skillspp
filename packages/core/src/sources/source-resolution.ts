@@ -1,22 +1,10 @@
 import path from "node:path";
-import type {
-  ParsedSource,
-  Skill,
-  AddOptions,
-} from "../contracts/runtime-types";
+import type { ParsedSource, Skill, AddOptions } from "../contracts/runtime-types";
 import { parseSource } from "./source-parser";
 import { prepareSourceDir } from "./git";
-import {
-  discoverSkills,
-  filterSkillsByName,
-  stageRemoteSkillFilesToTempDir,
-} from "./skills";
+import { discoverSkills, filterSkillsByName, stageRemoteSkillFilesToTempDir } from "./skills";
 import { getProviderById, initializeProviders } from "../providers";
-import type {
-  RemotePlugin,
-  RemoteSkill,
-  RemoteSkillsProvider,
-} from "../providers";
+import type { RemotePlugin, RemoteSkill, RemoteSkillsProvider } from "../providers";
 
 import type { LockEntry } from "../runtime/lockfile";
 import { assertExperimentalFeatureEnabled } from "../application/experimental";
@@ -144,9 +132,7 @@ export async function resolveSourceCandidates(
   );
   try {
     const skills = discoverSkills(prepared.basePath);
-    const selected = requestedSkills
-      ? filterSkillsByName(skills, requestedSkills)
-      : skills;
+    const selected = requestedSkills ? filterSkillsByName(skills, requestedSkills) : skills;
 
     return selected.map((skill) => ({
       skill,
@@ -176,9 +162,7 @@ export async function resolveSkillFromLockEntry(
       (item) => item.installName === entry.source.selector.skillName,
     );
     if (!matched) {
-      throw new Error(
-        `Skill '${entry.source.selector.skillName}' not found in well-known source`,
-      );
+      throw new Error(`Skill '${entry.source.selector.skillName}' not found in well-known source`);
     }
 
     const staged = stageRemoteSkillFilesToTempDir(matched.files);
@@ -200,25 +184,16 @@ export async function resolveSkillFromLockEntry(
   try {
     let targetPath = prepared.basePath;
     if (entry.source.selector.relativePath) {
-      targetPath = path.join(
-        prepared.basePath,
-        entry.source.selector.relativePath,
-      );
+      targetPath = path.join(prepared.basePath, entry.source.selector.relativePath);
     }
 
     const skills = discoverSkills(prepared.basePath);
-    const byName = skills.find(
-      (item) => item.name === entry.source.selector.skillName,
-    );
-    const byPath = skills.find(
-      (item) => path.resolve(item.path) === path.resolve(targetPath),
-    );
+    const byName = skills.find((item) => item.name === entry.source.selector.skillName);
+    const byPath = skills.find((item) => path.resolve(item.path) === path.resolve(targetPath));
     const matched = byPath || byName;
 
     if (!matched) {
-      throw new Error(
-        `Skill '${entry.source.selector.skillName}' not found in source`,
-      );
+      throw new Error(`Skill '${entry.source.selector.skillName}' not found in source`);
     }
 
     return {

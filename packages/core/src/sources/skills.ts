@@ -4,13 +4,7 @@ import path from "node:path";
 import matter from "gray-matter";
 import type { Skill, ParsedSource } from "../contracts/runtime-types";
 
-const SKIP_DIRS = new Set([
-  ".git",
-  "node_modules",
-  "dist",
-  "build",
-  "__pycache__",
-]);
+const SKIP_DIRS = new Set([".git", "node_modules", "dist", "build", "__pycache__"]);
 
 export function resolveSourceLabel(parsedSource: ParsedSource): string {
   switch (parsedSource.type) {
@@ -36,9 +30,7 @@ export function stageRemoteSkillFilesToTempDir(
   files: Map<string, string>,
   options?: { prefix?: string },
 ): RemoteStagingResult {
-  const tmp = fs.mkdtempSync(
-    path.join(os.tmpdir(), options?.prefix || "skillspp-remote-"),
-  );
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), options?.prefix || "skillspp-remote-"));
 
   try {
     for (const [relativePath, content] of files.entries()) {
@@ -111,12 +103,7 @@ async function parseSkillMdAsync(skillMdPath: string): Promise<Skill | null> {
   }
 }
 
-function findSkillDirsRecursive(
-  dir: string,
-  depth: number,
-  maxDepth: number,
-  out: string[]
-): void {
+function findSkillDirsRecursive(dir: string, depth: number, maxDepth: number, out: string[]): void {
   if (depth > maxDepth) {
     return;
   }
@@ -133,12 +120,7 @@ function findSkillDirsRecursive(
     if (!entry.isDirectory() || SKIP_DIRS.has(entry.name)) {
       continue;
     }
-    findSkillDirsRecursive(
-      path.join(dir, entry.name),
-      depth + 1,
-      maxDepth,
-      out
-    );
+    findSkillDirsRecursive(path.join(dir, entry.name), depth + 1, maxDepth, out);
   }
 }
 
@@ -146,7 +128,7 @@ async function findSkillDirsRecursiveAsync(
   dir: string,
   depth: number,
   maxDepth: number,
-  out: string[]
+  out: string[],
 ): Promise<void> {
   if (depth > maxDepth) {
     return;
@@ -176,12 +158,7 @@ async function findSkillDirsRecursiveAsync(
     if (!entry.isDirectory() || SKIP_DIRS.has(entry.name)) {
       continue;
     }
-    await findSkillDirsRecursiveAsync(
-      path.join(dir, entry.name),
-      depth + 1,
-      maxDepth,
-      out
-    );
+    await findSkillDirsRecursiveAsync(path.join(dir, entry.name), depth + 1, maxDepth, out);
   }
 }
 
@@ -303,10 +280,7 @@ export async function discoverSkillsAsync(basePath: string): Promise<Skill[]> {
   return skills;
 }
 
-export function filterSkillsByName(
-  skills: Skill[],
-  requested?: string[]
-): Skill[] {
+export function filterSkillsByName(skills: Skill[], requested?: string[]): Skill[] {
   if (!requested || requested.length === 0) {
     return skills;
   }

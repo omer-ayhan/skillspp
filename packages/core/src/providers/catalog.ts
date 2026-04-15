@@ -56,10 +56,7 @@ export class HttpCatalogProvider implements RemoteSkillsProvider {
     return `catalog/${parsed.host}${parsed.pathname.replace(/\/+$/, "")}`;
   }
 
-  async fetchAllSkills(
-    url: string,
-    options: WellKnownFetchOptions = {},
-  ): Promise<RemoteSkill[]> {
+  async fetchAllSkills(url: string, options: WellKnownFetchOptions = {}): Promise<RemoteSkill[]> {
     return this.fetchAllResources(url, options, {
       kind: "skills",
       indexLabel: "catalog skills",
@@ -68,9 +65,7 @@ export class HttpCatalogProvider implements RemoteSkillsProvider {
           ? parsed.toString()
           : new URL(
               "index.json",
-              parsed.toString().endsWith("/")
-                ? parsed.toString()
-                : `${parsed.toString()}/`,
+              parsed.toString().endsWith("/") ? parsed.toString() : `${parsed.toString()}/`,
             ).toString();
       },
       requireDescription: true,
@@ -91,10 +86,7 @@ export class HttpCatalogProvider implements RemoteSkillsProvider {
     });
   }
 
-  async fetchAllPlugins(
-    url: string,
-    options: WellKnownFetchOptions = {},
-  ): Promise<RemotePlugin[]> {
+  async fetchAllPlugins(url: string, options: WellKnownFetchOptions = {}): Promise<RemotePlugin[]> {
     return this.fetchAllResources(url, options, {
       kind: "plugins",
       indexLabel: "catalog plugins",
@@ -103,14 +95,11 @@ export class HttpCatalogProvider implements RemoteSkillsProvider {
           ? parsed.toString()
           : new URL(
               "plugins/index.json",
-              parsed.toString().endsWith("/")
-                ? parsed.toString()
-                : `${parsed.toString()}/`,
+              parsed.toString().endsWith("/") ? parsed.toString() : `${parsed.toString()}/`,
             ).toString();
       },
       requireDescription: false,
-      missingManifestMessage: (name) =>
-        `Catalog plugin '${name}' is missing plugin.json`,
+      missingManifestMessage: (name) => `Catalog plugin '${name}' is missing plugin.json`,
       hasRequiredManifest(filePath) {
         return filePath.split("/").at(-1)?.toLowerCase() === "plugin.json";
       },
@@ -137,13 +126,10 @@ export class HttpCatalogProvider implements RemoteSkillsProvider {
       throw new Error("Catalog provider requires HTTPS URLs");
     }
 
-    const maxDownloadBytes =
-      options.maxDownloadBytes ?? DEFAULT_OPTIONS.maxDownloadBytes;
+    const maxDownloadBytes = options.maxDownloadBytes ?? DEFAULT_OPTIONS.maxDownloadBytes;
     const timeoutMs = options.timeoutMs ?? DEFAULT_OPTIONS.timeoutMs;
-    const maxFilesPerSkill =
-      options.maxFilesPerSkill ?? DEFAULT_OPTIONS.maxFilesPerSkill;
-    const maxSkillFileBytes =
-      options.maxSkillFileBytes ?? DEFAULT_OPTIONS.maxSkillFileBytes;
+    const maxFilesPerSkill = options.maxFilesPerSkill ?? DEFAULT_OPTIONS.maxFilesPerSkill;
+    const maxSkillFileBytes = options.maxSkillFileBytes ?? DEFAULT_OPTIONS.maxSkillFileBytes;
 
     const indexUrl = config.resolveIndexUrl(parsed);
     const indexText = await this.fetchTextWithLimit(
@@ -151,11 +137,7 @@ export class HttpCatalogProvider implements RemoteSkillsProvider {
       Math.min(maxDownloadBytes, maxSkillFileBytes),
       timeoutMs,
     );
-    const index = this.validateIndex(
-      JSON.parse(indexText) as unknown,
-      maxFilesPerSkill,
-      config,
-    );
+    const index = this.validateIndex(JSON.parse(indexText) as unknown, maxFilesPerSkill, config);
 
     const out: TResult[] = [];
     let remaining = maxDownloadBytes - indexText.length;
@@ -193,7 +175,7 @@ export class HttpCatalogProvider implements RemoteSkillsProvider {
   private async fetchTextWithLimit(
     url: string,
     maxBytes: number,
-    timeoutMs: number
+    timeoutMs: number,
   ): Promise<string> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -201,7 +183,7 @@ export class HttpCatalogProvider implements RemoteSkillsProvider {
       const response = await fetch(url, { signal: controller.signal });
       if (!response.ok) {
         throw new Error(
-          `Catalog fetch failed (${response.status} ${response.statusText}) for ${url}`
+          `Catalog fetch failed (${response.status} ${response.statusText}) for ${url}`,
         );
       }
       const bytes = new Uint8Array(await response.arrayBuffer());
@@ -233,25 +215,16 @@ export class HttpCatalogProvider implements RemoteSkillsProvider {
       }
       const row = item as Record<string, unknown>;
       const name = String(row.name || "").trim();
-      const description =
-        typeof row.description === "string" ? row.description.trim() : undefined;
-      const files = Array.isArray(row.files)
-        ? row.files.map((x) => String(x))
-        : [];
+      const description = typeof row.description === "string" ? row.description.trim() : undefined;
+      const files = Array.isArray(row.files) ? row.files.map((x) => String(x)) : [];
       if (!name || files.length === 0) {
-        throw new Error(
-          `Invalid catalog index entry[${idx}]: missing required fields`,
-        );
+        throw new Error(`Invalid catalog index entry[${idx}]: missing required fields`);
       }
       if (config.requireDescription && !description) {
-        throw new Error(
-          `Invalid catalog index entry[${idx}]: missing required fields`,
-        );
+        throw new Error(`Invalid catalog index entry[${idx}]: missing required fields`);
       }
       if (files.length > maxFilesPerSkill) {
-        throw new Error(
-          `Too many files in catalog ${config.kind.slice(0, -1)} '${name}'`,
-        );
+        throw new Error(`Too many files in catalog ${config.kind.slice(0, -1)} '${name}'`);
       }
       if (!files.some((filePath) => config.hasRequiredManifest(filePath))) {
         throw new Error(config.missingManifestMessage(name));
@@ -263,10 +236,7 @@ export class HttpCatalogProvider implements RemoteSkillsProvider {
     });
   }
 
-  private pickPrimaryManifestPath(
-    filePaths: string[],
-    config: ResourceConfig<unknown>,
-  ): string {
+  private pickPrimaryManifestPath(filePaths: string[], config: ResourceConfig<unknown>): string {
     const manifests = filePaths
       .filter((filePath) => config.hasRequiredManifest(filePath))
       .sort((left, right) => {

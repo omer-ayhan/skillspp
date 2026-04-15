@@ -59,15 +59,6 @@ describe("core services delegation @unit", () => {
     await new FindSkillService(port).execute({ source: "./skills" });
     await new InitSkillService(port).execute({});
 
-    expect(calls).toEqual([
-      "add",
-      "update",
-      "check",
-      "validate",
-      "list",
-      "remove",
-      "find",
-      "init",
-    ]);
+    expect(calls).toEqual(["add", "update", "check", "validate", "list", "remove", "find", "init"]);
   });
 });
