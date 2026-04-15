@@ -1,9 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildSourceLoadCacheKey, type LockEntry } from "./lockfile";
 
-function makeEntry(
-  sourceOverrides: Partial<LockEntry["source"]> = {},
-): LockEntry {
+function makeEntry(sourceOverrides: Partial<LockEntry["source"]> = {}): LockEntry {
   const selector = {
     skillName: "alpha",
     relativePath: "alpha",
@@ -48,12 +46,8 @@ describe("source load cache key @unit", () => {
   });
 
   it("dedupes same remote source across pinned ref changes @unit", () => {
-    const keyA = buildSourceLoadCacheKey(
-      makeEntry({ pinnedRef: "old-pin" }).source,
-    );
-    const keyB = buildSourceLoadCacheKey(
-      makeEntry({ pinnedRef: "new-pin" }).source,
-    );
+    const keyA = buildSourceLoadCacheKey(makeEntry({ pinnedRef: "old-pin" }).source);
+    const keyB = buildSourceLoadCacheKey(makeEntry({ pinnedRef: "new-pin" }).source);
 
     expect(keyA).toBe(keyB);
   });

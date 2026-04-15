@@ -1,10 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { Command } from "commander";
-import type {
-  AgentType,
-  RemoveOptions,
-} from "@skillspp/core/contracts/runtime-types";
+import type { AgentType, RemoveOptions } from "@skillspp/core/contracts/runtime-types";
 import {
   AGENTS,
   getAgentPluginsDir,
@@ -134,10 +131,7 @@ function buildRemoveConfirmSelectionRows(): SelectionRow[] {
   ];
 }
 
-function renderRemovePluginsPanel(options: {
-  plugins: string[];
-  selectedNames: string[];
-}) {
+function renderRemovePluginsPanel(options: { plugins: string[]; selectedNames: string[] }) {
   return manySelectionClosedSection(
     REMOVE_PLUGINS_SELECTION_VIEW,
     buildRemovePluginSelectionRows(options.plugins),
@@ -232,21 +226,13 @@ function orderAgentsForDisplay(agents: AgentType[]): AgentType[] {
   });
 }
 
-function resolveCandidateAgentsForPlugins(
-  pluginNames: string[],
-  index: InstallIndex,
-): AgentType[] {
+function resolveCandidateAgentsForPlugins(pluginNames: string[], index: InstallIndex): AgentType[] {
   return orderAgentsForDisplay(
-    pluginNames.flatMap((name) =>
-      Array.from(index.agentsByPlugin.get(name) ?? []),
-    ),
+    pluginNames.flatMap((name) => Array.from(index.agentsByPlugin.get(name) ?? [])),
   );
 }
 
-async function executeRemove(
-  positional: string[],
-  options: RemoveOptions,
-): Promise<void> {
+async function executeRemove(positional: string[], options: RemoveOptions): Promise<void> {
   const interactive = canUseInteractive(options.nonInteractive);
   await renderRemoveFlowHeader();
   const cwd = process.cwd();
@@ -256,9 +242,7 @@ async function executeRemove(
   try {
     index = buildInstallIndex(globalInstall, cwd);
   } catch (error) {
-    await renderStaticScreen([
-      failedStepsSection(["failed to index installed plugins"]),
-    ]);
+    await renderStaticScreen([failedStepsSection(["failed to index installed plugins"])]);
     throw error;
   }
 
@@ -276,9 +260,7 @@ async function executeRemove(
   const scopedAgentRowsById = new Map<AgentType, SelectionRow>(
     scopedAgentRows.map((row) => [row.id as AgentType, row]),
   );
-  const scopeAllowedAgents = new Set<AgentType>(
-    scopedAgentRows.map((row) => row.id as AgentType),
-  );
+  const scopeAllowedAgents = new Set<AgentType>(scopedAgentRows.map((row) => row.id as AgentType));
 
   const explicitPlugins = [...(options.skill || []), ...positional];
   let finalPlugins = uniqueSorted(explicitPlugins);
@@ -300,9 +282,7 @@ async function executeRemove(
   try {
     if (options.agent && options.agent.length > 0) {
       if (options.agent.includes("*")) {
-        candidateAgents = orderAgentsForDisplay(
-          Array.from(index.pluginsByAgent.keys()),
-        );
+        candidateAgents = orderAgentsForDisplay(Array.from(index.pluginsByAgent.keys()));
         agents = candidateAgents;
       } else {
         candidateAgents = resolveAgents(options.agent).filter((agent) =>
@@ -312,9 +292,7 @@ async function executeRemove(
       }
     } else {
       candidateAgents =
-        finalPlugins.length > 0
-          ? resolveCandidateAgentsForPlugins(finalPlugins, index)
-          : [];
+        finalPlugins.length > 0 ? resolveCandidateAgentsForPlugins(finalPlugins, index) : [];
 
       if (candidateAgents.length === 0 && !requiresInteractivePluginSelection) {
         throw new Error("No installed plugins found to remove.");
@@ -328,16 +306,12 @@ async function executeRemove(
       }
     }
 
-    candidateAgents = candidateAgents.filter((agent) =>
-      scopeAllowedAgents.has(agent),
-    );
+    candidateAgents = candidateAgents.filter((agent) => scopeAllowedAgents.has(agent));
     agents = agents.filter((agent) => scopeAllowedAgents.has(agent));
     candidateAgents = orderAgentsForDisplay(candidateAgents);
     agents = orderAgentsForDisplay(agents);
   } catch (error) {
-    await renderStaticScreen([
-      failedStepsSection(["failed to resolve target candidates"]),
-    ]);
+    await renderStaticScreen([failedStepsSection(["failed to resolve target candidates"])]);
     throw error;
   }
 
@@ -374,9 +348,7 @@ async function executeRemove(
 
   if (!options.agent || options.agent.length === 0) {
     candidateAgents = resolveCandidateAgentsForPlugins(finalPlugins, index);
-    candidateAgents = candidateAgents.filter((agent) =>
-      scopeAllowedAgents.has(agent),
-    );
+    candidateAgents = candidateAgents.filter((agent) => scopeAllowedAgents.has(agent));
     candidateAgents = orderAgentsForDisplay(candidateAgents);
 
     if (candidateAgents.length === 0) {
@@ -388,17 +360,11 @@ async function executeRemove(
     }
   }
 
-  const shouldPromptAgents =
-    interactive && (!options.agent || options.agent.length === 0);
-  const visibleCandidateAgents = candidateAgents.filter((agent) =>
-    scopeAllowedAgents.has(agent),
-  );
+  const shouldPromptAgents = interactive && (!options.agent || options.agent.length === 0);
+  const visibleCandidateAgents = candidateAgents.filter((agent) => scopeAllowedAgents.has(agent));
   const selectedAgentIds = await runManySelectionStep({
     interactive,
-    rows: buildRemoveAgentSelectionRows(
-      visibleCandidateAgents,
-      scopedAgentRowsById,
-    ),
+    rows: buildRemoveAgentSelectionRows(visibleCandidateAgents, scopedAgentRowsById),
     selectedIds: agents,
     shouldPrompt: shouldPromptAgents,
     prompt: {
@@ -417,9 +383,7 @@ async function executeRemove(
       }),
   });
   const selectedAgentSet = new Set(selectedAgentIds);
-  agents = visibleCandidateAgents.filter((agent) =>
-    selectedAgentSet.has(agent),
-  );
+  agents = visibleCandidateAgents.filter((agent) => selectedAgentSet.has(agent));
 
   if (!renderedPluginsPanel) {
     finalPlugins = await runManySelectionStep({
@@ -553,27 +517,18 @@ function configureRemoveCommand(
     .action(action);
 }
 
-export function registerRemoveCommand(
-  program: Command,
-  ctx: CliCommandContext,
-): void {
+export function registerRemoveCommand(program: Command, ctx: CliCommandContext): void {
   configureRemoveCommand(
     program.command("remove").alias("rm"),
-    ctx.wrapAction(
-      "remove",
-      async (plugins: string[], options: RemoveCommanderOptions) => {
-        await executeRemove(plugins, toRemoveOptions(options));
-      },
-    ),
+    ctx.wrapAction("remove", async (plugins: string[], options: RemoveCommanderOptions) => {
+      await executeRemove(plugins, toRemoveOptions(options));
+    }),
   );
 }
 
 export async function runRemove(args: string[]): Promise<void> {
-  const command = configureRemoveCommand(
-    new Command().name("remove"),
-    async (plugins, options) => {
-      await executeRemove(plugins, toRemoveOptions(options));
-    },
-  );
+  const command = configureRemoveCommand(new Command().name("remove"), async (plugins, options) => {
+    await executeRemove(plugins, toRemoveOptions(options));
+  });
   await parseStandaloneCommand(command, args);
 }

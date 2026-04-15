@@ -74,7 +74,7 @@ function readPackageMeta(packageDir: string): {
 function collectSkillsFromPackage(
   packageDir: string,
   depth: number,
-  out: TransitiveSkillCandidate[]
+  out: TransitiveSkillCandidate[],
 ): void {
   const meta = readPackageMeta(packageDir);
   const skillsDir = path.join(packageDir, "skills");
@@ -106,7 +106,7 @@ function walkNodeModules(
   depth: number,
   maxDepth: number,
   seen: Set<string>,
-  out: TransitiveSkillCandidate[]
+  out: TransitiveSkillCandidate[],
 ): void {
   const resolvedNodeModules = path.resolve(nodeModulesDir);
   if (seen.has(resolvedNodeModules) || depth > maxDepth) {
@@ -114,10 +114,7 @@ function walkNodeModules(
   }
   seen.add(resolvedNodeModules);
 
-  if (
-    !fs.existsSync(resolvedNodeModules) ||
-    !fs.statSync(resolvedNodeModules).isDirectory()
-  ) {
+  if (!fs.existsSync(resolvedNodeModules) || !fs.statSync(resolvedNodeModules).isDirectory()) {
     return;
   }
 
@@ -136,32 +133,20 @@ function walkNodeModules(
         }
         const packageDir = path.join(scopeDir, scoped.name);
         collectSkillsFromPackage(packageDir, depth, out);
-        walkNodeModules(
-          path.join(packageDir, "node_modules"),
-          depth + 1,
-          maxDepth,
-          seen,
-          out
-        );
+        walkNodeModules(path.join(packageDir, "node_modules"), depth + 1, maxDepth, seen, out);
       }
       continue;
     }
 
     const packageDir = path.join(resolvedNodeModules, entry.name);
     collectSkillsFromPackage(packageDir, depth, out);
-    walkNodeModules(
-      path.join(packageDir, "node_modules"),
-      depth + 1,
-      maxDepth,
-      seen,
-      out
-    );
+    walkNodeModules(path.join(packageDir, "node_modules"), depth + 1, maxDepth, seen, out);
   }
 }
 
 export function discoverTransitiveSkillCandidates(
   cwd: string,
-  options: { maxDepth?: number } = {}
+  options: { maxDepth?: number } = {},
 ): TransitiveSkillCandidate[] {
   const maxDepth = options.maxDepth ?? 8;
   const out: TransitiveSkillCandidate[] = [];
@@ -187,7 +172,7 @@ export function discoverTransitiveSkillCandidates(
 }
 
 export function detectTransitiveSkillConflicts(
-  candidates: TransitiveSkillCandidate[]
+  candidates: TransitiveSkillCandidate[],
 ): TransitiveSkillConflict[] {
   const grouped = new Map<string, TransitiveSkillCandidate[]>();
   for (const candidate of candidates) {

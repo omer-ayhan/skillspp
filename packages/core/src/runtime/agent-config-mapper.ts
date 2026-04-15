@@ -31,24 +31,20 @@ function renderOpenAiInterfaceYaml(input: AgentConfigTemplateInput): string {
   return YAML.stringify(payload);
 }
 
-export const AGENT_INIT_CONFIG_MAPPINGS: Partial<
-  Record<AgentType, AgentConfigMapping>
-> = {
+export const AGENT_INIT_CONFIG_MAPPINGS: Partial<Record<AgentType, AgentConfigMapping>> = {
   codex: {
     path: "agents/openai.yaml",
     renderContent: renderOpenAiInterfaceYaml,
   },
 };
 
-export function resolveAgentInitConfigMapping(
-  agent: AgentType
-): AgentConfigMapping | undefined {
+export function resolveAgentInitConfigMapping(agent: AgentType): AgentConfigMapping | undefined {
   return AGENT_INIT_CONFIG_MAPPINGS[agent];
 }
 
 export function buildAgentConfigScaffoldPlan(
   agents: AgentType[],
-  input: AgentConfigTemplateInput
+  input: AgentConfigTemplateInput,
 ): {
   mapped: Array<{ agent: AgentType; path: string; content: string }>;
   unmapped: AgentType[];

@@ -3,9 +3,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 const runManySelectionStep = vi.fn();
 
 vi.mock("./ui/selection-step", async () => {
-  const actual = await vi.importActual<typeof import("./ui/selection-step")>(
-    "./ui/selection-step",
-  );
+  const actual = await vi.importActual<typeof import("./ui/selection-step")>("./ui/selection-step");
   return {
     ...actual,
     runManySelectionStep,
@@ -219,10 +217,7 @@ describe("add-command helpers @unit", () => {
 
   it("marks forced global/symlink flags without changing values @unit", () => {
     expect(
-      applyForcedAddOptionFlags(
-        { global: false, symlink: false },
-        { global: true, symlink: true },
-      ),
+      applyForcedAddOptionFlags({ global: false, symlink: false }, { global: true, symlink: true }),
     ).toEqual(
       expect.objectContaining({
         global: false,
@@ -237,8 +232,6 @@ describe("add-command helpers @unit", () => {
     expect(parseAddLockFormatValue("json")).toBe("json");
     expect(parseAddLockFormatValue("yaml")).toBe("yaml");
     expect(parseAddLockFormatValue()).toBeUndefined();
-    expect(() => parseAddLockFormatValue("toml")).toThrow(
-      "Invalid --lock-format value: toml",
-    );
+    expect(() => parseAddLockFormatValue("toml")).toThrow("Invalid --lock-format value: toml");
   });
 });

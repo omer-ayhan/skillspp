@@ -2,11 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import {
-  discoverPlugins,
-  resolvePluginsRoot,
-  stageRemotePluginFilesToTempDir,
-} from "./plugins";
+import { discoverPlugins, resolvePluginsRoot, stageRemotePluginFilesToTempDir } from "./plugins";
 
 const tempDirs: string[] = [];
 
@@ -82,13 +78,7 @@ describe("plugin discovery @unit", () => {
 
   it("fails when plugin.json contains invalid JSON @unit", () => {
     const repoRoot = makeTempDir("skillspp-plugin-invalid-json-");
-    const manifestPath = path.join(
-      repoRoot,
-      "plugins",
-      "plugin-alpha",
-      "codex",
-      "plugin.json",
-    );
+    const manifestPath = path.join(repoRoot, "plugins", "plugin-alpha", "codex", "plugin.json");
     fs.mkdirSync(path.dirname(manifestPath), { recursive: true });
     fs.writeFileSync(manifestPath, "{ invalid", "utf8");
 
@@ -175,10 +165,7 @@ describe("remote plugin staging @unit", () => {
         ),
       ).toContain('"name":"plugin-alpha"');
       expect(
-        fs.readFileSync(
-          path.join(staged.path, "plugins", "plugin-alpha", "README.md"),
-          "utf8",
-        ),
+        fs.readFileSync(path.join(staged.path, "plugins", "plugin-alpha", "README.md"), "utf8"),
       ).toBe("docs");
     } finally {
       staged.cleanup();

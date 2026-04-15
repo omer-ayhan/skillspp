@@ -27,11 +27,7 @@ describe("plugin agent path resolution @unit", () => {
       path.join(os.homedir(), ".codex", "plugins", "cache"),
     );
 
-    expect(getAgentSkillsDir("codex", false, cwd)).toBe(
-      path.join(cwd, ".agents", "skills"),
-    );
-    expect(getAgentSkillsDir("codex", true, cwd)).toBe(
-      path.join(os.homedir(), ".codex", "skills"),
-    );
+    expect(getAgentSkillsDir("codex", false, cwd)).toBe(path.join(cwd, ".agents", "skills"));
+    expect(getAgentSkillsDir("codex", true, cwd)).toBe(path.join(os.homedir(), ".codex", "skills"));
   });
 });

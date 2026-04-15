@@ -59,8 +59,7 @@ describe("plugin providers @unit", () => {
     expect(plugins[0]).toMatchObject({
       installName: "plugin-alpha",
       description: "",
-      sourceUrl:
-        "https://example.com/.well-known/plugins/plugin-alpha/codex/plugin.json",
+      sourceUrl: "https://example.com/.well-known/plugins/plugin-alpha/codex/plugin.json",
     });
     expect(plugins[0]?.files.get("codex/plugin.json")).toContain("plugin-alpha");
   });
@@ -86,9 +85,7 @@ describe("plugin providers @unit", () => {
       return new Response("missing", { status: 404 });
     }) as typeof fetch;
 
-    await expect(
-      provider.fetchAllPlugins("https://example.com"),
-    ).rejects.toThrow(
+    await expect(provider.fetchAllPlugins("https://example.com")).rejects.toThrow(
       "No valid well-known plugins index found at /.well-known/plugins/index.json",
     );
   });
@@ -113,8 +110,7 @@ describe("plugin providers @unit", () => {
         );
       }
       if (
-        url ===
-        "https://catalog.example.com/base/plugins/plugin-alpha/agents/codex/plugin.json"
+        url === "https://catalog.example.com/base/plugins/plugin-alpha/agents/codex/plugin.json"
       ) {
         return new Response(
           JSON.stringify({
@@ -127,9 +123,7 @@ describe("plugin providers @unit", () => {
       return new Response("missing", { status: 404 });
     }) as typeof fetch;
 
-    const plugins = await provider.fetchAllPlugins(
-      "https://catalog.example.com/base",
-    );
+    const plugins = await provider.fetchAllPlugins("https://catalog.example.com/base");
 
     expect(plugins).toHaveLength(1);
     expect(plugins[0]?.sourceUrl).toBe(
@@ -159,8 +153,8 @@ describe("plugin providers @unit", () => {
       return new Response("missing", { status: 404 });
     }) as typeof fetch;
 
-    await expect(
-      provider.fetchAllPlugins("https://catalog.example.com/base"),
-    ).rejects.toThrow("Catalog plugin 'plugin-alpha' is missing plugin.json");
+    await expect(provider.fetchAllPlugins("https://catalog.example.com/base")).rejects.toThrow(
+      "Catalog plugin 'plugin-alpha' is missing plugin.json",
+    );
   });
 });

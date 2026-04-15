@@ -9,16 +9,11 @@ export function shortenHomePath(value: string, homeDir: string = os.homedir()) {
   return value;
 }
 
-export function compactAgentDisplayNames(
-  names: string[],
-  maxVisible = 4,
-): string {
+export function compactAgentDisplayNames(names: string[], maxVisible = 4): string {
   if (names.length <= maxVisible) {
     return names.join(", ");
   }
-  return `${names.slice(0, maxVisible).join(", ")} +${
-    names.length - maxVisible
-  } more`;
+  return `${names.slice(0, maxVisible).join(", ")} +${names.length - maxVisible} more`;
 }
 
 export function formatDriftChips(options: {

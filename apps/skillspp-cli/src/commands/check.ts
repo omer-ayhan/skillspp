@@ -22,10 +22,7 @@ import {
   showLoader,
   sourceSection,
 } from "@skillspp/cli-shared/ui/screens";
-import {
-  formatDriftChips,
-  shortenHomePath,
-} from "@skillspp/cli-shared/ui/format";
+import { formatDriftChips, shortenHomePath } from "@skillspp/cli-shared/ui/format";
 
 export type { DriftRecord, CheckOptions, SkillAssessment };
 export type DriftKind = DriftRecord["kind"];
@@ -47,12 +44,8 @@ export function buildCheckDriftSummaryLines(options: {
   const plusCount = options.grouped.get("changed-source")?.length ?? 0;
   const minusCount = options.grouped.get("local-modified")?.length ?? 0;
   const summaryLines = [
-    `${options.checked} tracked skill${
-      options.checked === 1 ? "" : "s"
-    } checked`,
-    `${options.driftCount} drift case${
-      options.driftCount === 1 ? "" : "s"
-    } detected`,
+    `${options.checked} tracked skill${options.checked === 1 ? "" : "s"} checked`,
+    `${options.driftCount} drift case${options.driftCount === 1 ? "" : "s"} detected`,
     `Drift signal: ${formatDriftChips({
       plusCount,
       minusCount,
@@ -81,16 +74,12 @@ type CheckCommanderOptions = {
 };
 
 function toCheckOptions(options: CheckCommanderOptions): CheckOptions {
-  const maxDownloadBytes = options.maxDownloadBytes
-    ? Number(options.maxDownloadBytes)
-    : undefined;
+  const maxDownloadBytes = options.maxDownloadBytes ? Number(options.maxDownloadBytes) : undefined;
   if (
     typeof maxDownloadBytes === "number" &&
     (!Number.isFinite(maxDownloadBytes) || maxDownloadBytes <= 0)
   ) {
-    throw new Error(
-      `Invalid --max-download-bytes value: ${options.maxDownloadBytes}`,
-    );
+    throw new Error(`Invalid --max-download-bytes value: ${options.maxDownloadBytes}`);
   }
 
   return {
@@ -129,28 +118,27 @@ async function executeCheck(options: CheckOptions): Promise<void> {
   showLoader("checking drift");
   await flushUiFrame();
   try {
-    const { drift, checked, conflicts, transitiveConflicts } =
-      await runBackgroundTask(
-        {
-          kind: "check.scan",
-          payload: {
-            cwd,
-            options,
-          },
+    const { drift, checked, conflicts, transitiveConflicts } = await runBackgroundTask(
+      {
+        kind: "check.scan",
+        payload: {
+          cwd,
+          options,
         },
-        {
-          onProgress: (label) => {
-            if (label === "checking local/global conflicts") {
-              failedLabel = "failed to scan local/global conflicts";
-            } else if (label === "checking transitive conflicts") {
-              failedLabel = "failed to scan transitive conflicts";
-            } else {
-              failedLabel = "failed to assess drift";
-            }
-            showLoader(label);
-          },
+      },
+      {
+        onProgress: (label) => {
+          if (label === "checking local/global conflicts") {
+            failedLabel = "failed to scan local/global conflicts";
+          } else if (label === "checking transitive conflicts") {
+            failedLabel = "failed to scan transitive conflicts";
+          } else {
+            failedLabel = "failed to assess drift";
+          }
+          showLoader(label);
         },
-      );
+      },
+    );
     hideLoader();
     const grouped = new Map<DriftKind, DriftRecord[]>();
     for (const item of drift) {
@@ -170,13 +158,9 @@ async function executeCheck(options: CheckOptions): Promise<void> {
         lines: [
           `Scope: ${options.global ? "global" : "current project"}`,
           `Skill filter: ${
-            !options.skill ||
-            options.skill.length === 0 ||
-            options.skill.includes("*")
+            !options.skill || options.skill.length === 0 || options.skill.includes("*")
               ? "all tracked skills"
-              : [...new Set(options.skill)]
-                  .sort((a, b) => a.localeCompare(b))
-                  .join(", ")
+              : [...new Set(options.skill)].sort((a, b) => a.localeCompare(b)).join(", ")
           }`,
         ],
         style: "square",
@@ -185,9 +169,7 @@ async function executeCheck(options: CheckOptions): Promise<void> {
     ];
 
     const cleanState =
-      drift.length === 0 &&
-      conflicts.length === 0 &&
-      transitiveConflicts.length === 0;
+      drift.length === 0 && conflicts.length === 0 && transitiveConflicts.length === 0;
 
     if (cleanState) {
       sections.push(
@@ -232,9 +214,7 @@ async function executeCheck(options: CheckOptions): Promise<void> {
           detailLines.push("");
         }
         detailLines.push(`  ${kind}`);
-        for (const row of [...rows].sort((a, b) =>
-          a.skillName.localeCompare(b.skillName),
-        )) {
+        for (const row of [...rows].sort((a, b) => a.skillName.localeCompare(b.skillName))) {
           detailLines.push(`    ${row.skillName}: ${row.detail}`);
         }
       }
@@ -253,9 +233,7 @@ async function executeCheck(options: CheckOptions): Promise<void> {
       if (conflicts.length > 0) {
         conflictLines.push("Local/global conflicts (local preferred):");
         for (const conflict of conflicts) {
-          conflictLines.push(
-            `  ${conflict.skillName}: winner=${conflict.winner}`,
-          );
+          conflictLines.push(`  ${conflict.skillName}: winner=${conflict.winner}`);
         }
       }
       if (transitiveConflicts.length > 0) {
@@ -287,18 +265,13 @@ async function executeCheck(options: CheckOptions): Promise<void> {
     const updateSkillNames = [
       ...new Set(
         drift
-          .filter(
-            (item) =>
-              item.kind === "changed-source" || item.kind === "local-modified",
-          )
+          .filter((item) => item.kind === "changed-source" || item.kind === "local-modified")
           .map((item) => item.skillName),
       ),
     ].sort((a, b) => a.localeCompare(b));
     const migrateSkillNames = [
       ...new Set(
-        drift
-          .filter((item) => item.kind === "migrate-required")
-          .map((item) => item.skillName),
+        drift.filter((item) => item.kind === "migrate-required").map((item) => item.skillName),
       ),
     ].sort((a, b) => a.localeCompare(b));
 
@@ -307,9 +280,7 @@ async function executeCheck(options: CheckOptions): Promise<void> {
       if (migrateSkillNames.length > 0) {
         lines.push("Migration required:");
         for (const skillName of migrateSkillNames) {
-          lines.push(
-            `skillspp update ${skillName} --migrate <new-skill-source>`,
-          );
+          lines.push(`skillspp update ${skillName} --migrate <new-skill-source>`);
         }
       }
       if (updateSkillNames.length > 0) {
@@ -357,10 +328,7 @@ function configureCheckCommand(
     .action(action);
 }
 
-export function registerCheckCommand(
-  program: Command,
-  ctx: CliCommandContext,
-): void {
+export function registerCheckCommand(program: Command, ctx: CliCommandContext): void {
   configureCheckCommand(
     program.command("check"),
     ctx.wrapAction("check", async (options: CheckCommanderOptions) => {
@@ -373,11 +341,8 @@ export function registerCheckCommand(
 }
 
 export async function runCheck(args: string[]): Promise<void> {
-  const command = configureCheckCommand(
-    new Command().name("check"),
-    async (options) => {
-      await executeCheck(toCheckOptions(options));
-    },
-  );
+  const command = configureCheckCommand(new Command().name("check"), async (options) => {
+    await executeCheck(toCheckOptions(options));
+  });
   await parseStandaloneCommand(command, args);
 }

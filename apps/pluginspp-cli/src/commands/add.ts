@@ -1,10 +1,6 @@
 import path from "node:path";
 import { Command } from "commander";
-import type {
-  AddOptions,
-  AgentType,
-  ParsedSource,
-} from "@skillspp/core/contracts/runtime-types";
+import type { AddOptions, AgentType, ParsedSource } from "@skillspp/core/contracts/runtime-types";
 import { parseSource } from "@skillspp/core/source-parser";
 import { resolveSourceLabel } from "@skillspp/core/skills";
 import {
@@ -131,10 +127,7 @@ function buildAddPluginSelectionRows(plugins: SourcePlugin[]): SelectionRow[] {
   return buildNamedAddSelectionRows(plugins);
 }
 
-function renderAddPluginsSection(options: {
-  plugins: SourcePlugin[];
-  selectedNames: string[];
-}) {
+function renderAddPluginsSection(options: { plugins: SourcePlugin[]; selectedNames: string[] }) {
   return manySelectionClosedSection(
     ADD_PLUGINS_SELECTION_VIEW,
     buildAddPluginSelectionRows(options.plugins),
@@ -142,10 +135,7 @@ function renderAddPluginsSection(options: {
   );
 }
 
-function renderAddAgentsSection(options: {
-  rows: SelectionRow[];
-  selectedAgents: AgentType[];
-}) {
+function renderAddAgentsSection(options: { rows: SelectionRow[]; selectedAgents: AgentType[] }) {
   return manySelectionClosedSection(
     ADD_AGENTS_SELECTION_VIEW,
     options.rows,
@@ -165,11 +155,7 @@ function buildInstallationSummaryRows(options: {
   if (!canonicalAgent) {
     return rows;
   }
-  const canonicalBase = getAgentPluginsDir(
-    canonicalAgent,
-    options.globalInstall,
-    options.cwd,
-  );
+  const canonicalBase = getAgentPluginsDir(canonicalAgent, options.globalInstall, options.cwd);
 
   for (const rawPluginName of options.pluginNames) {
     const pluginName = sanitizeSkillName(rawPluginName);
@@ -180,9 +166,7 @@ function buildInstallationSummaryRows(options: {
         pluginName,
       );
       const destinationPath =
-        path.resolve(agentDir) === path.resolve(canonicalDir)
-          ? canonicalDir
-          : agentDir;
+        path.resolve(agentDir) === path.resolve(canonicalDir) ? canonicalDir : agentDir;
       rows.push({
         pluginName,
         agentDisplayName: AGENTS[agent].displayName,
@@ -226,9 +210,7 @@ async function printInstallationSummary(options: {
     "",
     ...rows.map(
       (row) =>
-        `${row.pluginName} -> ${row.agentDisplayName} @ ${shortenHomePath(
-          row.destinationPath,
-        )}`,
+        `${row.pluginName} -> ${row.agentDisplayName} @ ${shortenHomePath(row.destinationPath)}`,
     ),
   ];
 
@@ -264,10 +246,7 @@ async function printCompletionSummary(options: {
       `Installed ${options.pluginCount} ${pluralize(
         options.pluginCount,
         "plugin",
-      )} across ${options.agentCount} ${pluralize(
-        options.agentCount,
-        "agent",
-      )}.`,
+      )} across ${options.agentCount} ${pluralize(options.agentCount, "agent")}.`,
     ]),
   ]);
 }
@@ -306,9 +285,7 @@ async function resolveAddAgents(
   globalInstall: boolean,
   interactive: boolean,
 ): Promise<AgentType[]> {
-  const rows = resolveAddPluginAgentSelectionRows(
-    globalInstall ? "global" : "local",
-  );
+  const rows = resolveAddPluginAgentSelectionRows(globalInstall ? "global" : "local");
   const allForScope = rows.map((row) => row.id as AgentType);
   const allowed = new Set(allForScope);
   const renderClosed = (selectedIds: string[]) =>
@@ -327,9 +304,7 @@ async function resolveAddAgents(
     for (const value of values) {
       if (!allowed.has(value as AgentType)) {
         throw new Error(
-          `Unknown or unsupported agent for ${
-            globalInstall ? "global" : "local"
-          } scope: ${value}`,
+          `Unknown or unsupported agent for ${globalInstall ? "global" : "local"} scope: ${value}`,
         );
       }
       const typed = value as AgentType;
@@ -361,9 +336,7 @@ async function resolveAddAgents(
   }
 
   if (!interactive) {
-    throw new Error(
-      "Missing --agent in non-interactive mode. Provide at least one agent.",
-    );
+    throw new Error("Missing --agent in non-interactive mode. Provide at least one agent.");
   }
 
   if (allForScope.length === 1) {
@@ -403,10 +376,7 @@ async function resolveAddAgents(
   return allForScope.filter((agent) => wanted.has(agent));
 }
 
-async function resolveAddGlobalInstall(
-  merged: AddOptions,
-  interactive: boolean,
-): Promise<boolean> {
+async function resolveAddGlobalInstall(merged: AddOptions, interactive: boolean): Promise<boolean> {
   if (merged.globalFlagProvided) {
     return Boolean(merged.global);
   }
@@ -462,10 +432,7 @@ type AddCommanderOptions = {
   nonInteractive?: boolean;
 };
 
-function toAddOptions(
-  options: AddCommanderOptions,
-  presence: AddOptionPresence = {},
-): AddOptions {
+function toAddOptions(options: AddCommanderOptions, presence: AddOptionPresence = {}): AddOptions {
   return buildBaseAddOptions(
     {
       global: options.global,
@@ -487,10 +454,7 @@ function toAddOptions(
   );
 }
 
-async function executeAdd(
-  sourceInput: string,
-  merged: AddOptions,
-): Promise<void> {
+async function executeAdd(sourceInput: string, merged: AddOptions): Promise<void> {
   const interactive = canUseInteractive(merged.nonInteractive);
   try {
     showLoader("loading");
@@ -501,9 +465,7 @@ async function executeAdd(
       sourceLabel = resolveSourceLabel(parsedSource);
     } catch (error) {
       hideLoader();
-      await renderStaticScreen([
-        failedStepsSection(["failed to parse source"]),
-      ]);
+      await renderStaticScreen([failedStepsSection(["failed to parse source"])]);
       throw error;
     }
     hideLoader();
@@ -529,36 +491,22 @@ async function executeAdd(
       );
     } catch (error) {
       hideLoader();
-      await renderStaticScreen([
-        failedStepsSection(["failed to fetch plugins from source"]),
-      ]);
+      await renderStaticScreen([failedStepsSection(["failed to fetch plugins from source"])]);
       throw error;
     }
     hideLoader();
     await renderStaticScreen([
-      completedStepsSection([
-        "plugin index fetched",
-        "interactive session ready",
-      ]),
+      completedStepsSection(["plugin index fetched", "interactive session ready"]),
     ]);
 
     if (!merged.list) {
-      await renderStaticScreen([
-        sourceSection(shortenHomePath(sourceLabel), "Plugins source"),
-      ]);
+      await renderStaticScreen([sourceSection(shortenHomePath(sourceLabel), "Plugins source")]);
     }
 
-    const selected = await resolveAddPlugins(
-      discovered.plugins,
-      merged,
-      interactive,
-    );
+    const selected = await resolveAddPlugins(discovered.plugins, merged, interactive);
 
     if (selected.length === 0) {
-      if (
-        parsedSource.type === "well-known" ||
-        parsedSource.type === "catalog"
-      ) {
+      if (parsedSource.type === "well-known" || parsedSource.type === "catalog") {
         throw new Error("No matching well-known plugins found in source");
       }
       throw new Error("No matching plugins found in source");
@@ -578,11 +526,7 @@ async function executeAdd(
       global: globalInstall,
       globalFlagProvided: true,
     };
-    const agents = await resolveAddAgents(
-      installOptions,
-      globalInstall,
-      interactive,
-    );
+    const agents = await resolveAddAgents(installOptions, globalInstall, interactive);
     const mode = resolveAddInstallMode(merged);
 
     await printInstallationSummary({
@@ -616,9 +560,7 @@ async function executeAdd(
       );
     } catch (error) {
       hideLoader();
-      await renderStaticScreen([
-        failedStepsSection(["failed to install plugins"]),
-      ]);
+      await renderStaticScreen([failedStepsSection(["failed to install plugins"])]);
       throw error;
     }
     hideLoader();
@@ -641,11 +583,7 @@ async function executeAdd(
 
 function configureAddCommand(
   command: Command,
-  action: (
-    source: string,
-    options: AddCommanderOptions,
-    command: Command,
-  ) => Promise<void>,
+  action: (source: string, options: AddCommanderOptions, command: Command) => Promise<void>,
 ): Command {
   return command
     .description("Install plugins from local path or git source")
@@ -654,10 +592,7 @@ function configureAddCommand(
     .option("-p, --plugin <plugins...>", "Install only selected plugin(s)")
     .option("-l, --list", "List plugins from source without installing")
     .option("--symlink", "Install by symlinking files to all agents")
-    .option(
-      "--yaml",
-      "Create skill-installer.yaml when scaffolding missing installer config",
-    )
+    .option("--yaml", "Create skill-installer.yaml when scaffolding missing installer config")
     .option("-g, --global", "Install globally")
     .option("--trust-well-known", "Allow hook commands for well-known source")
     .option("--allow-host <hosts...>", "Restrict well-known hosts to allowlist")
@@ -665,26 +600,16 @@ function configureAddCommand(
     .option("--max-download-bytes <n>", "Set well-known download budget")
     .option("--policy-mode <mode>", "Policy mode (enforce|warn)")
     .option("--lock-format <format>", "Lockfile format output (json|yaml)")
-    .option(
-      "--non-interactive",
-      "Disable prompts and require explicit selection",
-    )
+    .option("--non-interactive", "Disable prompts and require explicit selection")
     .action(action);
 }
 
-export function registerAddCommand(
-  program: Command,
-  ctx: CliCommandContext,
-): void {
+export function registerAddCommand(program: Command, ctx: CliCommandContext): void {
   configureAddCommand(
     program.command("add"),
     ctx.wrapAction(
       "add",
-      async (
-        source: string,
-        options: AddCommanderOptions,
-        command: Command,
-      ) => {
+      async (source: string, options: AddCommanderOptions, command: Command) => {
         const presence: AddOptionPresence = {
           agentProvided: command.getOptionValueSource("agent") === "cli",
           globalProvided: command.getOptionValueSource("global") === "cli",
@@ -696,24 +621,18 @@ export function registerAddCommand(
   );
 }
 
-export async function runAdd(
-  args: string[],
-  forcedOptions: AddOptions = {},
-): Promise<void> {
-  const command = configureAddCommand(
-    new Command().name("add"),
-    async (source, options, cmd) => {
-      const presence: AddOptionPresence = {
-        agentProvided: cmd.getOptionValueSource("agent") === "cli",
-        globalProvided: cmd.getOptionValueSource("global") === "cli",
-        symlinkProvided: cmd.getOptionValueSource("symlink") === "cli",
-      };
-      const merged: AddOptions = {
-        ...toAddOptions(options, presence),
-        ...forcedOptions,
-      };
-      await executeAdd(source, applyForcedAddOptionFlags(merged, forcedOptions));
-    },
-  );
+export async function runAdd(args: string[], forcedOptions: AddOptions = {}): Promise<void> {
+  const command = configureAddCommand(new Command().name("add"), async (source, options, cmd) => {
+    const presence: AddOptionPresence = {
+      agentProvided: cmd.getOptionValueSource("agent") === "cli",
+      globalProvided: cmd.getOptionValueSource("global") === "cli",
+      symlinkProvided: cmd.getOptionValueSource("symlink") === "cli",
+    };
+    const merged: AddOptions = {
+      ...toAddOptions(options, presence),
+      ...forcedOptions,
+    };
+    await executeAdd(source, applyForcedAddOptionFlags(merged, forcedOptions));
+  });
   await parseStandaloneCommand(command, args);
 }

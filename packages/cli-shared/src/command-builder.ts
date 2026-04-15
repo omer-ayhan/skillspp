@@ -1,8 +1,5 @@
 import { Command, CommanderError } from "commander";
-import {
-  emitLifecycleEvent,
-  type TelemetryEmitter,
-} from "@skillspp/core/telemetry";
+import { emitLifecycleEvent, type TelemetryEmitter } from "@skillspp/core/telemetry";
 
 export type CliCommandContext = {
   experimental: boolean;
@@ -15,22 +12,19 @@ export type CliCommandContext = {
       error?: string;
       metadata?: Record<string, unknown>;
       source?: string;
-    }
+    },
   ) => void;
   wrapAction: <TArgs extends unknown[]>(
     command: string,
-    action: (...args: TArgs) => Promise<void>
+    action: (...args: TArgs) => Promise<void>,
   ) => (...args: TArgs) => Promise<void>;
 };
 
 export function createCliCommandContext(
   emitter: TelemetryEmitter,
-  options: { experimental?: boolean } = {}
+  options: { experimental?: boolean } = {},
 ): CliCommandContext {
-  const emitCommandEvent: CliCommandContext["emitCommandEvent"] = (
-    command,
-    event
-  ) => {
+  const emitCommandEvent: CliCommandContext["emitCommandEvent"] = (command, event) => {
     emitLifecycleEvent(emitter, {
       eventType: event.eventType,
       source: event.source ?? command,
@@ -46,10 +40,7 @@ export function createCliCommandContext(
     experimental: Boolean(options.experimental),
     emitCommandEvent,
     wrapAction:
-      <TArgs extends unknown[]>(
-        command: string,
-        action: (...args: TArgs) => Promise<void>
-      ) =>
+      <TArgs extends unknown[]>(command: string, action: (...args: TArgs) => Promise<void>) =>
       async (...args: TArgs): Promise<void> => {
         emitCommandEvent(command, {
           eventType: `${command}_started`,
@@ -87,13 +78,10 @@ export function applyExitOverride(command: Command): void {
   }
 }
 
-export function isGracefulCommanderExit(
-  error: unknown
-): error is CommanderError {
+export function isGracefulCommanderExit(error: unknown): error is CommanderError {
   return (
     error instanceof CommanderError &&
-    (error.code === "commander.helpDisplayed" ||
-      error.code === "commander.version")
+    (error.code === "commander.helpDisplayed" || error.code === "commander.version")
   );
 }
 
@@ -104,7 +92,7 @@ type InferCommandSourceOptions = {
 
 export function inferCommandSource(
   argv: string[],
-  options: InferCommandSourceOptions = {}
+  options: InferCommandSourceOptions = {},
 ): string {
   const valueFlags = new Set(options.valueFlags ?? []);
 
@@ -127,7 +115,7 @@ export function emitCommanderParseErrorTelemetry(
   emitter: TelemetryEmitter,
   argv: string[],
   error: CommanderError,
-  options: InferCommandSourceOptions = {}
+  options: InferCommandSourceOptions = {},
 ): void {
   const source = inferCommandSource(argv, options);
   emitLifecycleEvent(emitter, {
@@ -143,19 +131,13 @@ export function emitCommanderParseErrorTelemetry(
   });
 }
 
-export async function parseStandaloneCommand(
-  command: Command,
-  args: string[]
-): Promise<void> {
+export async function parseStandaloneCommand(command: Command, args: string[]): Promise<void> {
   applyExitOverride(command);
 
   try {
     await command.parseAsync(args, { from: "user" });
   } catch (error) {
-    if (
-      error instanceof CommanderError &&
-      error.code === "commander.helpDisplayed"
-    ) {
+    if (error instanceof CommanderError && error.code === "commander.helpDisplayed") {
       return;
     }
     if (error instanceof CommanderError) {

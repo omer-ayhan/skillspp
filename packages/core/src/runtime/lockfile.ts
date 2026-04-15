@@ -1,11 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import YAML from "yaml";
-import type {
-  AgentType,
-  InstallMode,
-  ParsedSource,
-} from "../contracts/runtime-types";
+import type { AgentType, InstallMode, ParsedSource } from "../contracts/runtime-types";
 import { parseSource } from "../sources/source-parser";
 import { AGENTS, getAgentPluginsDir, getAgentSkillsDir } from "./agents";
 
@@ -50,9 +46,7 @@ export type LockfileFormat = "json" | "yaml";
 type SourceLoadIdentity = Pick<LockedSource, "type" | "input" | "canonical">;
 
 export function resolveSourceLoadInput(source: SourceLoadIdentity): string {
-  return source.type === "local" && source.canonical
-    ? source.canonical
-    : source.input;
+  return source.type === "local" && source.canonical ? source.canonical : source.input;
 }
 
 export function buildSourceIdentityCacheKey(parsed: ParsedSource): string {
@@ -79,10 +73,7 @@ export function buildSourceLoadCacheKey(source: SourceLoadIdentity): string {
   return buildSourceIdentityCacheKey(parseSource(resolveSourceLoadInput(source)));
 }
 
-function perSkillLockfilePath(
-  canonicalDir: string,
-  format: LockfileFormat = "json",
-): string {
+function perSkillLockfilePath(canonicalDir: string, format: LockfileFormat = "json"): string {
   if (format === "yaml") {
     return path.join(canonicalDir, "skillspp-lock.yaml");
   }
@@ -109,8 +100,8 @@ function readPerSkillLockfile(canonicalDir: string): LockEntry | null {
   const raw = fs.existsSync(jsonPath)
     ? parseLockPayload(fs.readFileSync(jsonPath, "utf8"), "json")
     : fs.existsSync(yamlPath)
-    ? parseLockPayload(fs.readFileSync(yamlPath, "utf8"), "yaml")
-    : null;
+      ? parseLockPayload(fs.readFileSync(yamlPath, "utf8"), "yaml")
+      : null;
 
   if (!raw) {
     return null;
@@ -147,11 +138,7 @@ function writePerSkillLockfile(
     return;
   }
 
-  fs.writeFileSync(
-    jsonPath,
-    `${JSON.stringify({ version: 1, entry }, null, 2)}\n`,
-    "utf8",
-  );
+  fs.writeFileSync(jsonPath, `${JSON.stringify({ version: 1, entry }, null, 2)}\n`, "utf8");
   if (fs.existsSync(yamlPath)) {
     fs.rmSync(yamlPath, { force: true });
   }
@@ -172,10 +159,7 @@ function listInstalledResourceDirs(
       kind === "plugin"
         ? getAgentPluginsDir(agent, globalInstall, cwd)
         : getAgentSkillsDir(agent, globalInstall, cwd);
-    if (
-      !fs.existsSync(resourceRoot) ||
-      !fs.statSync(resourceRoot).isDirectory()
-    ) {
+    if (!fs.existsSync(resourceRoot) || !fs.statSync(resourceRoot).isDirectory()) {
       continue;
     }
     for (const entry of fs.readdirSync(resourceRoot, { withFileTypes: true })) {
@@ -194,10 +178,7 @@ function lockEntrySortTime(entry: LockEntry): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-export function readLockfile(
-  globalInstall: boolean,
-  cwd: string,
-): SkillsLockfile {
+export function readLockfile(globalInstall: boolean, cwd: string): SkillsLockfile {
   return readResourceLockfile("skill", globalInstall, cwd);
 }
 
@@ -214,19 +195,14 @@ export function readResourceLockfile(
     }
 
     const existing = entriesBySkill.get(entry.skillName);
-    if (
-      !existing ||
-      lockEntrySortTime(entry) > lockEntrySortTime(existing)
-    ) {
+    if (!existing || lockEntrySortTime(entry) > lockEntrySortTime(existing)) {
       entriesBySkill.set(entry.skillName, entry);
     }
   }
 
   return {
     version: 1,
-    entries: [...entriesBySkill.values()].sort((a, b) =>
-      a.skillName.localeCompare(b.skillName),
-    ),
+    entries: [...entriesBySkill.values()].sort((a, b) => a.skillName.localeCompare(b.skillName)),
   };
 }
 
@@ -246,19 +222,14 @@ export function writeResourceLockfile(
   lockfile: ResourceLockfile,
   format: LockfileFormat = "json",
 ): void {
-  const normalized = [...lockfile.entries].sort((a, b) =>
-    a.skillName.localeCompare(b.skillName),
-  );
+  const normalized = [...lockfile.entries].sort((a, b) => a.skillName.localeCompare(b.skillName));
 
   for (const entry of normalized) {
     writePerSkillLockfile(entry.canonicalDir, entry, format);
   }
 }
 
-export function upsertLockEntry(
-  lockfile: SkillsLockfile,
-  entry: LockEntry,
-): SkillsLockfile {
+export function upsertLockEntry(lockfile: SkillsLockfile, entry: LockEntry): SkillsLockfile {
   return upsertResourceLockEntry(lockfile, entry);
 }
 
@@ -266,17 +237,12 @@ export function upsertResourceLockEntry(
   lockfile: ResourceLockfile,
   entry: ResourceLockEntry,
 ): ResourceLockfile {
-  const next = lockfile.entries.filter(
-    (item) => item.skillName !== entry.skillName,
-  );
+  const next = lockfile.entries.filter((item) => item.skillName !== entry.skillName);
   next.push(entry);
   return { version: 1, entries: next };
 }
 
-export function removeLockEntry(
-  lockfile: SkillsLockfile,
-  skillName: string,
-): SkillsLockfile {
+export function removeLockEntry(lockfile: SkillsLockfile, skillName: string): SkillsLockfile {
   return removeResourceLockEntry(lockfile, skillName);
 }
 
@@ -290,10 +256,7 @@ export function removeResourceLockEntry(
   };
 }
 
-export function listCanonicalSkillDirs(
-  globalInstall: boolean,
-  cwd: string,
-): string[] {
+export function listCanonicalSkillDirs(globalInstall: boolean, cwd: string): string[] {
   return listCanonicalResourceDirs("skill", globalInstall, cwd);
 }
 
@@ -304,9 +267,7 @@ export function listCanonicalResourceDirs(
 ): string[] {
   return [
     ...new Set(
-      listInstalledResourceDirs(kind, globalInstall, cwd).map((dir) =>
-        path.basename(dir),
-      ),
+      listInstalledResourceDirs(kind, globalInstall, cwd).map((dir) => path.basename(dir)),
     ),
   ].sort((a, b) => a.localeCompare(b));
 }

@@ -21,10 +21,7 @@ function mapPromptError(error: unknown): never {
   throw error;
 }
 
-export async function askText(
-  message: string,
-  defaultValue?: string
-): Promise<string> {
+export async function askText(message: string, defaultValue?: string): Promise<string> {
   try {
     return await runTextInputScreen({
       message,

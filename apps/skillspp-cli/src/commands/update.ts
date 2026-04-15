@@ -25,10 +25,7 @@ import {
   showLoader,
   sourceSection,
 } from "@skillspp/cli-shared/ui/screens";
-import {
-  formatDriftChips,
-  shortenHomePath,
-} from "@skillspp/cli-shared/ui/format";
+import { formatDriftChips, shortenHomePath } from "@skillspp/cli-shared/ui/format";
 import type { SelectionRow } from "@skillspp/core/agents";
 
 export type UpdateOptions = CheckOptions & {
@@ -55,16 +52,12 @@ type UpdateCommanderOptions = {
 };
 
 function toUpdateOptions(options: UpdateCommanderOptions): UpdateOptions {
-  const maxDownloadBytes = options.maxDownloadBytes
-    ? Number(options.maxDownloadBytes)
-    : undefined;
+  const maxDownloadBytes = options.maxDownloadBytes ? Number(options.maxDownloadBytes) : undefined;
   if (
     typeof maxDownloadBytes === "number" &&
     (!Number.isFinite(maxDownloadBytes) || maxDownloadBytes <= 0)
   ) {
-    throw new Error(
-      `Invalid --max-download-bytes value: ${options.maxDownloadBytes}`,
-    );
+    throw new Error(`Invalid --max-download-bytes value: ${options.maxDownloadBytes}`);
   }
 
   const lockFormat = options.lockFormat;
@@ -120,15 +113,8 @@ function buildUpdateRows(assessments: SkillAssessment[]): SelectionRow[] {
   });
 }
 
-function renderUpdateSkillsClosedPanel(
-  rows: SelectionRow[],
-  selectedIds: string[],
-) {
-  return manySelectionClosedSection(
-    UPDATE_SKILLS_SELECTION_VIEW,
-    rows,
-    selectedIds,
-  );
+function renderUpdateSkillsClosedPanel(rows: SelectionRow[], selectedIds: string[]) {
+  return manySelectionClosedSection(UPDATE_SKILLS_SELECTION_VIEW, rows, selectedIds);
 }
 
 type UpdateAssessment = Pick<SkillAssessment, "entry" | "drift">;
@@ -141,9 +127,7 @@ export function buildUpdateDriftSummaryLines(options: {
   colorEnabled?: boolean;
 }): string[] {
   return [
-    `${options.assessedCount} tracked skill${
-      options.assessedCount === 1 ? "" : "s"
-    } checked`,
+    `${options.assessedCount} tracked skill${options.assessedCount === 1 ? "" : "s"} checked`,
     `${options.requiresUpdateCount} skill${
       options.requiresUpdateCount === 1 ? "" : "s"
     } require update`,
@@ -230,18 +214,12 @@ async function executeMigrateUpdate(options: {
   }
   hideLoader();
   await renderStaticScreen([
-    completedStepsSection([
-      `migrated ${options.skillName}`,
-      "lockfile written",
-    ]),
+    completedStepsSection([`migrated ${options.skillName}`, "lockfile written"]),
     linesSection(["Migration complete.", `Updated ${options.skillName}.`]),
   ]);
 }
 
-async function executeUpdate(
-  options: UpdateOptions,
-  positionalSkill?: string,
-): Promise<void> {
+async function executeUpdate(options: UpdateOptions, positionalSkill?: string): Promise<void> {
   const interactive = canUseInteractive(options.nonInteractive);
 
   const cwd = process.cwd();
@@ -251,9 +229,7 @@ async function executeUpdate(
     skill: mergedSkills,
   };
 
-  const requestedSkills = (effectiveOptions.skill || []).filter(
-    (skill) => skill !== "*",
-  );
+  const requestedSkills = (effectiveOptions.skill || []).filter((skill) => skill !== "*");
   if (effectiveOptions.migrate) {
     if (requestedSkills.length !== 1) {
       throw new Error(
@@ -303,9 +279,7 @@ async function executeUpdate(
       );
     } catch (error) {
       hideLoader();
-      await renderStaticScreen([
-        failedStepsSection(["failed to assess drift"]),
-      ]);
+      await renderStaticScreen([failedStepsSection(["failed to assess drift"])]);
       throw error;
     }
     hideLoader();
@@ -316,14 +290,11 @@ async function executeUpdate(
         return false;
       }
       return assessment.drift.some(
-        (item) =>
-          item.kind === "changed-source" || item.kind === "local-modified",
+        (item) => item.kind === "changed-source" || item.kind === "local-modified",
       );
     });
     const migrateRequired = assessments
-      .filter((assessment) =>
-        assessment.drift.some((item) => item.kind === "migrate-required"),
-      )
+      .filter((assessment) => assessment.drift.some((item) => item.kind === "migrate-required"))
       .map((assessment) => assessment.entry.skillName)
       .sort((a, b) => a.localeCompare(b));
     let changedSourceCount = 0;
@@ -366,8 +337,7 @@ async function executeUpdate(
           panelSection({
             title: "Migration Required",
             lines: migrateRequired.map(
-              (skillName) =>
-                `skillspp update ${skillName} --migrate <new-skill-source>`,
+              (skillName) => `skillspp update ${skillName} --migrate <new-skill-source>`,
             ),
             style: "square",
             minWidth: 74,
@@ -386,8 +356,7 @@ async function executeUpdate(
       interactive,
       rows: candidateRows,
       selectedIds: candidateRows.map((row) => row.id),
-      shouldPrompt:
-        interactive && !effectiveOptions.skill && candidateRows.length > 1,
+      shouldPrompt: interactive && !effectiveOptions.skill && candidateRows.length > 1,
       prompt: {
         title: "Choose Skills To Update",
         required: true,
@@ -396,8 +365,7 @@ async function executeUpdate(
         keyHints: UPDATE_SKILLS_KEY_HINTS,
         view: UPDATE_SKILLS_SELECTION_VIEW,
       },
-      renderClosed: (selectedIds) =>
-        renderUpdateSkillsClosedPanel(candidateRows, selectedIds),
+      renderClosed: (selectedIds) => renderUpdateSkillsClosedPanel(candidateRows, selectedIds),
     });
 
     const selectedSet = new Set(selectedSkillIds);
@@ -431,9 +399,7 @@ async function executeUpdate(
     ]);
 
     if (effectiveOptions.dryRun) {
-      await renderStaticScreen([
-        linesSection(["Dry-run mode: no changes applied."]),
-      ]);
+      await renderStaticScreen([linesSection(["Dry-run mode: no changes applied."])]);
       return;
     }
 
@@ -448,9 +414,7 @@ async function executeUpdate(
           payload: {
             cwd,
             options: effectiveOptions,
-            selectedSkillNames: selectedAssessments.map(
-              (assessment) => assessment.entry.skillName,
-            ),
+            selectedSkillNames: selectedAssessments.map((assessment) => assessment.entry.skillName),
             lockFormat,
           },
         },
@@ -459,9 +423,7 @@ async function executeUpdate(
             if (label === "writing lockfile") {
               failedLabel = "failed to write lockfile";
             } else if (label.startsWith("updating ")) {
-              failedLabel = `failed to update ${label.slice(
-                "updating ".length,
-              )}`;
+              failedLabel = `failed to update ${label.slice("updating ".length)}`;
             } else {
               failedLabel = "failed to assess selected skills";
             }
@@ -481,10 +443,7 @@ async function executeUpdate(
         ...applied.updatedSkillNames.map((skillName) => `updated ${skillName}`),
         "lockfile written",
       ]),
-      linesSection([
-        "Update complete.",
-        `Updated ${applied.updatedSkillNames.length} skills.`,
-      ]),
+      linesSection(["Update complete.", `Updated ${applied.updatedSkillNames.length} skills.`]),
     ]);
   } finally {
     hideLoader();
@@ -493,10 +452,7 @@ async function executeUpdate(
 
 function configureUpdateCommand(
   command: Command,
-  action: (
-    skill: string | undefined,
-    options: UpdateCommanderOptions,
-  ) => Promise<void>,
+  action: (skill: string | undefined, options: UpdateCommanderOptions) => Promise<void>,
 ): Command {
   return command
     .description("Update drifted skills")
@@ -515,33 +471,24 @@ function configureUpdateCommand(
     .action(action);
 }
 
-export function registerUpdateCommand(
-  program: Command,
-  ctx: CliCommandContext,
-): void {
+export function registerUpdateCommand(program: Command, ctx: CliCommandContext): void {
   configureUpdateCommand(
     program.command("update"),
-    ctx.wrapAction(
-      "update",
-      async (skill: string | undefined, options: UpdateCommanderOptions) => {
-        await executeUpdate(
-          {
-            ...toUpdateOptions(options),
-            experimental: ctx.experimental,
-          },
-          skill,
-        );
-      },
-    ),
+    ctx.wrapAction("update", async (skill: string | undefined, options: UpdateCommanderOptions) => {
+      await executeUpdate(
+        {
+          ...toUpdateOptions(options),
+          experimental: ctx.experimental,
+        },
+        skill,
+      );
+    }),
   );
 }
 
 export async function runUpdate(args: string[]): Promise<void> {
-  const command = configureUpdateCommand(
-    new Command().name("update"),
-    async (skill, options) => {
-      await executeUpdate(toUpdateOptions(options), skill);
-    },
-  );
+  const command = configureUpdateCommand(new Command().name("update"), async (skill, options) => {
+    await executeUpdate(toUpdateOptions(options), skill);
+  });
   await parseStandaloneCommand(command, args);
 }

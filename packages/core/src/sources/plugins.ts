@@ -1,18 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { Plugin } from "../contracts/runtime-types";
-import {
-  stageRemoteSkillFilesToTempDir,
-  type RemoteStagingResult,
-} from "./skills";
+import { stageRemoteSkillFilesToTempDir, type RemoteStagingResult } from "./skills";
 
-const SKIP_DIRS = new Set([
-  ".git",
-  "node_modules",
-  "dist",
-  "build",
-  "__pycache__",
-]);
+const SKIP_DIRS = new Set([".git", "node_modules", "dist", "build", "__pycache__"]);
 
 type PluginManifest = {
   name: string;
@@ -76,11 +67,7 @@ async function resolvePluginsRootAsync(basePath: string): Promise<string> {
   throw new Error("No plugins directory found in source");
 }
 
-function collectPluginJsonFilesRecursive(
-  dir: string,
-  pluginRoot: string,
-  out: string[],
-): void {
+function collectPluginJsonFilesRecursive(dir: string, pluginRoot: string, out: string[]): void {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   for (const entry of entries) {
     if (SKIP_DIRS.has(entry.name)) {
@@ -93,10 +80,7 @@ function collectPluginJsonFilesRecursive(
       continue;
     }
 
-    if (
-      entry.isFile() &&
-      path.basename(fullPath).toLowerCase() === "plugin.json"
-    ) {
+    if (entry.isFile() && path.basename(fullPath).toLowerCase() === "plugin.json") {
       out.push(path.relative(pluginRoot, fullPath));
     }
   }
@@ -119,19 +103,13 @@ async function collectPluginJsonFilesRecursiveAsync(
       continue;
     }
 
-    if (
-      entry.isFile() &&
-      path.basename(fullPath).toLowerCase() === "plugin.json"
-    ) {
+    if (entry.isFile() && path.basename(fullPath).toLowerCase() === "plugin.json") {
       out.push(path.relative(pluginRoot, fullPath));
     }
   }
 }
 
-function parsePluginManifest(
-  manifestPath: string,
-  pluginName: string,
-): PluginManifest {
+function parsePluginManifest(manifestPath: string, pluginName: string): PluginManifest {
   let parsed: unknown;
   try {
     parsed = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as unknown;
@@ -149,15 +127,12 @@ function parsePluginManifest(
   }
 
   if (data.name !== pluginName) {
-    throw new Error(
-      `Plugin '${pluginName}' plugin.json name must match plugin folder name`,
-    );
+    throw new Error(`Plugin '${pluginName}' plugin.json name must match plugin folder name`);
   }
 
   return {
     name: data.name,
-    description:
-      typeof data.description === "string" ? data.description : undefined,
+    description: typeof data.description === "string" ? data.description : undefined,
   };
 }
 
@@ -167,9 +142,7 @@ async function parsePluginManifestAsync(
 ): Promise<PluginManifest> {
   let parsed: unknown;
   try {
-    parsed = JSON.parse(
-      await fs.promises.readFile(manifestPath, "utf8"),
-    ) as unknown;
+    parsed = JSON.parse(await fs.promises.readFile(manifestPath, "utf8")) as unknown;
   } catch {
     throw new Error(`Plugin '${pluginName}' has invalid plugin.json`);
   }
@@ -184,15 +157,12 @@ async function parsePluginManifestAsync(
   }
 
   if (data.name !== pluginName) {
-    throw new Error(
-      `Plugin '${pluginName}' plugin.json name must match plugin folder name`,
-    );
+    throw new Error(`Plugin '${pluginName}' plugin.json name must match plugin folder name`);
   }
 
   return {
     name: data.name,
-    description:
-      typeof data.description === "string" ? data.description : undefined,
+    description: typeof data.description === "string" ? data.description : undefined,
   };
 }
 
@@ -222,10 +192,7 @@ function inspectPluginFolder(pluginDir: string): PluginInspection {
   const manifests: ManifestCandidate[] = [];
   try {
     for (const relativePath of pluginJsonRelativePaths) {
-      const manifest = parsePluginManifest(
-        path.join(pluginDir, relativePath),
-        pluginName,
-      );
+      const manifest = parsePluginManifest(path.join(pluginDir, relativePath), pluginName);
       manifests.push({
         description: manifest.description || "",
         relativePath,
@@ -254,11 +221,7 @@ function inspectPluginFolder(pluginDir: string): PluginInspection {
 async function inspectPluginFolderAsync(pluginDir: string): Promise<PluginInspection> {
   const pluginName = path.basename(pluginDir);
   const pluginJsonRelativePaths: string[] = [];
-  await collectPluginJsonFilesRecursiveAsync(
-    pluginDir,
-    pluginDir,
-    pluginJsonRelativePaths,
-  );
+  await collectPluginJsonFilesRecursiveAsync(pluginDir, pluginDir, pluginJsonRelativePaths);
   pluginJsonRelativePaths.sort(sortManifestCandidates);
 
   if (pluginJsonRelativePaths.length === 0) {
@@ -324,10 +287,7 @@ function filterRequestedPluginErrors(
   }
 }
 
-export function discoverPlugins(
-  basePath: string,
-  requestedPlugins?: string[],
-): Plugin[] {
+export function discoverPlugins(basePath: string, requestedPlugins?: string[]): Plugin[] {
   const pluginsRoot = resolvePluginsRoot(basePath);
   const entries = fs.readdirSync(pluginsRoot, { withFileTypes: true });
   const inspections = entries
@@ -356,9 +316,7 @@ export async function discoverPluginsAsync(
   const inspections = await Promise.all(
     entries
       .filter((entry) => entry.isDirectory())
-      .map((entry) =>
-        inspectPluginFolderAsync(path.join(pluginsRoot, entry.name)),
-      ),
+      .map((entry) => inspectPluginFolderAsync(path.join(pluginsRoot, entry.name))),
   );
 
   filterRequestedPluginErrors(requestedPlugins, inspections);
@@ -371,10 +329,7 @@ export async function discoverPluginsAsync(
   );
 }
 
-export function filterPluginsByName(
-  plugins: Plugin[],
-  requested?: string[],
-): Plugin[] {
+export function filterPluginsByName(plugins: Plugin[], requested?: string[]): Plugin[] {
   if (!requested || requested.length === 0) {
     return plugins;
   }

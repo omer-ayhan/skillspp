@@ -23,7 +23,7 @@ export type PolicyDecision = {
 
 function applyMode(
   result: InstallerSecurityEvaluationResult,
-  mode: PolicyMode
+  mode: PolicyMode,
 ): InstallerSecurityEvaluationResult {
   if (mode === "enforce" || result.ok) {
     return result;
@@ -44,12 +44,9 @@ function applyMode(
 
 export function evaluateInstallerLocalDependencyPolicy(
   input: { source: string; sourceRoot: string },
-  mode: PolicyMode
+  mode: PolicyMode,
 ): InstallerSecurityEvaluationResult {
-  return applyMode(
-    evaluateLocalDependencySecurity(input, { policyMode: "fixed" }),
-    mode
-  );
+  return applyMode(evaluateLocalDependencySecurity(input, { policyMode: "fixed" }), mode);
 }
 
 export function evaluateHookTrustPolicy(input: {
@@ -70,8 +67,7 @@ export function evaluateHookTrustPolicy(input: {
       allowed: true,
       violation: {
         rule: "hook-trust-required",
-        message:
-          "Well-known hook commands are untrusted. Proceeding due to warning policy mode.",
+        message: "Well-known hook commands are untrusted. Proceeding due to warning policy mode.",
         severity: "warning",
         blocking: false,
       },

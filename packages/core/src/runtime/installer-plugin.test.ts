@@ -75,11 +75,7 @@ describe("installPlugin @unit", () => {
         ),
       ),
     ).toBe(true);
-    expect(
-      fs.existsSync(path.join(root, ".agents", "skills", "plugin-alpha")),
-    ).toBe(false);
-    expect(
-      fs.existsSync(path.join(root, ".claude", "skills", "plugin-alpha")),
-    ).toBe(false);
+    expect(fs.existsSync(path.join(root, ".agents", "skills", "plugin-alpha"))).toBe(false);
+    expect(fs.existsSync(path.join(root, ".claude", "skills", "plugin-alpha"))).toBe(false);
   });
 });

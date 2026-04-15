@@ -14,10 +14,7 @@ describe("shared background-runner adapter @unit", () => {
   it("uses a colocated executor module when one exists @unit", async () => {
     const here = path.dirname(fileURLToPath(import.meta.url));
     const appRunnerUrl = pathToFileURL(
-      path.resolve(
-        here,
-        "../../../../apps/skillspp-cli/src/runtime/background-runner.ts",
-      ),
+      path.resolve(here, "../../../../apps/skillspp-cli/src/runtime/background-runner.ts"),
     ).href;
     const runBackgroundTask = createBackgroundTaskRunner(appRunnerUrl);
 
@@ -48,10 +45,7 @@ describe("shared background-runner adapter @unit", () => {
 
     const here = path.dirname(fileURLToPath(import.meta.url));
     const appRunnerUrl = pathToFileURL(
-      path.resolve(
-        here,
-        "../../../../apps/pluginspp-cli/src/runtime/background-runner.ts",
-      ),
+      path.resolve(here, "../../../../apps/pluginspp-cli/src/runtime/background-runner.ts"),
     ).href;
     const runBackgroundTask = createBackgroundTaskRunner(appRunnerUrl);
 
@@ -73,9 +67,7 @@ describe("shared background-runner adapter @unit", () => {
     expect(runBackgroundTaskInPlatform).toHaveBeenCalled();
     const secondArg = (runBackgroundTaskInPlatform.mock.calls[0] as any)?.[1];
     expect(typeof secondArg?.executorModule).toBe("string");
-    expect(secondArg.executorModule).toBe(
-      "@skillspp/core/runtime/background-tasks",
-    );
+    expect(secondArg.executorModule).toBe("@skillspp/core/runtime/background-tasks");
     expect(response).toEqual({ durationMs: 123 });
   });
 });

@@ -1,10 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { Command } from "commander";
-import type {
-  AgentType,
-  RemoveOptions,
-} from "@skillspp/core/contracts/runtime-types";
+import type { AgentType, RemoveOptions } from "@skillspp/core/contracts/runtime-types";
 import {
   AGENTS,
   STANDARD_AGENTS,
@@ -138,10 +135,7 @@ function buildRemoveConfirmSelectionRows(): SelectionRow[] {
   ];
 }
 
-function renderRemoveSkillsPanel(options: {
-  skills: string[];
-  selectedNames: string[];
-}) {
+function renderRemoveSkillsPanel(options: { skills: string[]; selectedNames: string[] }) {
   return manySelectionClosedSection(
     REMOVE_SKILLS_SELECTION_VIEW,
     buildRemoveSkillSelectionRows(options.skills),
@@ -236,21 +230,13 @@ function orderAgentsForDisplay(agents: AgentType[]): AgentType[] {
   });
 }
 
-function resolveCandidateAgentsForSkills(
-  skillNames: string[],
-  index: InstallIndex,
-): AgentType[] {
+function resolveCandidateAgentsForSkills(skillNames: string[], index: InstallIndex): AgentType[] {
   return orderAgentsForDisplay(
-    skillNames.flatMap((name) =>
-      Array.from(index.agentsBySkill.get(name) ?? []),
-    ),
+    skillNames.flatMap((name) => Array.from(index.agentsBySkill.get(name) ?? [])),
   );
 }
 
-async function executeRemove(
-  positional: string[],
-  options: RemoveOptions,
-): Promise<void> {
+async function executeRemove(positional: string[], options: RemoveOptions): Promise<void> {
   const interactive = canUseInteractive(options.nonInteractive);
   await renderRemoveFlowHeader();
   const cwd = process.cwd();
@@ -259,9 +245,7 @@ async function executeRemove(
   try {
     index = buildInstallIndex(globalInstall, cwd);
   } catch (error) {
-    await renderStaticScreen([
-      failedStepsSection(["failed to index installed skills"]),
-    ]);
+    await renderStaticScreen([failedStepsSection(["failed to index installed skills"])]);
     throw error;
   }
   if (index.agentsBySkill.size === 0) {
@@ -303,20 +287,14 @@ async function executeRemove(
   try {
     if (options.agent && options.agent.length > 0) {
       if (options.agent.includes("*")) {
-        candidateAgents = orderAgentsForDisplay(
-          Array.from(index.skillsByAgent.keys()),
-        );
+        candidateAgents = orderAgentsForDisplay(Array.from(index.skillsByAgent.keys()));
         agents = candidateAgents;
       } else {
         const resolved = resolveAgents(options.agent);
-        const outOfScopeAgents = resolved.filter(
-          (agent) => !scopeAllowedAgents.has(agent),
-        );
+        const outOfScopeAgents = resolved.filter((agent) => !scopeAllowedAgents.has(agent));
         if (outOfScopeAgents.length > 0) {
           throw new Error(
-            `Agent(s) not available in ${scope} scope: ${outOfScopeAgents.join(
-              ", ",
-            )}`,
+            `Agent(s) not available in ${scope} scope: ${outOfScopeAgents.join(", ")}`,
           );
         }
         candidateAgents = resolved;
@@ -326,8 +304,8 @@ async function executeRemove(
       candidateAgents = options.all
         ? orderAgentsForDisplay(Array.from(index.skillsByAgent.keys()))
         : finalSkills.length > 0
-        ? resolveCandidateAgentsForSkills(finalSkills, index)
-        : [];
+          ? resolveCandidateAgentsForSkills(finalSkills, index)
+          : [];
 
       if (candidateAgents.length === 0 && !requiresInteractiveSkillSelection) {
         throw new Error("No installed skills found to remove.");
@@ -340,16 +318,12 @@ async function executeRemove(
         );
       }
     }
-    candidateAgents = candidateAgents.filter((agent) =>
-      scopeAllowedAgents.has(agent),
-    );
+    candidateAgents = candidateAgents.filter((agent) => scopeAllowedAgents.has(agent));
     agents = agents.filter((agent) => scopeAllowedAgents.has(agent));
     candidateAgents = orderAgentsForDisplay(candidateAgents);
     agents = orderAgentsForDisplay(agents);
   } catch (error) {
-    await renderStaticScreen([
-      failedStepsSection(["failed to resolve target candidates"]),
-    ]);
+    await renderStaticScreen([failedStepsSection(["failed to resolve target candidates"])]);
     throw error;
   }
 
@@ -389,9 +363,7 @@ async function executeRemove(
   if (!options.agent || options.agent.length === 0) {
     if (!options.all) {
       candidateAgents = resolveCandidateAgentsForSkills(finalSkills, index);
-      candidateAgents = candidateAgents.filter((agent) =>
-        scopeAllowedAgents.has(agent),
-      );
+      candidateAgents = candidateAgents.filter((agent) => scopeAllowedAgents.has(agent));
       candidateAgents = orderAgentsForDisplay(candidateAgents);
     }
 
@@ -406,17 +378,11 @@ async function executeRemove(
     }
   }
 
-  const shouldPromptAgents =
-    interactive && (!options.agent || options.agent.length === 0);
-  const visibleCandidateAgents = candidateAgents.filter((agent) =>
-    scopeAllowedAgents.has(agent),
-  );
+  const shouldPromptAgents = interactive && (!options.agent || options.agent.length === 0);
+  const visibleCandidateAgents = candidateAgents.filter((agent) => scopeAllowedAgents.has(agent));
   const selectedAgentIds = await runManySelectionStep({
     interactive,
-    rows: buildRemoveAgentSelectionRows(
-      visibleCandidateAgents,
-      scopedAgentRowsById,
-    ),
+    rows: buildRemoveAgentSelectionRows(visibleCandidateAgents, scopedAgentRowsById),
     selectedIds: agents,
     shouldPrompt: shouldPromptAgents,
     prompt: {
@@ -435,9 +401,7 @@ async function executeRemove(
       }),
   });
   const selectedAgentSet = new Set(selectedAgentIds);
-  agents = visibleCandidateAgents.filter((agent) =>
-    selectedAgentSet.has(agent),
-  );
+  agents = visibleCandidateAgents.filter((agent) => selectedAgentSet.has(agent));
 
   if (options.all) {
     const all = new Set<string>();
@@ -583,27 +547,18 @@ function configureRemoveCommand(
     .action(action);
 }
 
-export function registerRemoveCommand(
-  program: Command,
-  ctx: CliCommandContext,
-): void {
+export function registerRemoveCommand(program: Command, ctx: CliCommandContext): void {
   configureRemoveCommand(
     program.command("remove").alias("rm"),
-    ctx.wrapAction(
-      "remove",
-      async (skills: string[], options: RemoveCommanderOptions) => {
-        await executeRemove(skills, toRemoveOptions(options));
-      },
-    ),
+    ctx.wrapAction("remove", async (skills: string[], options: RemoveCommanderOptions) => {
+      await executeRemove(skills, toRemoveOptions(options));
+    }),
   );
 }
 
 export async function runRemove(args: string[]): Promise<void> {
-  const command = configureRemoveCommand(
-    new Command().name("remove"),
-    async (skills, options) => {
-      await executeRemove(skills, toRemoveOptions(options));
-    },
-  );
+  const command = configureRemoveCommand(new Command().name("remove"), async (skills, options) => {
+    await executeRemove(skills, toRemoveOptions(options));
+  });
   await parseStandaloneCommand(command, args);
 }

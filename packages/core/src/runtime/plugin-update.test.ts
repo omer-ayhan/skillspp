@@ -6,11 +6,7 @@ import { executeBackgroundTask } from "./background-tasks";
 import type { PluginUpdateApplyTaskResult } from "./background-task-contracts";
 import { hashDirectory } from "./hash";
 import { installPlugin } from "./installer";
-import {
-  readResourceLockfile,
-  writeResourceLockfile,
-  type LockEntry,
-} from "./lockfile";
+import { readResourceLockfile, writeResourceLockfile, type LockEntry } from "./lockfile";
 
 const tempDirs: string[] = [];
 
@@ -74,8 +70,7 @@ function buildPluginLockEntry(options: {
       isSymlinkSource: false,
       selector: {
         skillName: options.pluginName,
-        relativePath:
-          path.relative(options.repoRoot, options.pluginPath) || ".",
+        relativePath: path.relative(options.repoRoot, options.pluginPath) || ".",
       },
     },
     sourceHash: hashDirectory(options.pluginPath),
@@ -141,12 +136,9 @@ describe("plugin update background task @unit", () => {
     )) as PluginUpdateApplyTaskResult;
 
     expect(result.updatedPluginNames).toEqual(["plugin-alpha"]);
-    expect(
-      fs.readFileSync(
-        path.join(outcome.canonicalDir, "README.md"),
-        "utf8",
-      ),
-    ).toBe("alpha v2\n");
+    expect(fs.readFileSync(path.join(outcome.canonicalDir, "README.md"), "utf8")).toBe(
+      "alpha v2\n",
+    );
 
     const [updatedEntry] = readResourceLockfile("plugin", false, root).entries;
     expect(updatedEntry?.skillName).toBe("plugin-alpha");

@@ -14,19 +14,13 @@
       "@skillspp/core/telemetry": ["../core/dist/runtime/telemetry.d.ts"],
       "@skillspp/core/policy": ["../core/dist/runtime/policy.d.ts"],
       "@skillspp/core/agents": ["../core/dist/runtime/agents.d.ts"],
-      "@skillspp/core/source-parser": [
-        "../core/dist/sources/source-parser.d.ts"
-      ],
-      "@skillspp/core/source-resolution": [
-        "../core/dist/sources/source-resolution.d.ts"
-      ],
+      "@skillspp/core/source-parser": ["../core/dist/sources/source-parser.d.ts"],
+      "@skillspp/core/source-resolution": ["../core/dist/sources/source-resolution.d.ts"],
       "@skillspp/core/skills": ["../core/dist/sources/skills.d.ts"],
       "@skillspp/core/commands": ["../core/dist/contracts/commands.d.ts"],
       "@skillspp/core/results": ["../core/dist/contracts/results.d.ts"],
       "@skillspp/core/errors": ["../core/dist/contracts/errors/core-error.d.ts"],
-      "@skillspp/core/events": [
-        "../core/dist/contracts/events/lifecycle-event.d.ts"
-      ],
+      "@skillspp/core/events": ["../core/dist/contracts/events/lifecycle-event.d.ts"],
       "@skillspp/core/contracts/*": ["../core/dist/contracts/*.d.ts"],
       "@skillspp/core/sources/*": ["../core/dist/sources/*.d.ts"],
       "@skillspp/core/runtime/*": ["../core/dist/runtime/*.d.ts"]

@@ -30,9 +30,7 @@ function isFile(filePath: string): boolean {
   return fs.existsSync(filePath) && fs.statSync(filePath).isFile();
 }
 
-export function getInstallerConfigState(
-  skillDir: string
-): InstallerConfigState {
+export function getInstallerConfigState(skillDir: string): InstallerConfigState {
   const yamlPath = path.join(skillDir, "skill-installer.yaml");
   const jsonPath = path.join(skillDir, "skill-installer.json");
   const hasYaml = isFile(yamlPath);
@@ -40,7 +38,7 @@ export function getInstallerConfigState(
 
   if (hasYaml && hasJson) {
     throw new Error(
-      "Both skill-installer.yaml and skill-installer.json exist. Keep only one installer config file."
+      "Both skill-installer.yaml and skill-installer.json exist. Keep only one installer config file.",
     );
   }
 
@@ -53,17 +51,13 @@ export function getInstallerConfigState(
   };
 }
 
-export function listSkillsMissingInstallerConfig(
-  skillDirs: string[]
-): string[] {
-  return skillDirs.filter(
-    (skillDir) => getInstallerConfigState(skillDir).missing
-  );
+export function listSkillsMissingInstallerConfig(skillDirs: string[]): string[] {
+  return skillDirs.filter((skillDir) => getInstallerConfigState(skillDir).missing);
 }
 
 export function scaffoldInstallerConfigFile(
   skillDir: string,
-  format: InstallerScaffoldFormat
+  format: InstallerScaffoldFormat,
 ): { created: boolean; filePath?: string } {
   const state = getInstallerConfigState(skillDir);
   if (!state.missing) {
@@ -81,7 +75,7 @@ export function scaffoldInstallerConfigFile(
 
 export function scaffoldInstallerConfigForSkills(
   skillDirs: string[],
-  format: InstallerScaffoldFormat
+  format: InstallerScaffoldFormat,
 ): string[] {
   const created: string[] = [];
   for (const skillDir of skillDirs) {

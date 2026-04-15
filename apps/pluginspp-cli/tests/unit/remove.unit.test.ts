@@ -8,9 +8,7 @@ function buildRemoveCommand(): Command {
   const program = new Command().name("pluginspp").exitOverride();
   const context = createCliCommandContext(createTelemetryEmitter());
   registerRemoveCommand(program, context);
-  return program.commands.find(
-    (command) => command.name() === "remove",
-  ) as Command;
+  return program.commands.find((command) => command.name() === "remove") as Command;
 }
 
 describe("pluginspp remove command @unit", () => {

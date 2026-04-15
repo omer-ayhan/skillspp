@@ -1,21 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
-import type {
-  AddOptions,
-  ParsedSource,
-  Skill,
-} from "../contracts/runtime-types";
+import type { AddOptions, ParsedSource, Skill } from "../contracts/runtime-types";
 import type { DriftRecord } from "../contracts/results";
 import type { RemoteSkill } from "../providers";
 import type { SourceCandidate } from "../sources/source-resolution";
-import {
-  discoverSkillsAsync,
-  stageRemoteSkillFilesToTempDir,
-} from "../sources/skills";
-import {
-  resolveCatalogSkills,
-  resolveWellKnownSkills,
-} from "../sources/source-resolution";
+import { discoverSkillsAsync, stageRemoteSkillFilesToTempDir } from "../sources/skills";
+import { resolveCatalogSkills, resolveWellKnownSkills } from "../sources/source-resolution";
 import { parseSource } from "../sources/source-parser";
 import { prepareSourceDirAsync, resolveGitHeadRefAsync } from "../sources/git";
 import { hashDirectoryAsync } from "./hash";
@@ -157,10 +147,7 @@ function unwrapAsyncResult<T>(result: AsyncResult<T>): T {
   throw (result as { ok: false; error: unknown }).error;
 }
 
-async function loadCachedSource(
-  entry: LockEntry,
-  options: AddOptions,
-): Promise<CachedSource> {
+async function loadCachedSource(entry: LockEntry, options: AddOptions): Promise<CachedSource> {
   const sourceInput = resolveSourceLoadInput(entry.source);
   const parsed = parseSource(sourceInput);
 
@@ -259,9 +246,7 @@ function resolveCandidateFromCachedSource(
       (item) => item.installName === entry.source.selector.skillName,
     );
     if (!matched) {
-      throw new Error(
-        `Skill '${entry.source.selector.skillName}' not found in well-known source`,
-      );
+      throw new Error(`Skill '${entry.source.selector.skillName}' not found in well-known source`);
     }
 
     const staged = stageRemoteSkillFilesToTempDir(matched.files);
@@ -280,18 +265,12 @@ function resolveCandidateFromCachedSource(
     ? cachedSource.skills.find(
         (item) =>
           path.resolve(item.path) ===
-          path.resolve(
-            path.join(cachedSource.basePath, entry.source.selector.relativePath!),
-          ),
+          path.resolve(path.join(cachedSource.basePath, entry.source.selector.relativePath!)),
       )
-    : cachedSource.skills.find(
-        (item) => item.name === entry.source.selector.skillName,
-      );
+    : cachedSource.skills.find((item) => item.name === entry.source.selector.skillName);
 
   if (!matched) {
-    throw new Error(
-      `Skill '${entry.source.selector.skillName}' not found in source`,
-    );
+    throw new Error(`Skill '${entry.source.selector.skillName}' not found in source`);
   }
 
   return {
@@ -311,9 +290,7 @@ export async function assessLockEntries(
   assessments: SkillAssessment[];
 }> {
   const lock = readLockfile(Boolean(options.global), cwd);
-  const entries = lock.entries.filter((entry) =>
-    includeBySkill(entry, options.skill),
-  );
+  const entries = lock.entries.filter((entry) => includeBySkill(entry, options.skill));
   const drift: DriftRecord[] = [];
   const assessments: SkillAssessment[] = [];
   const sourceOptions: AddOptions = {
@@ -345,10 +322,7 @@ export async function assessLockEntries(
         drift: [],
       };
 
-      if (
-        !fs.existsSync(entry.canonicalDir) ||
-        !fs.statSync(entry.canonicalDir).isDirectory()
-      ) {
+      if (!fs.existsSync(entry.canonicalDir) || !fs.statSync(entry.canonicalDir).isDirectory()) {
         const row: DriftRecord = {
           skillName: entry.skillName,
           kind: "local-modified",
@@ -388,14 +362,8 @@ export async function assessLockEntries(
 
       let resolved: SourceCandidate | undefined;
       try {
-        const cachedSource = unwrapAsyncResult(
-          await toAsyncResult(getCachedSource(entry)),
-        );
-        resolved = resolveCandidateFromCachedSource(
-          entry,
-          cachedSource,
-          behavior.keepResolved,
-        );
+        const cachedSource = unwrapAsyncResult(await toAsyncResult(getCachedSource(entry)));
+        resolved = resolveCandidateFromCachedSource(entry, cachedSource, behavior.keepResolved);
 
         if (entry.source.type === "local") {
           const currentResolvedPath = fs.realpathSync(resolved.skill.path);
@@ -441,8 +409,7 @@ export async function assessLockEntries(
         const asText = error instanceof Error ? error.message : String(error);
         const migrateRequired =
           entry.source.type === "local" &&
-          (asText.includes("Local source not found") ||
-            asText.includes("not found in source"));
+          (asText.includes("Local source not found") || asText.includes("not found in source"));
         const row: DriftRecord = {
           skillName: entry.skillName,
           kind: migrateRequired ? "migrate-required" : "missing-source",
@@ -464,10 +431,7 @@ export async function assessLockEntries(
     const canonical = listCanonicalSkillDirs(Boolean(options.global), cwd);
     const lockNames = new Set(lock.entries.map((item) => item.skillName));
     for (const skillName of canonical) {
-      if (
-        !lockNames.has(skillName) &&
-        includeBySkill({ skillName } as LockEntry, options.skill)
-      ) {
+      if (!lockNames.has(skillName) && includeBySkill({ skillName } as LockEntry, options.skill)) {
         drift.push({
           skillName,
           kind: "lock-missing",

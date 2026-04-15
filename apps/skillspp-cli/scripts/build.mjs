@@ -39,10 +39,7 @@ async function runBuild() {
 
   await build(
     createBuildOptions(
-      path.resolve(
-        packageRoot,
-        "../../packages/platform-node/src/background-worker.ts",
-      ),
+      path.resolve(packageRoot, "../../packages/platform-node/src/background-worker.ts"),
       workerOutFile,
     ),
   );

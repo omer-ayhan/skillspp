@@ -4,10 +4,7 @@ import os from "node:os";
 import matter from "gray-matter";
 import { parseSource } from "../sources/source-parser";
 import { prepareSourceDir } from "../sources/git";
-import {
-  discoverSkills,
-  stageRemoteSkillFilesToTempDir,
-} from "../sources/skills";
+import { discoverSkills, stageRemoteSkillFilesToTempDir } from "../sources/skills";
 import {
   classifyDependencySource,
   cleanupPreparedInstallerArtifacts,
@@ -16,14 +13,8 @@ import {
   loadInstallerConfig,
   prepareInstallerArtifacts,
 } from "./skill-installer";
-import {
-  evaluateInstallerLocalDependencyPolicy,
-  type PolicyMode,
-} from "./policy";
-import {
-  resolveCatalogSkills,
-  resolveWellKnownSkills,
-} from "../sources/source-resolution";
+import { evaluateInstallerLocalDependencyPolicy, type PolicyMode } from "./policy";
+import { resolveCatalogSkills, resolveWellKnownSkills } from "../sources/source-resolution";
 import type { AddOptions } from "../contracts/runtime-types";
 import { CoreError } from "../contracts/errors/core-error";
 
@@ -81,10 +72,7 @@ function resolveThresholds(options: ValidateOptions): ValidateThresholds {
   };
 }
 
-function addDiagnostic(
-  list: ValidateDiagnostic[],
-  diagnostic: ValidateDiagnostic,
-): void {
+function addDiagnostic(list: ValidateDiagnostic[], diagnostic: ValidateDiagnostic): void {
   list.push(diagnostic);
 }
 
@@ -115,10 +103,7 @@ const typeRules: TypeRule[] = [
     when: (frontmatter) => frontmatter.type === "framework",
     validate: ({ skillDir, skillName, diagnostics }) => {
       const referencesDir = path.join(skillDir, "references");
-      if (
-        !fs.existsSync(referencesDir) ||
-        !fs.statSync(referencesDir).isDirectory()
-      ) {
+      if (!fs.existsSync(referencesDir) || !fs.statSync(referencesDir).isDirectory()) {
         addDiagnostic(diagnostics, {
           severity: "error",
           skill: skillName,
@@ -137,9 +122,7 @@ async function validateInstallerDependencies(
   diagnostics: ValidateDiagnostic[],
   skillName: string,
 ): Promise<void> {
-  const installerConfigPath = fs.existsSync(
-    path.join(skillDir, "skill-installer.yaml"),
-  )
+  const installerConfigPath = fs.existsSync(path.join(skillDir, "skill-installer.yaml"))
     ? path.join(skillDir, "skill-installer.yaml")
     : path.join(skillDir, "skill-installer.json");
 
@@ -178,8 +161,7 @@ async function validateInstallerDependencies(
           accepted = true;
           break;
         } else {
-          securityViolation =
-            "violation" in evaluated ? evaluated.violation : undefined;
+          securityViolation = "violation" in evaluated ? evaluated.violation : undefined;
         }
       }
 
@@ -199,15 +181,9 @@ async function validateInstallerDependencies(
       return;
     }
 
-    const tempSkillDir = fs.mkdtempSync(
-      path.join(os.tmpdir(), "skillspp-validate-installer-"),
-    );
+    const tempSkillDir = fs.mkdtempSync(path.join(os.tmpdir(), "skillspp-validate-installer-"));
     try {
-      const filesToCopy = [
-        "SKILL.md",
-        "skill-installer.yaml",
-        "skill-installer.json",
-      ];
+      const filesToCopy = ["SKILL.md", "skill-installer.yaml", "skill-installer.json"];
       for (const fileName of filesToCopy) {
         const src = path.join(skillDir, fileName);
         if (fs.existsSync(src) && fs.statSync(src).isFile()) {
@@ -246,8 +222,7 @@ async function validateInstallerDependencies(
             securityError = error;
             break;
           }
-          const message =
-            error instanceof Error ? error.message : String(error);
+          const message = error instanceof Error ? error.message : String(error);
           if (message.includes("(local) source not found")) {
             lastMissingSourceError = error;
             continue;
@@ -340,8 +315,7 @@ async function validateSkillDir(
       skill: skillName,
       file: skillMd,
       rule: "invalid-frontmatter",
-      message:
-        error instanceof Error ? error.message : "frontmatter parsing failed",
+      message: error instanceof Error ? error.message : "frontmatter parsing failed",
     });
     return;
   }
@@ -418,12 +392,7 @@ async function validateSkillDir(
     }
   }
 
-  await validateInstallerDependencies(
-    skillDir,
-    sourceRoot,
-    diagnostics,
-    skillName,
-  );
+  await validateInstallerDependencies(skillDir, sourceRoot, diagnostics, skillName);
 }
 
 async function stageAndValidateLocalRoot(
@@ -436,10 +405,7 @@ async function stageAndValidateLocalRoot(
   emitProgress?: (label: string) => Promise<void> | void,
 ): Promise<void> {
   const resolvedRoot = path.resolve(rootPath);
-  if (
-    !fs.existsSync(resolvedRoot) ||
-    !fs.statSync(resolvedRoot).isDirectory()
-  ) {
+  if (!fs.existsSync(resolvedRoot) || !fs.statSync(resolvedRoot).isDirectory()) {
     addDiagnostic(diagnostics, {
       severity: "error",
       skill: path.basename(resolvedRoot),
@@ -470,13 +436,7 @@ async function stageAndValidateLocalRoot(
     }
     seenSkillPaths.add(resolvedSkillPath);
     await emitProgress?.(`validating ${skill.name}`);
-    await validateSkillDir(
-      skill.path,
-      dependencyRoot,
-      diagnostics,
-      strict,
-      thresholds,
-    );
+    await validateSkillDir(skill.path, dependencyRoot, diagnostics, strict, thresholds);
   }
 }
 
@@ -578,10 +538,7 @@ export async function runValidateAnalysis(
 
   if (options.ci) {
     await emitProgress?.("staging source");
-    const roots =
-      options.roots && options.roots.length > 0
-        ? options.roots
-        : [process.cwd()];
+    const roots = options.roots && options.roots.length > 0 ? options.roots : [process.cwd()];
     if (roots.length === 0) {
       throw new Error("No CI roots found to validate");
     }
@@ -599,12 +556,7 @@ export async function runValidateAnalysis(
       );
     }
   } else {
-    await stageAndValidateSource(
-      options,
-      diagnostics,
-      thresholds,
-      emitProgress,
-    );
+    await stageAndValidateSource(options, diagnostics, thresholds, emitProgress);
   }
 
   await emitProgress?.("collecting diagnostics");

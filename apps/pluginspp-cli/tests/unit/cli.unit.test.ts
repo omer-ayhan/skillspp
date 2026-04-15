@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Command } from "commander";
-import {
-  getAnimatedLogoFrames,
-  resetLogoCache,
-} from "@skillspp/cli-shared/ui/logo";
+import { getAnimatedLogoFrames, resetLogoCache } from "@skillspp/cli-shared/ui/logo";
 import { configurePluginsppLogoAssetPaths } from "../../src/cli";
 import { registerAddCommand } from "../../src/commands/add";
 import { registerRemoveCommand } from "../../src/commands/remove";

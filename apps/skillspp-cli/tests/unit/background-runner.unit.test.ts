@@ -21,7 +21,7 @@ describe("CLI background runner adapter @unit", () => {
         onProgress: () => {
           // no-op
         },
-      }
+      },
     );
 
     expect(runBackgroundTaskInPlatform).toHaveBeenCalled();

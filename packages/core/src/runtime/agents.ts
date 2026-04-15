@@ -356,9 +356,7 @@ export function isAgent(value: string): value is AgentType {
   return Object.prototype.hasOwnProperty.call(AGENTS, value);
 }
 
-export function resolveAddAgentSelectionRows(
-  scope: "local" | "global",
-): SelectionRow[] {
+export function resolveAddAgentSelectionRows(scope: "local" | "global"): SelectionRow[] {
   const dataset =
     scope === "global"
       ? Object.entries(AGENTS).map(([agent, info]) => ({
@@ -422,9 +420,7 @@ export function normalizeAgentSelectionInput(
 
   // If all unknown values are filesystem entries, this is likely shell
   // expansion from an unquoted `*`.
-  const expandedFromGlob = unknown.every((value) =>
-    fs.existsSync(path.resolve(cwd, value)),
-  );
+  const expandedFromGlob = unknown.every((value) => fs.existsSync(path.resolve(cwd, value)));
   if (!expandedFromGlob) {
     return values;
   }
@@ -435,33 +431,19 @@ export function normalizeAgentSelectionInput(
   return ["*"];
 }
 
-export function getAgentSkillsDir(
-  agent: AgentType,
-  globalInstall: boolean,
-  cwd: string,
-): string {
-  const relative = globalInstall
-    ? AGENTS[agent].globalSkillsDir
-    : AGENTS[agent].projectSkillsDir;
+export function getAgentSkillsDir(agent: AgentType, globalInstall: boolean, cwd: string): string {
+  const relative = globalInstall ? AGENTS[agent].globalSkillsDir : AGENTS[agent].projectSkillsDir;
   const base = globalInstall ? os.homedir() : cwd;
   return path.join(base, relative);
 }
 
-export function getAgentPluginsDir(
-  agent: AgentType,
-  globalInstall: boolean,
-  cwd: string,
-): string {
-  const relative = globalInstall
-    ? AGENTS[agent].globalPluginsDir
-    : AGENTS[agent].projectPluginsDir;
+export function getAgentPluginsDir(agent: AgentType, globalInstall: boolean, cwd: string): string {
+  const relative = globalInstall ? AGENTS[agent].globalPluginsDir : AGENTS[agent].projectPluginsDir;
   const base = globalInstall ? os.homedir() : cwd;
   return path.join(base, relative);
 }
 
-export function resolveAddPluginAgentSelectionRows(
-  scope: "local" | "global",
-): SelectionRow[] {
+export function resolveAddPluginAgentSelectionRows(scope: "local" | "global"): SelectionRow[] {
   const dataset =
     scope === "global"
       ? Object.entries(AGENTS).map(([agent, info]) => ({
@@ -482,9 +464,7 @@ export function resolveAddPluginAgentSelectionRows(
   }));
 }
 
-export function detectInstalledAgents(
-  cwd: string = process.cwd(),
-): AgentType[] {
+export function detectInstalledAgents(cwd: string = process.cwd()): AgentType[] {
   const found: AgentType[] = [];
   for (const agent of Object.keys(AGENTS) as AgentType[]) {
     if (isAgentInstalled(agent, cwd)) {
@@ -514,10 +494,7 @@ function isAgentInstalled(agent: AgentType, cwd: string): boolean {
   }
 
   const projectSkillsDir = getAgentSkillsDir(agent, false, cwd);
-  if (
-    info.projectSkillsDir !== ".agents/skills" &&
-    fs.existsSync(projectSkillsDir)
-  ) {
+  if (info.projectSkillsDir !== ".agents/skills" && fs.existsSync(projectSkillsDir)) {
     return true;
   }
 

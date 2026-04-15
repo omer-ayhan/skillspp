@@ -6,21 +6,15 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 async function callMcpTool(input: object): Promise<any> {
-  const appRoot = path.resolve(
-    path.dirname(fileURLToPath(import.meta.url)),
-    "../.."
-  );
+  const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
   const child = spawn(
     process.execPath,
-    [
-      path.resolve(appRoot, "node_modules/tsx/dist/cli.mjs"),
-      path.resolve(appRoot, "src/index.ts"),
-    ],
+    [path.resolve(appRoot, "node_modules/tsx/dist/cli.mjs"), path.resolve(appRoot, "src/index.ts")],
     {
       cwd: appRoot,
       stdio: ["pipe", "pipe", "pipe"],
       env: process.env,
-    }
+    },
   );
 
   const chunks: Buffer[] = [];
@@ -38,9 +32,7 @@ async function callMcpTool(input: object): Promise<any> {
 
     const onData = () => {
       const output = Buffer.concat(chunks).toString("utf8");
-      const firstLine = output
-        .split(/\r?\n/)
-        .find((line) => line.trim().length > 0);
+      const firstLine = output.split(/\r?\n/).find((line) => line.trim().length > 0);
       if (firstLine) {
         clearTimeout(timeout);
         child.kill("SIGTERM");
@@ -52,9 +44,7 @@ async function callMcpTool(input: object): Promise<any> {
     child.once("error", reject);
     child.once("close", (code) => {
       const output = Buffer.concat(chunks).toString("utf8");
-      const firstLine = output
-        .split(/\r?\n/)
-        .find((line) => line.trim().length > 0);
+      const firstLine = output.split(/\r?\n/).find((line) => line.trim().length > 0);
       if (!firstLine) {
         const stderr = Buffer.concat(errChunks).toString("utf8");
         reject(new Error(`MCP process exited (${String(code)}): ${stderr}`));
@@ -73,7 +63,7 @@ describe("skills.validate MCP contract @contract", () => {
     fs.writeFileSync(
       path.join(skillDir, "SKILL.md"),
       "---\nname: demo-skill\ndescription: demo\n---\n\n# Demo\n",
-      "utf8"
+      "utf8",
     );
 
     const okResponse = await callMcpTool({

@@ -8,9 +8,7 @@ function buildUpdateCommand(): Command {
   const program = new Command().name("pluginspp").exitOverride();
   const context = createCliCommandContext(createTelemetryEmitter());
   registerUpdateCommand(program, context);
-  return program.commands.find(
-    (command) => command.name() === "update",
-  ) as Command;
+  return program.commands.find((command) => command.name() === "update") as Command;
 }
 
 describe("pluginspp update command @unit", () => {

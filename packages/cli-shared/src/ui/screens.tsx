@@ -3,11 +3,7 @@ import React, { type ReactNode, useEffect, useState } from "react";
 import { Box, Text, render, useInput, useStdout } from "ink";
 import type { Instance } from "ink";
 import { compactAgentDisplayNames, shortenHomePath } from "./format";
-import {
-  type AnimatedLogo,
-  getAnimatedLogoFrames,
-  getBannerLogoLines,
-} from "./logo";
+import { type AnimatedLogo, getAnimatedLogoFrames, getBannerLogoLines } from "./logo";
 import { ANSI_RESET, bold, colorToken, dim } from "./colors";
 import type { SelectionRow } from "@skillspp/core/agents";
 
@@ -96,10 +92,7 @@ function readAnsiSequence(text: string, index: number): string | null {
   return match?.[0] ?? null;
 }
 
-function splitVisiblePrefix(
-  text: string,
-  visibleChars: number,
-): { head: string; tail: string } {
+function splitVisiblePrefix(text: string, visibleChars: number): { head: string; tail: string } {
   const target = Math.max(0, Math.floor(visibleChars));
   if (target <= 0) {
     return { head: "", tail: text };
@@ -188,9 +181,7 @@ function center(text: string, width: number): string {
 }
 
 export function selectionHintsText(hints: SelectionKeyHint[]): string {
-  return hints
-    .map((hint) => `${dim(hint.key)} ${hint.action}`.trim())
-    .join("   ");
+  return hints.map((hint) => `${dim(hint.key)} ${hint.action}`.trim()).join("   ");
 }
 
 function resolveTerminalColumns(): number {
@@ -198,30 +189,17 @@ function resolveTerminalColumns(): number {
 }
 
 function resolveMaxInnerWidth(indent = "  "): number {
-  return Math.max(
-    MIN_INNER_WIDTH,
-    resolveTerminalColumns() - indent.length - FRAME_OVERHEAD,
-  );
+  return Math.max(MIN_INNER_WIDTH, resolveTerminalColumns() - indent.length - FRAME_OVERHEAD);
 }
 
-function clampToTerminalInnerWidth(
-  idealWidth: number,
-  minWidth: number,
-  indent = "  ",
-): number {
+function clampToTerminalInnerWidth(idealWidth: number, minWidth: number, indent = "  "): number {
   const maxInnerWidth = resolveMaxInnerWidth(indent);
   const lowerBound = Math.min(minWidth, maxInnerWidth);
   return Math.max(lowerBound, Math.min(idealWidth, maxInnerWidth));
 }
 
-function resolvePanelWidth(options: {
-  title: string;
-  lines: string[];
-  minWidth?: number;
-}): number {
-  const lineLengths = options.lines.map((line) =>
-    visibleLength(singleLine(line)),
-  );
+function resolvePanelWidth(options: { title: string; lines: string[]; minWidth?: number }): number {
+  const lineLengths = options.lines.map((line) => visibleLength(singleLine(line)));
   return Math.max(
     options.minWidth ?? DEFAULT_PANEL_MIN_WIDTH,
     singleLine(options.title).length + 4,
@@ -235,10 +213,7 @@ export function resolveSelectionColumnWidths(
   targetDescWidth: number,
 ): { labelWidth: number; descWidth: number } {
   const availableColumns = Math.max(8, innerWidth - SELECTION_ROW_OVERHEAD);
-  const targetTotal = Math.max(
-    8,
-    targetLabelWidth + Math.max(0, targetDescWidth),
-  );
+  const targetTotal = Math.max(8, targetLabelWidth + Math.max(0, targetDescWidth));
   if (availableColumns >= targetTotal) {
     return {
       labelWidth: targetLabelWidth,
@@ -275,25 +250,13 @@ function renderFramedPanel(options: {
   const bottomRight = options.style === "rounded" ? "╯" : "┘";
 
   const out: string[] = [];
-  out.push(
-    `${options.indent}${dim(
-      `${topLeft}─ ${title} ${"─".repeat(topTail)}${topRight}`,
-    )}`,
-  );
+  out.push(`${options.indent}${dim(`${topLeft}─ ${title} ${"─".repeat(topTail)}${topRight}`)}`);
   for (const line of options.lines) {
     for (const wrappedLine of wrapVisibleLine(line, width)) {
-      out.push(
-        `${options.indent}${dim("│")} ${padRight(wrappedLine, width)} ${dim(
-          "│",
-        )}`,
-      );
+      out.push(`${options.indent}${dim("│")} ${padRight(wrappedLine, width)} ${dim("│")}`);
     }
   }
-  out.push(
-    `${options.indent}${dim(
-      `${bottomLeft}${"─".repeat(bottomWidth)}${bottomRight}`,
-    )}`,
-  );
+  out.push(`${options.indent}${dim(`${bottomLeft}${"─".repeat(bottomWidth)}${bottomRight}`)}`);
   return out.join("\n");
 }
 
@@ -362,11 +325,7 @@ export function resolveSelectionPanelLayout(options: {
     options.minWidth ?? DEFAULT_PANEL_MIN_WIDTH,
     indent,
   );
-  const columns = resolveSelectionColumnWidths(
-    width,
-    options.labelWidth,
-    options.descWidth,
-  );
+  const columns = resolveSelectionColumnWidths(width, options.labelWidth, options.descWidth);
   return {
     width,
     labelWidth: columns.labelWidth,
@@ -400,10 +359,7 @@ function renderSectionToText(section: UiSection): string {
   switch (section.type) {
     case "banner": {
       const logoLines = getBannerLogoLines();
-      const widestLogoLine = logoLines.reduce(
-        (max, line) => Math.max(max, visibleLength(line)),
-        0,
-      );
+      const widestLogoLine = logoLines.reduce((max, line) => Math.max(max, visibleLength(line)), 0);
       const resolvedWidth = clampToTerminalInnerWidth(
         Math.max(
           section.width ?? DEFAULT_BANNER_WIDTH,
@@ -467,10 +423,7 @@ function HistoryText({ text }: { text: string }) {
 }
 
 function renderPinnedLogoHeaderText(lines: string[]): string {
-  const widestLogoLine = lines.reduce(
-    (max, line) => Math.max(max, visibleLength(line)),
-    0,
-  );
+  const widestLogoLine = lines.reduce((max, line) => Math.max(max, visibleLength(line)), 0);
   const resolvedWidth = clampToTerminalInnerWidth(
     Math.max(PINNED_LOGO_HEADER_WIDTH, widestLogoLine),
     Math.max(1, widestLogoLine),
@@ -479,9 +432,7 @@ function renderPinnedLogoHeaderText(lines: string[]): string {
   return finalizeUiBlock(bodyLines.join("\n"));
 }
 
-const AnimatedLogoHeader = React.memo(function AnimatedLogoHeader(props: {
-  logo: AnimatedLogo;
-}) {
+const AnimatedLogoHeader = React.memo(function AnimatedLogoHeader(props: { logo: AnimatedLogo }) {
   const [frameIndex, setFrameIndex] = useState(0);
 
   useEffect(() => {
@@ -499,8 +450,7 @@ const AnimatedLogoHeader = React.memo(function AnimatedLogoHeader(props: {
     };
   }, [props.logo]);
 
-  const frameLines =
-    props.logo.frames[frameIndex] ?? props.logo.frames[0] ?? [];
+  const frameLines = props.logo.frames[frameIndex] ?? props.logo.frames[0] ?? [];
   return (
     <Box flexDirection="column" marginBottom={PINNED_LOGO_BOTTOM_MARGIN_LINES}>
       <HistoryText text={renderPinnedLogoHeaderText(frameLines)} />
@@ -687,10 +637,7 @@ function renderSectionToTextWithLogoLines(
   }
 
   const logoLines = logoLinesOverride ?? getBannerLogoLines();
-  const widestLogoLine = logoLines.reduce(
-    (max, line) => Math.max(max, visibleLength(line)),
-    0,
-  );
+  const widestLogoLine = logoLines.reduce((max, line) => Math.max(max, visibleLength(line)), 0);
   const resolvedWidth = clampToTerminalInnerWidth(
     Math.max(
       section.width ?? DEFAULT_BANNER_WIDTH,
@@ -706,18 +653,11 @@ function renderSectionToTextWithLogoLines(
     center(section.title, resolvedWidth),
   ];
   return finalizeUiBlock(
-    [
-      `╭${border}╮`,
-      ...bodyLines.map((line) => `│${line}│`),
-      `╰${border}╯`,
-    ].join("\n"),
+    [`╭${border}╮`, ...bodyLines.map((line) => `│${line}│`), `╰${border}╯`].join("\n"),
   );
 }
 
-function freezeBannerSections(
-  sections: UiSection[],
-  logoLines: string[],
-): UiSection[] {
+function freezeBannerSections(sections: UiSection[], logoLines: string[]): UiSection[] {
   return sections.map((section) => {
     if (section.type !== "banner") {
       return section;
@@ -729,15 +669,11 @@ function freezeBannerSections(
   });
 }
 
-export function filterBannerSectionsForGlobalMode(
-  sections: UiSection[],
-): UiSection[] {
+export function filterBannerSectionsForGlobalMode(sections: UiSection[]): UiSection[] {
   return sections.filter((section) => section.type !== "banner");
 }
 
-export function setLiveScreen(
-  renderer: ((resizeTick: number) => ReactNode) | null,
-): void {
+export function setLiveScreen(renderer: ((resizeTick: number) => ReactNode) | null): void {
   getSession().setLiveRenderer(renderer);
 }
 
@@ -785,36 +721,24 @@ export function linesSection(lines: string[]): UiSection {
   return { type: "lines", lines };
 }
 
-export function statusStepsSection(
-  steps: Array<{ status: StepStatus; label: string }>,
-): UiSection {
+export function statusStepsSection(steps: Array<{ status: StepStatus; label: string }>): UiSection {
   return linesSection(
     steps.map(({ status, label }) => {
-      const marker =
-        status === "failed"
-          ? colorToken("x", "danger")
-          : colorToken("✓", "success");
+      const marker = status === "failed" ? colorToken("x", "danger") : colorToken("✓", "success");
       return `  ${marker} ${singleLine(label)}`;
     }),
   );
 }
 
 export function completedStepsSection(steps: string[]): UiSection {
-  return statusStepsSection(
-    steps.map((step) => ({ status: "completed" as const, label: step })),
-  );
+  return statusStepsSection(steps.map((step) => ({ status: "completed" as const, label: step })));
 }
 
 export function failedStepsSection(steps: string[]): UiSection {
-  return statusStepsSection(
-    steps.map((step) => ({ status: "failed" as const, label: step })),
-  );
+  return statusStepsSection(steps.map((step) => ({ status: "failed" as const, label: step })));
 }
 
-export function sourceSection(
-  source: string,
-  label: string = "Skills source",
-): UiSection {
+export function sourceSection(source: string, label: string = "Skills source"): UiSection {
   return { type: "source", source: `${label}: ${source}` };
 }
 
@@ -834,9 +758,7 @@ export function completionSummarySection(options: {
   ]);
 }
 
-export function removeCompletionSummarySection(
-  removedCount: number,
-): UiSection {
+export function removeCompletionSummarySection(removedCount: number): UiSection {
   return linesSection(["Done.", `Total removed: ${removedCount}`]);
 }
 
@@ -862,10 +784,7 @@ export function installationSummarySection(options: {
     )}   ${bold("Agents:")} ${colorToken(
       options.agentCount.toString(),
       "primary",
-    )}   ${bold("Targets:")} ${colorToken(
-      options.targetCount.toString(),
-      "primary",
-    )}`,
+    )}   ${bold("Targets:")} ${colorToken(options.targetCount.toString(), "primary")}`,
     "",
     bold("Targets:"),
   ];
@@ -918,10 +837,7 @@ export function uninstallSummarySection(options: {
 }
 
 export function manySelectionClosedSection(
-  config: Pick<
-    ManySelectionViewConfig,
-    "title" | "labelWidth" | "descWidth" | "minWidth"
-  >,
+  config: Pick<ManySelectionViewConfig, "title" | "labelWidth" | "descWidth" | "minWidth">,
   rows: SelectionRow[],
   selectedIds: string[],
 ): UiSection {
@@ -1050,7 +966,5 @@ export function Spinner({ label }: { label: string }) {
     return () => clearInterval(timer);
   }, []);
 
-  return (
-    <Text>{`  ${colorToken(frames[frameIndex], "primary")} ${label}`}</Text>
-  );
+  return <Text>{`  ${colorToken(frames[frameIndex], "primary")} ${label}`}</Text>;
 }

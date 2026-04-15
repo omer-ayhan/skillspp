@@ -1,12 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type {
-  AgentType,
-  InstallMode,
-  Plugin,
-  Skill,
-} from "../contracts/runtime-types";
+import type { AgentType, InstallMode, Plugin, Skill } from "../contracts/runtime-types";
 import { getAgentPluginsDir, getAgentSkillsDir } from "./agents";
 
 export type InstallOutcome = {
@@ -27,28 +22,19 @@ function ensureSafeInside(baseDir: string, target: string): void {
   const resolvedBase = path.resolve(baseDir);
   const resolvedTarget = path.resolve(target);
   if (
-    !(
-      resolvedTarget === resolvedBase ||
-      resolvedTarget.startsWith(`${resolvedBase}${path.sep}`)
-    )
+    !(resolvedTarget === resolvedBase || resolvedTarget.startsWith(`${resolvedBase}${path.sep}`))
   ) {
     throw new Error(`Unsafe path detected: ${target}`);
   }
 }
 
-export function getCanonicalSkillsBaseDir(
-  globalInstall: boolean,
-  cwd: string,
-): string {
+export function getCanonicalSkillsBaseDir(globalInstall: boolean, cwd: string): string {
   return globalInstall
     ? path.join(os.homedir(), ".config", "agents", "skills")
     : path.join(cwd, ".agents", "skills");
 }
 
-export function getCanonicalPluginsBaseDir(
-  globalInstall: boolean,
-  cwd: string,
-): string {
+export function getCanonicalPluginsBaseDir(globalInstall: boolean, cwd: string): string {
   return globalInstall
     ? path.join(os.homedir(), ".config", "agents", "plugins", "cache")
     : path.join(cwd, ".agents", "plugins", "cache");
@@ -69,11 +55,7 @@ function installToAgent(
   mode: InstallMode,
   globalInstall: boolean,
   cwd: string,
-  resolveAgentBaseDir: (
-    agent: AgentType,
-    globalInstall: boolean,
-    cwd: string,
-  ) => string,
+  resolveAgentBaseDir: (agent: AgentType, globalInstall: boolean, cwd: string) => string,
 ): { agent: AgentType; path: string; mode: InstallMode } {
   const agentBase = resolveAgentBaseDir(agent, globalInstall, cwd);
   const agentDir = path.join(agentBase, itemName);
@@ -165,16 +147,8 @@ export function installSkill(
   const uniqueAgents = Array.from(new Set(agents));
   const skillName = sanitizeSkillName(skill.name);
   const canonicalAgent = uniqueAgents[0];
-  const canonicalBase = getAgentSkillsDir(
-    canonicalAgent,
-    options.globalInstall,
-    options.cwd,
-  );
-  const canonicalDir = installToCanonicalDir(
-    skill.path,
-    skillName,
-    canonicalBase,
-  );
+  const canonicalBase = getAgentSkillsDir(canonicalAgent, options.globalInstall, options.cwd);
+  const canonicalDir = installToCanonicalDir(skill.path, skillName, canonicalBase);
 
   const installedTo = [
     { agent: canonicalAgent, path: canonicalDir, mode: options.mode },
@@ -211,16 +185,8 @@ export function installPlugin(
   const uniqueAgents = Array.from(new Set(agents));
   const pluginName = sanitizeSkillName(plugin.name);
   const canonicalAgent = uniqueAgents[0];
-  const canonicalBase = getAgentPluginsDir(
-    canonicalAgent,
-    options.globalInstall,
-    options.cwd,
-  );
-  const canonicalDir = installToCanonicalDir(
-    plugin.path,
-    pluginName,
-    canonicalBase,
-  );
+  const canonicalBase = getAgentPluginsDir(canonicalAgent, options.globalInstall, options.cwd);
+  const canonicalDir = installToCanonicalDir(plugin.path, pluginName, canonicalBase);
 
   const installedTo = [
     { agent: canonicalAgent, path: canonicalDir, mode: options.mode },

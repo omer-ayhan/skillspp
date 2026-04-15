@@ -1,11 +1,4 @@
-export type ColorToken =
-  | "primary"
-  | "success"
-  | "danger"
-  | "warning"
-  | "accent"
-  | "muted"
-  | "info";
+export type ColorToken = "primary" | "success" | "danger" | "warning" | "accent" | "muted" | "info";
 
 const ANSI_ESCAPE = "\x1b[";
 export const ANSI_RESET = "\x1b[0m";
@@ -27,22 +20,14 @@ function isColorEnabled(explicit?: boolean): boolean {
   return Boolean(process.stdout.isTTY) && !process.env.NO_COLOR;
 }
 
-export function ansiStyle(
-  text: string,
-  code: string,
-  colorEnabled?: boolean,
-): string {
+export function ansiStyle(text: string, code: string, colorEnabled?: boolean): string {
   if (!isColorEnabled(colorEnabled)) {
     return text;
   }
   return `${ANSI_ESCAPE}${code}m${text}${ANSI_RESET}`;
 }
 
-export function colorToken(
-  text: string,
-  token: ColorToken,
-  colorEnabled?: boolean,
-): string {
+export function colorToken(text: string, token: ColorToken, colorEnabled?: boolean): string {
   return ansiStyle(text, COLOR_TOKENS[token], colorEnabled);
 }
 

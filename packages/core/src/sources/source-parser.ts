@@ -21,9 +21,7 @@ export function parseSource(input: string): ParsedSource {
     return { type: "local", localPath: path.resolve(input) };
   }
 
-  const githubTreeWithPath = input.match(
-    /github\.com\/([^/]+)\/([^/]+)\/tree\/([^/]+)\/(.+)/
-  );
+  const githubTreeWithPath = input.match(/github\.com\/([^/]+)\/([^/]+)\/tree\/([^/]+)\/(.+)/);
   if (githubTreeWithPath) {
     const [, owner, repo, ref, subpath] = githubTreeWithPath;
     return {
@@ -34,9 +32,7 @@ export function parseSource(input: string): ParsedSource {
     };
   }
 
-  const githubTree = input.match(
-    /github\.com\/([^/]+)\/([^/]+)\/tree\/([^/]+)$/
-  );
+  const githubTree = input.match(/github\.com\/([^/]+)\/([^/]+)\/tree\/([^/]+)$/);
   if (githubTree) {
     const [, owner, repo, ref] = githubTree;
     return {

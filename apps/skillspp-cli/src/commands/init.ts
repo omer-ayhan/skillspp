@@ -7,10 +7,7 @@ import {
   normalizeAgentSelectionInput,
   resolveAgents,
 } from "@skillspp/core/agents";
-import {
-  askText,
-  canUseInteractive,
-} from "@skillspp/cli-shared/interactive";
+import { askText, canUseInteractive } from "@skillspp/cli-shared/interactive";
 import { buildAgentConfigScaffoldPlan } from "@skillspp/core/runtime/agent-config-mapper";
 import type { InstallerScaffoldFormat } from "@skillspp/core/runtime/installer-scaffold";
 import { scaffoldInstallerConfigFile } from "@skillspp/core/runtime/installer-scaffold";
@@ -149,9 +146,7 @@ async function chooseInitOne<T extends string>(options: {
     })),
   );
 
-  const labelByValue = new Map(
-    options.choices.map((choice) => [choice.value, choice.label]),
-  );
+  const labelByValue = new Map(options.choices.map((choice) => [choice.value, choice.label]));
   const selected = await runOneSelectionStep({
     interactive: true,
     rows,
@@ -253,11 +248,7 @@ async function collectAnswers(options: InitOptions): Promise<InitAnswers> {
   const answers: InitAnswers = { ...defaults };
   for (const question of initQuestions) {
     if (!question.when(interactive)) {
-      setAnswer(
-        answers,
-        question.id,
-        question.normalize(answers[question.id], defaults),
-      );
+      setAnswer(answers, question.id, question.normalize(answers[question.id], defaults));
       continue;
     }
 
@@ -277,9 +268,7 @@ async function resolveInitAgents(options: InitOptions): Promise<AgentType[]> {
   const rows = buildInitAgentRows(ALL_AGENTS);
   const normalized = normalizeAgentSelectionInput(options.agent);
   if (normalized && normalized.length > 0) {
-    const selected = normalized.includes("*")
-      ? ALL_AGENTS
-      : resolveAgents(normalized);
+    const selected = normalized.includes("*") ? ALL_AGENTS : resolveAgents(normalized);
     const selectedIds = await runManySelectionStep({
       interactive,
       rows,
@@ -292,16 +281,13 @@ async function resolveInitAgents(options: InitOptions): Promise<AgentType[]> {
         keyHints: INIT_AGENTS_KEY_HINTS,
         view: INIT_AGENTS_SELECTION_VIEW,
       },
-      renderClosed: (selectedRowIds) =>
-        renderInitAgentsClosedPanel(selectedRowIds),
+      renderClosed: (selectedRowIds) => renderInitAgentsClosedPanel(selectedRowIds),
     });
     return selectedIds as AgentType[];
   }
 
   if (!interactive) {
-    throw new Error(
-      "Missing --agent in non-interactive mode. Provide at least one agent.",
-    );
+    throw new Error("Missing --agent in non-interactive mode. Provide at least one agent.");
   }
 
   const selected = await runManySelectionStep({
@@ -317,8 +303,7 @@ async function resolveInitAgents(options: InitOptions): Promise<AgentType[]> {
       initialSelectedIds: ALL_AGENTS,
       view: INIT_AGENTS_SELECTION_VIEW,
     },
-    renderClosed: (selectedRowIds) =>
-      renderInitAgentsClosedPanel(selectedRowIds),
+    renderClosed: (selectedRowIds) => renderInitAgentsClosedPanel(selectedRowIds),
   });
   if (selected.length === 0) {
     throw new Error("At least one agent must be selected");
@@ -339,9 +324,7 @@ function buildTemplateBody(template: InitTemplate): string {
 }
 
 function renderSkillContent(answers: InitAnswers): string {
-  return `---\nname: ${answers.name}\ndescription: ${
-    answers.description
-  }\n---\n\n# ${
+  return `---\nname: ${answers.name}\ndescription: ${answers.description}\n---\n\n# ${
     answers.name
   }\n\nInstructions for the agent to follow when this skill is activated.\n\n${buildTemplateBody(
     answers.template,
@@ -358,24 +341,18 @@ function ensureInsideSkillDir(skillDir: string, relativePath: string): string {
 }
 
 export async function runInit(args: string[]): Promise<void> {
-  const command = configureInitCommand(
-    new Command().name("init"),
-    async (name, options) => {
-      await executeInit({
-        nameArg: name,
-        nonInteractive: Boolean(options.nonInteractive),
-        yaml: Boolean(options.yaml),
-        agent: options.agent,
-      });
-    },
-  );
+  const command = configureInitCommand(new Command().name("init"), async (name, options) => {
+    await executeInit({
+      nameArg: name,
+      nonInteractive: Boolean(options.nonInteractive),
+      yaml: Boolean(options.yaml),
+      agent: options.agent,
+    });
+  });
   await parseStandaloneCommand(command, args);
 }
 
-async function executeInit(
-  options: InitOptions,
-  hooks?: InitExecutionHooks,
-): Promise<void> {
+async function executeInit(options: InitOptions, hooks?: InitExecutionHooks): Promise<void> {
   const answers = await collectAnswers(options);
   const agents = await resolveInitAgents(options);
   const agentConfigPlan = buildAgentConfigScaffoldPlan(agents, {
@@ -391,16 +368,12 @@ async function executeInit(
     `Target directory: ${shortenHomePath(skillDir)}`,
     `Output file: ${shortenHomePath(skillFile)}`,
     `Installer format: ${answers.installerFormat.toUpperCase()}`,
-    `Template: ${answers.template
-      .charAt(0)
-      .toUpperCase()}${answers.template.slice(1)}`,
+    `Template: ${answers.template.charAt(0).toUpperCase()}${answers.template.slice(1)}`,
     `Mapped agent configs: ${agentConfigPlan.mapped.length}`,
   ];
   if (agentConfigPlan.unmapped.length > 0) {
     summaryLines.push(
-      `Unmapped agents (skipped): ${agentConfigPlan.unmapped.join(
-        ", ",
-      )} (no scaffold mapping)`,
+      `Unmapped agents (skipped): ${agentConfigPlan.unmapped.join(", ")} (no scaffold mapping)`,
     );
   }
   summaryLines.push("");
@@ -482,41 +455,32 @@ type InitCommanderOptions = {
 
 function configureInitCommand(
   command: Command,
-  action: (
-    name: string | undefined,
-    options: InitCommanderOptions,
-  ) => Promise<void>,
+  action: (name: string | undefined, options: InitCommanderOptions) => Promise<void>,
 ): Command {
   return command
     .description("Create a new SKILL.md template")
     .argument("[name]", "Optional skill directory/name")
     .option("-a, --agent <agents...>", "Target agent(s) for config scaffolding")
-    .option(
-      "--yaml",
-      "Create skill-installer.yaml when scaffolding installer config",
-    )
+    .option("--yaml", "Create skill-installer.yaml when scaffolding installer config")
     .option("--non-interactive", "Disable prompts")
     .action(action);
 }
 
-export function registerInitCommand(
-  program: Command,
-  ctx: CliCommandContext,
-): void {
+export function registerInitCommand(program: Command, ctx: CliCommandContext): void {
   configureInitCommand(
     program.command("init"),
-    ctx.wrapAction(
-      "init",
-      async (name: string | undefined, options: InitCommanderOptions) => {
-        await executeInit({
+    ctx.wrapAction("init", async (name: string | undefined, options: InitCommanderOptions) => {
+      await executeInit(
+        {
           nameArg: name,
           nonInteractive: Boolean(options.nonInteractive),
           yaml: Boolean(options.yaml),
           agent: options.agent,
-        }, {
+        },
+        {
           emitCommandEvent: (event) => ctx.emitCommandEvent("init", event),
-        });
-      },
-    ),
+        },
+      );
+    }),
   );
 }

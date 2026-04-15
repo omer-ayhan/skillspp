@@ -83,10 +83,7 @@ type VisibleSelectionRow = {
 
 const DEFAULT_REQUIRED_MESSAGE = "At least one choice must be selected";
 
-function assertPromptAllowed(
-  shouldPrompt: boolean,
-  interactive: boolean,
-): void {
+function assertPromptAllowed(shouldPrompt: boolean, interactive: boolean): void {
   if (shouldPrompt && !interactive) {
     throw new Error("Selection prompt requested in non-interactive mode.");
   }
@@ -102,9 +99,7 @@ export function filterSelectionRowIndexes(
   }
 
   return rows.reduce<number[]>((acc, row, index) => {
-    const haystack = `${row.label} ${row.description || ""}`.toLocaleLowerCase(
-      "en-US",
-    );
+    const haystack = `${row.label} ${row.description || ""}`.toLocaleLowerCase("en-US");
     if (haystack.includes(normalized)) {
       acc.push(index);
     }
@@ -134,16 +129,11 @@ export function setAllRowsSelected(
   return rows.map((row) => ({ ...row, selected }));
 }
 
-export function invertRowsSelection(
-  rows: SelectableRowState[],
-): SelectableRowState[] {
+export function invertRowsSelection(rows: SelectableRowState[]): SelectableRowState[] {
   return rows.map((row) => ({ ...row, selected: !row.selected }));
 }
 
-export function clampActiveVisibleIndex(
-  activeVisibleIndex: number,
-  visibleCount: number,
-): number {
+export function clampActiveVisibleIndex(activeVisibleIndex: number, visibleCount: number): number {
   if (visibleCount <= 0) {
     return 0;
   }
@@ -191,9 +181,7 @@ function buildRenderModel(options: {
       label: row.label,
       description: row.description,
     })),
-    visibleRowIds: options.visibleIndexes.map(
-      (index) => options.rows[index].id,
-    ),
+    visibleRowIds: options.visibleIndexes.map((index) => options.rows[index].id),
     activeVisibleIndex: options.activeVisibleIndex,
     selectedIds: options.selectedIds ?? selectedRowIds(options.rows),
     searchable: Boolean(options.request.searchable),
@@ -287,14 +275,8 @@ export function renderSingleSelectionOpenPanel(
   model: SelectionRenderModel,
 ): string {
   const visibleRows = toVisibleRows(model);
-  const maxLabelWidth = visibleRows.reduce(
-    (max, row) => Math.max(max, row.label.length),
-    8,
-  );
-  const maxDescWidth = visibleRows.reduce(
-    (max, row) => Math.max(max, row.description.length),
-    0,
-  );
+  const maxLabelWidth = visibleRows.reduce((max, row) => Math.max(max, row.label.length), 8);
+  const maxDescWidth = visibleRows.reduce((max, row) => Math.max(max, row.description.length), 0);
   const layout = resolveSelectionPanelLayout({
     title: config.title,
     staticLines: [config.instructionLine, "↑↓ navigate   enter confirm"],
@@ -347,9 +329,7 @@ function MultiSelectPrompt(props: {
   onSubmit: (selectedIds: string[]) => void;
   onCancel: (error: Error) => void;
 }) {
-  const initialSelectedIds = new Set(
-    props.options.initialSelectedIds || props.selectedIds || [],
-  );
+  const initialSelectedIds = new Set(props.options.initialSelectedIds || props.selectedIds || []);
   const [rows, setRows] = useState<SelectableRowState[]>(
     props.rows.map((row) => ({
       ...row,
@@ -360,17 +340,10 @@ function MultiSelectPrompt(props: {
   const [activeVisibleIndex, setActiveVisibleIndex] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const visibleIndexes = useMemo(
-    () =>
-      filterSelectionRowIndexes(
-        rows,
-        props.options.searchable !== false ? searchTerm : "",
-      ),
+    () => filterSelectionRowIndexes(rows, props.options.searchable !== false ? searchTerm : ""),
     [rows, searchTerm, props.options.searchable],
   );
-  const clampedIndex = clampActiveVisibleIndex(
-    activeVisibleIndex,
-    visibleIndexes.length,
-  );
+  const clampedIndex = clampActiveVisibleIndex(activeVisibleIndex, visibleIndexes.length);
 
   useInput((input, key) => {
     if (key.ctrl && input === "c") {
@@ -383,9 +356,7 @@ function MultiSelectPrompt(props: {
     }
     if (key.upArrow) {
       if (visibleIndexes.length > 0) {
-        setActiveVisibleIndex(
-          (clampedIndex - 1 + visibleIndexes.length) % visibleIndexes.length,
-        );
+        setActiveVisibleIndex((clampedIndex - 1 + visibleIndexes.length) % visibleIndexes.length);
       }
       setErrorMessage(undefined);
       return;
@@ -398,9 +369,7 @@ function MultiSelectPrompt(props: {
       return;
     }
     if (input === " ") {
-      setRows((prev) =>
-        toggleSelectionAtVisibleIndex(prev, visibleIndexes, clampedIndex),
-      );
+      setRows((prev) => toggleSelectionAtVisibleIndex(prev, visibleIndexes, clampedIndex));
       setErrorMessage(undefined);
       return;
     }
@@ -428,21 +397,13 @@ function MultiSelectPrompt(props: {
     if (key.return) {
       const selectedIds = selectedRowIds(rows);
       if ((props.options.required ?? true) && selectedIds.length === 0) {
-        setErrorMessage(
-          props.options.requiredMessage || DEFAULT_REQUIRED_MESSAGE,
-        );
+        setErrorMessage(props.options.requiredMessage || DEFAULT_REQUIRED_MESSAGE);
         return;
       }
       props.onSubmit(selectedIds);
       return;
     }
-    if (
-      props.options.searchable !== false &&
-      input &&
-      !key.ctrl &&
-      !key.meta &&
-      input !== " "
-    ) {
+    if (props.options.searchable !== false && input && !key.ctrl && !key.meta && input !== " ") {
       setSearchTerm((prev) => appendSearchChar(prev, input));
       setActiveVisibleIndex(0);
       setErrorMessage(undefined);
@@ -494,9 +455,7 @@ function SingleSelectPrompt(props: {
     }
     if (key.upArrow) {
       setActiveVisibleIndex((prev) =>
-        props.rows.length === 0
-          ? 0
-          : (prev - 1 + props.rows.length) % props.rows.length,
+        props.rows.length === 0 ? 0 : (prev - 1 + props.rows.length) % props.rows.length,
       );
       setErrorMessage(undefined);
       return;
@@ -511,9 +470,7 @@ function SingleSelectPrompt(props: {
     if (key.return) {
       const selectedId = props.rows[activeVisibleIndex]?.id || "";
       if ((props.options.required ?? true) && !selectedId) {
-        setErrorMessage(
-          props.options.requiredMessage || DEFAULT_REQUIRED_MESSAGE,
-        );
+        setErrorMessage(props.options.requiredMessage || DEFAULT_REQUIRED_MESSAGE);
         return;
       }
       props.onSubmit(selectedId);
@@ -572,9 +529,7 @@ export async function runManySelectionStep(
   return selectedIds;
 }
 
-export async function runOneSelectionStep(
-  options: RunOneSelectionStepOptions,
-): Promise<string> {
+export async function runOneSelectionStep(options: RunOneSelectionStepOptions): Promise<string> {
   assertPromptAllowed(options.shouldPrompt, options.interactive);
 
   let selectedId = options.selectedId || "";

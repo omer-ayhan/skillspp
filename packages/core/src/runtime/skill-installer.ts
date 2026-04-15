@@ -76,9 +76,7 @@ export class InstallerSecurityError extends Error {
   }
 }
 
-export function isInstallerSecurityError(
-  error: unknown,
-): error is InstallerSecurityError {
+export function isInstallerSecurityError(error: unknown): error is InstallerSecurityError {
   return error instanceof InstallerSecurityError;
 }
 
@@ -102,9 +100,7 @@ export class InstallerPolicyError extends Error {
   }
 }
 
-export function isInstallerPolicyError(
-  error: unknown,
-): error is InstallerPolicyError {
+export function isInstallerPolicyError(error: unknown): error is InstallerPolicyError {
   return error instanceof InstallerPolicyError;
 }
 
@@ -166,9 +162,7 @@ function parseRepoSource(source: string): {
     .trim()
     .replace(/^https?:\/\//, "")
     .replace(/\/+$/, "");
-  const match = withoutProtocol.match(
-    /^(github\.com|gitlab\.com)\/([^/]+)\/([^/]+?)(?:\.git)?$/,
-  );
+  const match = withoutProtocol.match(/^(github\.com|gitlab\.com)\/([^/]+)\/([^/]+?)(?:\.git)?$/);
   if (!match) {
     throw new Error(`Unsupported repository dependency source: ${source}`);
   }
@@ -188,9 +182,7 @@ function deriveDestinationNameFromSource(source: string): string {
     const parts = parsed.pathname.split("/").filter(Boolean);
     const leaf = parts[parts.length - 1];
     if (!leaf) {
-      throw new Error(
-        `Cannot derive dependency name from URL source: ${source}`,
-      );
+      throw new Error(`Cannot derive dependency name from URL source: ${source}`);
     }
     return leaf;
   }
@@ -206,9 +198,7 @@ function deriveDestinationNameFromSource(source: string): string {
   return leaf;
 }
 
-export function classifyDependencySource(
-  source: string,
-): "url" | "repo" | "local" {
+export function classifyDependencySource(source: string): "url" | "repo" | "local" {
   if (sourceLooksLikeUrl(source)) {
     return "url";
   }
@@ -220,9 +210,7 @@ export function classifyDependencySource(
 
 function parseConfigObject(raw: unknown): InstallerConfig {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
-    throw new Error(
-      "Invalid skill-installer config: expected an object with top-level keys",
-    );
+    throw new Error("Invalid skill-installer config: expected an object with top-level keys");
   }
 
   const parsed = raw as Record<string, unknown>;
@@ -254,9 +242,7 @@ function parseConfigObject(raw: unknown): InstallerConfig {
 
   const validated = installerConfigSchema.safeParse(parsed);
   if (!validated.success) {
-    const reason = validated.error.issues
-      .map((issue) => issue.message)
-      .join("; ");
+    const reason = validated.error.issues.map((issue) => issue.message).join("; ");
     throw new Error(
       `Invalid skill-installer config: ${reason}. Use docs/proposed-skill-format.md as the source-of-truth for schemaVersion, dependencies, pre-install, and post-install.`,
     );
@@ -283,11 +269,7 @@ function assertNoLegacyInstallerBlock(skillDir: string): void {
     string,
     unknown
   > | null;
-  if (
-    parsed &&
-    typeof parsed === "object" &&
-    typeof parsed["skill-installer"] !== "undefined"
-  ) {
+  if (parsed && typeof parsed === "object" && typeof parsed["skill-installer"] !== "undefined") {
     throw new Error(
       "Legacy skill-installer config detected in agents/openai.yaml. Move it to skill-installer.yaml or skill-installer.json.",
     );
@@ -345,9 +327,8 @@ function runHookPhase(
 
     if (result.status !== 0) {
       const message =
-        (result.stderr || result.stdout || "command failed")
-          .trim()
-          .split(/\r?\n/)[0] || "command failed";
+        (result.stderr || result.stdout || "command failed").trim().split(/\r?\n/)[0] ||
+        "command failed";
       throw new Error(`${phase} command failed: ${command} (${message})`);
     }
   }
@@ -371,22 +352,15 @@ function resolveDependencySourceAndTarget(dep: Dependency): {
 }
 
 function runGitClone(repoUrl: string, targetDir: string): void {
-  const result = spawnSync(
-    "git",
-    ["clone", "--depth", "1", repoUrl, targetDir],
-    {
-      encoding: "utf8",
-      stdio: "pipe",
-    },
-  );
+  const result = spawnSync("git", ["clone", "--depth", "1", repoUrl, targetDir], {
+    encoding: "utf8",
+    stdio: "pipe",
+  });
   if (result.status !== 0) {
     const message =
-      (result.stderr || result.stdout || "git clone failed")
-        .trim()
-        .split(/\r?\n/)[0] || "git clone failed";
-    throw new Error(
-      `Repository dependency clone failed: ${repoUrl} (${message})`,
-    );
+      (result.stderr || result.stdout || "git clone failed").trim().split(/\r?\n/)[0] ||
+      "git clone failed";
+    throw new Error(`Repository dependency clone failed: ${repoUrl} (${message})`);
   }
 }
 
@@ -410,12 +384,9 @@ async function prepareDependency(
       policyMode,
     );
     if (!evaluation.ok) {
-      const violation =
-        "violation" in evaluation ? evaluation.violation : undefined;
+      const violation = "violation" in evaluation ? evaluation.violation : undefined;
       if (!violation) {
-        throw new Error(
-          `Dependency[${index}] policy evaluation failed for source: ${source}`,
-        );
+        throw new Error(`Dependency[${index}] policy evaluation failed for source: ${source}`);
       }
       if (violation.blocking) {
         throw new InstallerSecurityError(violation);
@@ -425,13 +396,9 @@ async function prepareDependency(
         message: `[skills] ${violation.message}`,
       });
     }
-    const sourcePath = evaluation.ok
-      ? evaluation.resolvedPath
-      : path.resolve(sourceCwd, source);
+    const sourcePath = evaluation.ok ? evaluation.resolvedPath : path.resolve(sourceCwd, source);
     if (!fs.existsSync(sourcePath)) {
-      throw new Error(
-        `Dependency[${index}] (local) source not found: ${source}`,
-      );
+      throw new Error(`Dependency[${index}] (local) source not found: ${source}`);
     }
     // Read access preflight; actual copy happens once during apply.
     fs.accessSync(sourcePath, fs.constants.R_OK);
@@ -451,9 +418,7 @@ async function prepareDependency(
   if (sourceKind === "repo") {
     const stagePath = ensureInsideRoot(
       stagingDir,
-      `repo-${index}-${path
-        .basename(targetPath)
-        .replace(/[^a-zA-Z0-9._-]/g, "_")}`,
+      `repo-${index}-${path.basename(targetPath).replace(/[^a-zA-Z0-9._-]/g, "_")}`,
     );
     const { repoUrl } = parseRepoSource(source);
     runGitClone(repoUrl, stagePath);
@@ -472,9 +437,7 @@ async function prepareDependency(
 
   const target = new URL(source);
   if (target.protocol !== "http:" && target.protocol !== "https:") {
-    throw new Error(
-      `Dependency[${index}] (remote) unsupported protocol: ${target.protocol}`,
-    );
+    throw new Error(`Dependency[${index}] (remote) unsupported protocol: ${target.protocol}`);
   }
 
   const response = await fetch(target.toString());
@@ -528,10 +491,7 @@ export async function prepareInstallerArtifacts(
     if (!trustDecision.allowed && trustDecision.violation) {
       throw new InstallerPolicyError(trustDecision.violation);
     }
-    if (
-      trustDecision.allowed &&
-      trustDecision.violation?.severity === "warning"
-    ) {
+    if (trustDecision.allowed && trustDecision.violation?.severity === "warning") {
       events.push({
         level: "warning",
         message: `[skills] ${trustDecision.violation.message}`,
@@ -553,9 +513,7 @@ export async function prepareInstallerArtifacts(
     };
   }
 
-  const stagingDir = fs.mkdtempSync(
-    path.join(os.tmpdir(), "skillspp-installer-stage-"),
-  );
+  const stagingDir = fs.mkdtempSync(path.join(os.tmpdir(), "skillspp-installer-stage-"));
   const preparedDependencies: PreparedDependency[] = [];
   const seenTargetPaths = new Set<string>();
 
@@ -566,9 +524,7 @@ export async function prepareInstallerArtifacts(
 
       const normalizedTarget = targetPath.replace(/\\/g, "/");
       if (seenTargetPaths.has(normalizedTarget)) {
-        throw new Error(
-          `Dependency[${i}] duplicate target path: ${targetPath}`,
-        );
+        throw new Error(`Dependency[${i}] duplicate target path: ${targetPath}`);
       }
       seenTargetPaths.add(normalizedTarget);
 
@@ -607,9 +563,7 @@ export async function prepareInstallerArtifacts(
   }
 }
 
-export function cleanupPreparedInstallerArtifacts(
-  prepared: PreparedInstallerArtifacts,
-): void {
+export function cleanupPreparedInstallerArtifacts(prepared: PreparedInstallerArtifacts): void {
   if (prepared.stagingDir) {
     fs.rmSync(prepared.stagingDir, { recursive: true, force: true });
   }
@@ -627,12 +581,7 @@ export async function applyInstallerArtifacts(
     return;
   }
 
-  runHookPhase(
-    "pre-install",
-    prepared.preInstall,
-    installedSkillDir,
-    prepared.events,
-  );
+  runHookPhase("pre-install", prepared.preInstall, installedSkillDir, prepared.events);
 
   for (const dep of prepared.preparedDependencies) {
     const destinationPath = ensureInsideRoot(installedSkillDir, dep.targetPath);
@@ -687,12 +636,7 @@ export async function applyInstallerArtifacts(
     });
   }
 
-  runHookPhase(
-    "post-install",
-    prepared.postInstall,
-    installedSkillDir,
-    prepared.events,
-  );
+  runHookPhase("post-install", prepared.postInstall, installedSkillDir, prepared.events);
 }
 
 export async function runSkillInstaller(
@@ -700,11 +644,7 @@ export async function runSkillInstaller(
   sourceCwd: string,
   options: SkillInstallerRuntimeOptions = {},
 ): Promise<void> {
-  const prepared = await prepareInstallerArtifacts(
-    skillDir,
-    sourceCwd,
-    options,
-  );
+  const prepared = await prepareInstallerArtifacts(skillDir, sourceCwd, options);
   try {
     await applyInstallerArtifacts(skillDir, prepared);
   } finally {

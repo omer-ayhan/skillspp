@@ -18,9 +18,7 @@ type DownloadBudget = {
   remaining: number;
 };
 
-type NormalizedOptions = Required<
-  Omit<WellKnownFetchOptions, "allowHosts" | "denyHosts">
-> & {
+type NormalizedOptions = Required<Omit<WellKnownFetchOptions, "allowHosts" | "denyHosts">> & {
   allowHosts: string[];
   denyHosts: string[];
 };
@@ -51,11 +49,7 @@ const DEFAULT_OPTIONS: Omit<NormalizedOptions, "allowHosts" | "denyHosts"> = {
   maxSkillFileBytes: 512 * 1024,
 };
 
-const EXCLUDED_HOSTS = new Set([
-  "github.com",
-  "gitlab.com",
-  "raw.githubusercontent.com",
-]);
+const EXCLUDED_HOSTS = new Set(["github.com", "gitlab.com", "raw.githubusercontent.com"]);
 
 const SKILL_CONFIG: ResourceConfig<RemoteSkill> = {
   kind: "skills",
@@ -90,8 +84,7 @@ const PLUGIN_CONFIG: ResourceConfig<RemotePlugin> = {
   indexPath: "/.well-known/plugins/index.json",
   entryLabel: "plugin",
   requireDescription: false,
-  missingManifestMessage: (name) =>
-    `Well-known plugin '${name}' is missing plugin.json`,
+  missingManifestMessage: (name) => `Well-known plugin '${name}' is missing plugin.json`,
   hasRequiredManifest(filePath) {
     return filePath.split("/").at(-1)?.toLowerCase() === "plugin.json";
   },
@@ -135,17 +128,11 @@ export class SecureWellKnownProvider implements WellKnownProvider {
       : `wellknown/${parsed.hostname}`;
   }
 
-  async fetchAllSkills(
-    url: string,
-    options: WellKnownFetchOptions = {},
-  ): Promise<RemoteSkill[]> {
+  async fetchAllSkills(url: string, options: WellKnownFetchOptions = {}): Promise<RemoteSkill[]> {
     return this.fetchAllResources(url, options, SKILL_CONFIG);
   }
 
-  async fetchAllPlugins(
-    url: string,
-    options: WellKnownFetchOptions = {},
-  ): Promise<RemotePlugin[]> {
+  async fetchAllPlugins(url: string, options: WellKnownFetchOptions = {}): Promise<RemotePlugin[]> {
     return this.fetchAllResources(url, options, PLUGIN_CONFIG);
   }
 
@@ -163,12 +150,7 @@ export class SecureWellKnownProvider implements WellKnownProvider {
 
     await this.assertHostAllowed(parsed.hostname, normalized);
 
-    const { index, resolvedBase } = await this.fetchIndex(
-      parsed,
-      normalized,
-      budget,
-      config,
-    );
+    const { index, resolvedBase } = await this.fetchIndex(parsed, normalized, budget, config);
 
     const resources: TResult[] = [];
     for (const entry of index) {
@@ -188,14 +170,11 @@ export class SecureWellKnownProvider implements WellKnownProvider {
       denyHosts: (options.denyHosts || [])
         .map((value) => value.trim().toLowerCase())
         .filter(Boolean),
-      maxDownloadBytes:
-        options.maxDownloadBytes ?? DEFAULT_OPTIONS.maxDownloadBytes,
+      maxDownloadBytes: options.maxDownloadBytes ?? DEFAULT_OPTIONS.maxDownloadBytes,
       timeoutMs: options.timeoutMs ?? DEFAULT_OPTIONS.timeoutMs,
       maxRedirects: options.maxRedirects ?? DEFAULT_OPTIONS.maxRedirects,
-      maxFilesPerSkill:
-        options.maxFilesPerSkill ?? DEFAULT_OPTIONS.maxFilesPerSkill,
-      maxSkillFileBytes:
-        options.maxSkillFileBytes ?? DEFAULT_OPTIONS.maxSkillFileBytes,
+      maxFilesPerSkill: options.maxFilesPerSkill ?? DEFAULT_OPTIONS.maxFilesPerSkill,
+      maxSkillFileBytes: options.maxSkillFileBytes ?? DEFAULT_OPTIONS.maxSkillFileBytes,
     };
   }
 
@@ -217,20 +196,14 @@ export class SecureWellKnownProvider implements WellKnownProvider {
           budget,
         );
         const parsed = JSON.parse(jsonText) as unknown;
-        const validated = this.validateIndex(
-          parsed,
-          options.maxFilesPerSkill,
-          config,
-        );
+        const validated = this.validateIndex(parsed, options.maxFilesPerSkill, config);
         return { index: validated, resolvedBase: base };
       } catch {
         continue;
       }
     }
 
-    throw new Error(
-      `No valid ${config.displayLabel} index found at ${config.indexPath}`,
-    );
+    throw new Error(`No valid ${config.displayLabel} index found at ${config.indexPath}`);
   }
 
   private buildBaseCandidates(parsed: URL, indexPath: string): string[] {
@@ -270,9 +243,7 @@ export class SecureWellKnownProvider implements WellKnownProvider {
     const data = raw as Record<string, unknown>;
     const rows = data[config.kind];
     if (!Array.isArray(rows)) {
-      throw new Error(
-        `Invalid well-known index: '${config.kind}' must be an array`,
-      );
+      throw new Error(`Invalid well-known index: '${config.kind}' must be an array`);
     }
 
     return rows.map((item, idx) => {
@@ -281,21 +252,14 @@ export class SecureWellKnownProvider implements WellKnownProvider {
       }
       const row = item as Record<string, unknown>;
       const name = String(row.name || "").trim();
-      const description =
-        typeof row.description === "string" ? row.description.trim() : undefined;
-      const files = Array.isArray(row.files)
-        ? row.files.map((value) => String(value))
-        : [];
+      const description = typeof row.description === "string" ? row.description.trim() : undefined;
+      const files = Array.isArray(row.files) ? row.files.map((value) => String(value)) : [];
 
       if (!name || files.length === 0) {
-        throw new Error(
-          `Invalid well-known index entry[${idx}]: missing required fields`,
-        );
+        throw new Error(`Invalid well-known index entry[${idx}]: missing required fields`);
       }
       if (config.requireDescription && !description) {
-        throw new Error(
-          `Invalid well-known index entry[${idx}]: missing required fields`,
-        );
+        throw new Error(`Invalid well-known index entry[${idx}]: missing required fields`);
       }
       config.validateName?.(name);
       if (files.length > maxFilesPerSkill) {
@@ -345,9 +309,7 @@ export class SecureWellKnownProvider implements WellKnownProvider {
         budget,
       );
       if (text.includes("\u0000")) {
-        throw new Error(
-          `Binary content is not allowed in well-known file: ${filePath}`,
-        );
+        throw new Error(`Binary content is not allowed in well-known file: ${filePath}`);
       }
       files.set(filePath, text);
     }
@@ -360,10 +322,7 @@ export class SecureWellKnownProvider implements WellKnownProvider {
     });
   }
 
-  private pickPrimaryManifestPath(
-    filePaths: string[],
-    config: ResourceConfig<unknown>,
-  ): string {
+  private pickPrimaryManifestPath(filePaths: string[], config: ResourceConfig<unknown>): string {
     const manifests = filePaths
       .filter((filePath) => config.hasRequiredManifest(filePath))
       .sort((left, right) => {
@@ -425,9 +384,7 @@ export class SecureWellKnownProvider implements WellKnownProvider {
       }
 
       if (!response.ok) {
-        throw new Error(
-          `Failed to fetch ${currentUrl}: ${response.status} ${response.statusText}`,
-        );
+        throw new Error(`Failed to fetch ${currentUrl}: ${response.status} ${response.statusText}`);
       }
 
       const bytes = new Uint8Array(await response.arrayBuffer());
@@ -443,19 +400,13 @@ export class SecureWellKnownProvider implements WellKnownProvider {
     }
   }
 
-  private async assertHostAllowed(
-    hostname: string,
-    options: NormalizedOptions,
-  ): Promise<void> {
+  private async assertHostAllowed(hostname: string, options: NormalizedOptions): Promise<void> {
     const lowerHost = hostname.toLowerCase();
 
     if (options.denyHosts.includes(lowerHost)) {
       throw new Error(`Host '${hostname}' is explicitly denied`);
     }
-    if (
-      options.allowHosts.length > 0 &&
-      !options.allowHosts.includes(lowerHost)
-    ) {
+    if (options.allowHosts.length > 0 && !options.allowHosts.includes(lowerHost)) {
       throw new Error(`Host '${hostname}' is not in allowed host list`);
     }
     if (isLocalHostname(lowerHost)) {
@@ -470,11 +421,7 @@ export class SecureWellKnownProvider implements WellKnownProvider {
 }
 
 function isLocalHostname(hostname: string): boolean {
-  return (
-    hostname === "localhost" ||
-    hostname.endsWith(".localhost") ||
-    hostname.endsWith(".local")
-  );
+  return hostname === "localhost" || hostname.endsWith(".localhost") || hostname.endsWith(".local");
 }
 
 async function resolveHostIps(hostname: string): Promise<string[]> {

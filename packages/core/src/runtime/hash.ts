@@ -2,20 +2,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { createHash } from "node:crypto";
 
-const SKIP_DIRS = new Set([
-  ".git",
-  "node_modules",
-  "dist",
-  "build",
-  "__pycache__",
-]);
+const SKIP_DIRS = new Set([".git", "node_modules", "dist", "build", "__pycache__"]);
 const SKIP_FILES = new Set(["skillspp-lock.json", "skillspp-lock.yaml"]);
 
-function walkDir(
-  baseDir: string,
-  dir: string,
-  hash: ReturnType<typeof createHash>,
-): void {
+function walkDir(baseDir: string, dir: string, hash: ReturnType<typeof createHash>): void {
   const entries = fs
     .readdirSync(dir, { withFileTypes: true })
     .sort((a, b) => a.name.localeCompare(b.name));
@@ -56,9 +46,9 @@ async function walkDirAsync(
   dir: string,
   hash: ReturnType<typeof createHash>,
 ): Promise<void> {
-  const entries = (
-    await fs.promises.readdir(dir, { withFileTypes: true })
-  ).sort((a, b) => a.name.localeCompare(b.name));
+  const entries = (await fs.promises.readdir(dir, { withFileTypes: true })).sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
 
   for (const entry of entries) {
     await waitForNextTurn();

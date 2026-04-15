@@ -1,7 +1,4 @@
-import {
-  normalizeAgentSelectionInput,
-  type SelectionRow,
-} from "@skillspp/core/agents";
+import { normalizeAgentSelectionInput, type SelectionRow } from "@skillspp/core/agents";
 import type { AddOptions } from "@skillspp/core/contracts/runtime-types";
 import {
   runManySelectionStep,
@@ -39,9 +36,7 @@ type BuildBaseAddOptionsInput = {
   experimental?: boolean;
 };
 
-export function parseAddLockFormatValue(
-  value?: string,
-): AddOptions["lockFormat"] {
+export function parseAddLockFormatValue(value?: string): AddOptions["lockFormat"] {
   if (!value) {
     return undefined;
   }
@@ -55,16 +50,12 @@ export function buildBaseAddOptions(
   input: BuildBaseAddOptionsInput,
   presence: AddOptionPresence = {},
 ): AddOptions {
-  const maxDownloadBytes = input.maxDownloadBytes
-    ? Number(input.maxDownloadBytes)
-    : undefined;
+  const maxDownloadBytes = input.maxDownloadBytes ? Number(input.maxDownloadBytes) : undefined;
   if (
     typeof maxDownloadBytes === "number" &&
     (!Number.isFinite(maxDownloadBytes) || maxDownloadBytes <= 0)
   ) {
-    throw new Error(
-      `Invalid --max-download-bytes value: ${input.maxDownloadBytes}`,
-    );
+    throw new Error(`Invalid --max-download-bytes value: ${input.maxDownloadBytes}`);
   }
 
   const parsed: AddOptions = {

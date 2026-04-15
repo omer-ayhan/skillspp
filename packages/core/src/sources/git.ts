@@ -132,9 +132,7 @@ export function prepareSourceDir(parsed: GitLikeSource): {
   applyCheckoutRefSync(tmp, ref);
 
   const basePath =
-    parsed.type === "github" && parsed.subpath
-      ? path.join(tmp, parsed.subpath)
-      : tmp;
+    parsed.type === "github" && parsed.subpath ? path.join(tmp, parsed.subpath) : tmp;
   return {
     basePath,
     cleanup: () => {
@@ -161,9 +159,7 @@ export async function prepareSourceDirAsync(parsed: GitLikeSource): Promise<{
   await applyCheckoutRefAsync(tmp, ref);
 
   const basePath =
-    parsed.type === "github" && parsed.subpath
-      ? path.join(tmp, parsed.subpath)
-      : tmp;
+    parsed.type === "github" && parsed.subpath ? path.join(tmp, parsed.subpath) : tmp;
   return {
     basePath,
     cleanup: () => {
@@ -183,9 +179,7 @@ export function prepareSourceDirWithRef(
     return prepareSourceDir(parsed);
   }
   const effectiveParsed =
-    parsed.type === "github"
-      ? { ...parsed, ref: options.overrideRef || parsed.ref }
-      : parsed;
+    parsed.type === "github" ? { ...parsed, ref: options.overrideRef || parsed.ref } : parsed;
   const prepared = prepareSourceDir(effectiveParsed);
   if (parsed.type === "git" && options.overrideRef) {
     applyCheckoutRefSync(prepared.basePath, options.overrideRef);
@@ -204,9 +198,7 @@ export async function prepareSourceDirAsyncWithRef(
     return prepareSourceDirAsync(parsed);
   }
   const effectiveParsed =
-    parsed.type === "github"
-      ? { ...parsed, ref: options.overrideRef || parsed.ref }
-      : parsed;
+    parsed.type === "github" ? { ...parsed, ref: options.overrideRef || parsed.ref } : parsed;
   const prepared = await prepareSourceDirAsync(effectiveParsed);
   if (parsed.type === "git" && options.overrideRef) {
     await applyCheckoutRefAsync(prepared.basePath, options.overrideRef);

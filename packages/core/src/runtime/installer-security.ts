@@ -4,9 +4,7 @@ import path from "node:path";
 export type InstallerSecuritySeverity = "error" | "warning";
 
 export type InstallerSecurityViolation = {
-  rule:
-    | "installer-local-dependency-absolute-path"
-    | "installer-local-dependency-path-escape";
+  rule: "installer-local-dependency-absolute-path" | "installer-local-dependency-path-escape";
   message: string;
   severity: InstallerSecuritySeverity;
   blocking: boolean;
@@ -34,11 +32,7 @@ export type InstallerSecurityEvaluationResult =
 
 function isInsideRoot(rootDir: string, candidatePath: string): boolean {
   const relative = path.relative(rootDir, candidatePath);
-  return (
-    Boolean(relative) &&
-    !relative.startsWith("..") &&
-    !path.isAbsolute(relative)
-  );
+  return Boolean(relative) && !relative.startsWith("..") && !path.isAbsolute(relative);
 }
 
 function toEscapeViolation(source: string): InstallerSecurityViolation {
@@ -52,7 +46,7 @@ function toEscapeViolation(source: string): InstallerSecurityViolation {
 
 export function evaluateInstallerLocalDependency(
   input: InstallerSecurityEvaluationInput,
-  _options: InstallerSecurityEvaluationOptions = {}
+  _options: InstallerSecurityEvaluationOptions = {},
 ): InstallerSecurityEvaluationResult {
   if (path.isAbsolute(input.source)) {
     return {

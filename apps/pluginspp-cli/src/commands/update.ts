@@ -1,8 +1,5 @@
 import { Command } from "commander";
-import {
-  type LockfileFormat,
-  readResourceLockfile,
-} from "@skillspp/core/lockfile";
+import { type LockfileFormat, readResourceLockfile } from "@skillspp/core/lockfile";
 import type { SelectionRow } from "@skillspp/core/agents";
 import { parsePolicyMode } from "../policy-mode";
 import {
@@ -28,10 +25,7 @@ import {
   showLoader,
   sourceSection,
 } from "@skillspp/cli-shared/ui/screens";
-import {
-  formatDriftChips,
-  shortenHomePath,
-} from "@skillspp/cli-shared/ui/format";
+import { formatDriftChips, shortenHomePath } from "@skillspp/cli-shared/ui/format";
 
 export type UpdateOptions = {
   global?: boolean;
@@ -72,16 +66,12 @@ type UpdateAssessment = {
 };
 
 function toUpdateOptions(options: UpdateCommanderOptions): UpdateOptions {
-  const maxDownloadBytes = options.maxDownloadBytes
-    ? Number(options.maxDownloadBytes)
-    : undefined;
+  const maxDownloadBytes = options.maxDownloadBytes ? Number(options.maxDownloadBytes) : undefined;
   if (
     typeof maxDownloadBytes === "number" &&
     (!Number.isFinite(maxDownloadBytes) || maxDownloadBytes <= 0)
   ) {
-    throw new Error(
-      `Invalid --max-download-bytes value: ${options.maxDownloadBytes}`,
-    );
+    throw new Error(`Invalid --max-download-bytes value: ${options.maxDownloadBytes}`);
   }
 
   const lockFormat = options.lockFormat;
@@ -137,15 +127,8 @@ function buildUpdateRows(assessments: UpdateAssessment[]): SelectionRow[] {
   });
 }
 
-function renderUpdatePluginsClosedPanel(
-  rows: SelectionRow[],
-  selectedIds: string[],
-) {
-  return manySelectionClosedSection(
-    UPDATE_PLUGINS_SELECTION_VIEW,
-    rows,
-    selectedIds,
-  );
+function renderUpdatePluginsClosedPanel(rows: SelectionRow[], selectedIds: string[]) {
+  return manySelectionClosedSection(UPDATE_PLUGINS_SELECTION_VIEW, rows, selectedIds);
 }
 
 export function buildUpdateDriftSummaryLines(options: {
@@ -156,9 +139,7 @@ export function buildUpdateDriftSummaryLines(options: {
   colorEnabled?: boolean;
 }): string[] {
   return [
-    `${options.assessedCount} tracked plugin${
-      options.assessedCount === 1 ? "" : "s"
-    } checked`,
+    `${options.assessedCount} tracked plugin${options.assessedCount === 1 ? "" : "s"} checked`,
     `${options.requiresUpdateCount} plugin${
       options.requiresUpdateCount === 1 ? "" : "s"
     } require update`,
@@ -248,18 +229,12 @@ async function executeMigrateUpdate(options: {
   }
   hideLoader();
   await renderStaticScreen([
-    completedStepsSection([
-      `migrated ${options.pluginName}`,
-      "lockfile written",
-    ]),
+    completedStepsSection([`migrated ${options.pluginName}`, "lockfile written"]),
     linesSection(["Migration complete.", `Updated ${options.pluginName}.`]),
   ]);
 }
 
-async function executeUpdate(
-  options: UpdateOptions,
-  positionalPlugins?: string[],
-): Promise<void> {
+async function executeUpdate(options: UpdateOptions, positionalPlugins?: string[]): Promise<void> {
   const interactive = canUseInteractive(options.nonInteractive);
   const cwd = process.cwd();
   const mergedPlugins = mergePluginSelection(positionalPlugins, options.skill);
@@ -268,9 +243,7 @@ async function executeUpdate(
     skill: mergedPlugins,
   };
 
-  const requestedPlugins = (effectiveOptions.skill || []).filter(
-    (plugin) => plugin !== "*",
-  );
+  const requestedPlugins = (effectiveOptions.skill || []).filter((plugin) => plugin !== "*");
   if (effectiveOptions.migrate) {
     if (requestedPlugins.length !== 1) {
       throw new Error(
@@ -279,11 +252,7 @@ async function executeUpdate(
     }
   }
   if (requestedPlugins.length > 0) {
-    const lock = readResourceLockfile(
-      "plugin",
-      Boolean(effectiveOptions.global),
-      cwd,
-    );
+    const lock = readResourceLockfile("plugin", Boolean(effectiveOptions.global), cwd);
     const known = new Set(lock.entries.map((entry) => entry.skillName));
     const unknown = [...new Set(requestedPlugins)]
       .filter((plugin) => !known.has(plugin))
@@ -324,9 +293,7 @@ async function executeUpdate(
       );
     } catch (error) {
       hideLoader();
-      await renderStaticScreen([
-        failedStepsSection(["failed to assess drift"]),
-      ]);
+      await renderStaticScreen([failedStepsSection(["failed to assess drift"])]);
       throw error;
     }
     hideLoader();
@@ -337,14 +304,11 @@ async function executeUpdate(
         return false;
       }
       return assessment.drift.some(
-        (item) =>
-          item.kind === "changed-source" || item.kind === "local-modified",
+        (item) => item.kind === "changed-source" || item.kind === "local-modified",
       );
     });
     const migrateRequired = assessments
-      .filter((assessment) =>
-        assessment.drift.some((item) => item.kind === "migrate-required"),
-      )
+      .filter((assessment) => assessment.drift.some((item) => item.kind === "migrate-required"))
       .map((assessment) => assessment.entry.skillName)
       .sort((a, b) => a.localeCompare(b));
     let changedSourceCount = 0;
@@ -387,8 +351,7 @@ async function executeUpdate(
           panelSection({
             title: "Migration Required",
             lines: migrateRequired.map(
-              (pluginName) =>
-                `pluginspp update ${pluginName} --migrate <new-plugin-source>`,
+              (pluginName) => `pluginspp update ${pluginName} --migrate <new-plugin-source>`,
             ),
             style: "square",
             minWidth: 74,
@@ -407,8 +370,7 @@ async function executeUpdate(
       interactive,
       rows: candidateRows,
       selectedIds: candidateRows.map((row) => row.id),
-      shouldPrompt:
-        interactive && !effectiveOptions.skill && candidateRows.length > 1,
+      shouldPrompt: interactive && !effectiveOptions.skill && candidateRows.length > 1,
       prompt: {
         title: "Choose Plugins To Update",
         required: true,
@@ -417,8 +379,7 @@ async function executeUpdate(
         keyHints: UPDATE_PLUGINS_KEY_HINTS,
         view: UPDATE_PLUGINS_SELECTION_VIEW,
       },
-      renderClosed: (selectedIds) =>
-        renderUpdatePluginsClosedPanel(candidateRows, selectedIds),
+      renderClosed: (selectedIds) => renderUpdatePluginsClosedPanel(candidateRows, selectedIds),
     });
 
     const selectedSet = new Set(selectedPluginIds);
@@ -451,9 +412,7 @@ async function executeUpdate(
     ]);
 
     if (effectiveOptions.dryRun) {
-      await renderStaticScreen([
-        linesSection(["Dry-run mode: no changes applied."]),
-      ]);
+      await renderStaticScreen([linesSection(["Dry-run mode: no changes applied."])]);
       return;
     }
 
@@ -479,9 +438,7 @@ async function executeUpdate(
             if (label === "writing lockfile") {
               failedLabel = "failed to write lockfile";
             } else if (label.startsWith("updating ")) {
-              failedLabel = `failed to update ${label.slice(
-                "updating ".length,
-              )}`;
+              failedLabel = `failed to update ${label.slice("updating ".length)}`;
             } else {
               failedLabel = "failed to assess selected plugins";
             }
@@ -498,15 +455,10 @@ async function executeUpdate(
     await renderStaticScreen([
       completedStepsSection([
         "selected plugins assessed",
-        ...applied.updatedPluginNames.map(
-          (pluginName: string) => `updated ${pluginName}`,
-        ),
+        ...applied.updatedPluginNames.map((pluginName: string) => `updated ${pluginName}`),
         "lockfile written",
       ]),
-      linesSection([
-        "Update complete.",
-        `Updated ${applied.updatedPluginNames.length} plugins.`,
-      ]),
+      linesSection(["Update complete.", `Updated ${applied.updatedPluginNames.length} plugins.`]),
     ]);
   } finally {
     hideLoader();
@@ -515,10 +467,7 @@ async function executeUpdate(
 
 function configureUpdateCommand(
   command: Command,
-  action: (
-    plugins: string[] | undefined,
-    options: UpdateCommanderOptions,
-  ) => Promise<void>,
+  action: (plugins: string[] | undefined, options: UpdateCommanderOptions) => Promise<void>,
 ): Command {
   return command
     .description("Update drifted plugins")
@@ -537,18 +486,12 @@ function configureUpdateCommand(
     .action(action);
 }
 
-export function registerUpdateCommand(
-  program: Command,
-  ctx: CliCommandContext,
-): void {
+export function registerUpdateCommand(program: Command, ctx: CliCommandContext): void {
   configureUpdateCommand(
     program.command("update"),
     ctx.wrapAction(
       "update",
-      async (
-        plugins: string[] | undefined,
-        options: UpdateCommanderOptions,
-      ) => {
+      async (plugins: string[] | undefined, options: UpdateCommanderOptions) => {
         await executeUpdate(
           {
             ...toUpdateOptions(options),
@@ -562,11 +505,8 @@ export function registerUpdateCommand(
 }
 
 export async function runUpdate(args: string[]): Promise<void> {
-  const command = configureUpdateCommand(
-    new Command().name("update"),
-    async (plugins, options) => {
-      await executeUpdate(toUpdateOptions(options), plugins);
-    },
-  );
+  const command = configureUpdateCommand(new Command().name("update"), async (plugins, options) => {
+    await executeUpdate(toUpdateOptions(options), plugins);
+  });
   await parseStandaloneCommand(command, args);
 }
