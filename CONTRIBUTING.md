@@ -124,5 +124,5 @@ Release management uses semantic-release and GitHub Actions:
 - Merge `development` into `main` via promotion PR.
 - On merge to `main`, the release workflow runs semantic-release.
 - semantic-release publishes `skillspp` to npm and creates tag/GitHub release metadata from `main` without committing changelog/version files back to the branch.
-- Required repository secrets:
-  - `NPM_TOKEN`: npm publish token.
+- npm publishing uses npm trusted publishing from GitHub Actions, so `NPM_TOKEN` is not required for releases.
+- The npm trusted publisher must match this repository (`omer-ayhan/skillspp`) and the workflow filename (`release.yml`) exactly.

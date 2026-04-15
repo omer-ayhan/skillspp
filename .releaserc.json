@@ -1,5 +1,6 @@
 {
   "branches": ["main"],
+  "repositoryUrl": "https://github.com/omer-ayhan/skillspp.git",
   "tagFormat": "v${version}",
   "plugins": [
     [
