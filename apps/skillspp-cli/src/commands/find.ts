@@ -2,7 +2,7 @@ import { Command } from "commander";
 import {
   parseStandaloneCommand,
   type CliCommandContext,
-} from "../command-builder";
+} from "@skillspp/cli-shared/command-builder";
 import { runBackgroundTask } from "../runtime/background-runner";
 import {
   completedStepsSection,
@@ -14,8 +14,8 @@ import {
   renderStaticScreen,
   showLoader,
   sourceSection,
-} from "../ui/screens";
-import { shortenHomePath } from "../ui/format";
+} from "@skillspp/cli-shared/ui/screens";
+import { shortenHomePath } from "@skillspp/cli-shared/ui/format";
 
 export type FindOptions = {
   allowHost?: string[];

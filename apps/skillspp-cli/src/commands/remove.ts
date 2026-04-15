@@ -13,18 +13,18 @@ import {
   getAgentSkillsDir,
   normalizeAgentSelectionInput,
 } from "@skillspp/core/agents";
-import { canUseInteractive } from "../interactive";
+import { canUseInteractive } from "@skillspp/cli-shared/interactive";
 import {
   parseStandaloneCommand,
   type CliCommandContext,
-} from "../command-builder";
+} from "@skillspp/cli-shared/command-builder";
 import {
   type ManySelectionViewConfig,
   type SelectionKeyHint,
   runManySelectionStep,
   runOneSelectionStep,
   type SingleSelectionViewConfig,
-} from "../ui/selection-step";
+} from "@skillspp/cli-shared/ui/selection-step";
 import {
   completedStepsSection,
   failedStepsSection,
@@ -35,8 +35,8 @@ import {
   singleSelectionClosedSection,
   sourceSection,
   uninstallSummarySection,
-} from "../ui/screens";
-import { shortenHomePath } from "../ui/format";
+} from "@skillspp/cli-shared/ui/screens";
+import { shortenHomePath } from "@skillspp/cli-shared/ui/format";
 import type { SelectionRow } from "@skillspp/core/agents";
 
 type RemoveCommanderOptions = {
@@ -173,7 +173,12 @@ function renderRemoveUninstallSummaryBox(options: {
   skillNames: string[];
   agentDisplayNames: string[];
 }) {
-  return uninstallSummarySection(options);
+  return uninstallSummarySection({
+    globalInstall: options.globalInstall,
+    itemNames: options.skillNames,
+    itemLabel: "Skills",
+    agentDisplayNames: options.agentDisplayNames,
+  });
 }
 
 type InstallIndex = {

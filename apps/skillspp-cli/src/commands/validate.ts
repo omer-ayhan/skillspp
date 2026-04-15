@@ -27,7 +27,7 @@ import { parsePolicyMode } from "../policy-mode";
 import {
   parseStandaloneCommand,
   type CliCommandContext,
-} from "../command-builder";
+} from "@skillspp/cli-shared/command-builder";
 import { runBackgroundTask } from "../runtime/background-runner";
 import {
   completedStepsSection,
@@ -38,8 +38,8 @@ import {
   panelSection,
   renderStaticScreen,
   showLoader,
-} from "../ui/screens";
-import { bold, colorToken } from "../ui/colors";
+} from "@skillspp/cli-shared/ui/screens";
+import { bold, colorToken } from "@skillspp/cli-shared/ui/colors";
 
 type Severity = "error" | "warning";
 

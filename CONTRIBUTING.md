@@ -104,7 +104,11 @@ ci(release): publish CLI through semantic-release automation
 
 Use this branch strategy:
 
-- Open feature branches as `feature/*`, `fix/*`, or `chore/*`.
+- Open working branches using one of these prefixes:
+  - `feature/*` or `feat/*` for new features (for example, `feature/add-login-page`, `feat/add-login-page`).
+  - `bugfix/*` or `fix/*` for bug fixes (for example, `bugfix/fix-header-bug`, `fix/header-bug`).
+  - `hotfix/*` for urgent fixes (for example, `hotfix/security-patch`).
+  - `chore/*` for maintenance/non-feature work (for example, dependency or docs updates).
 - Target `development` for regular work.
 - Promote to `main` through a dedicated PR from `development`.
 

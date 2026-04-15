@@ -69,6 +69,58 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@20.19.37)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2)
 
+  apps/pluginspp-cli:
+    dependencies:
+      '@skillspp/cli-shared':
+        specifier: workspace:*
+        version: link:../../packages/cli-shared
+      commander:
+        specifier: ^14.0.3
+        version: 14.0.3
+      ink:
+        specifier: ^6.8.0
+        version: 6.8.0(@types/react@19.2.14)(react-devtools-core@7.0.1)(react@19.2.4)
+      picocolors:
+        specifier: ^1.1.1
+        version: 1.1.1
+      react:
+        specifier: ^19.1.1
+        version: 19.2.4
+    devDependencies:
+      '@skillspp/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@skillspp/platform-node':
+        specifier: workspace:*
+        version: link:../../packages/platform-node
+      '@types/node':
+        specifier: ^25.4.0
+        version: 25.5.0
+      '@types/react':
+        specifier: ^19.1.13
+        version: 19.2.14
+      '@vitest/coverage-v8':
+        specifier: ^3.2.4
+        version: 3.2.4(vitest@3.2.4(@types/node@25.5.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2))
+      esbuild:
+        specifier: ^0.25.10
+        version: 0.25.12
+      react-devtools-core:
+        specifier: ^7.0.1
+        version: 7.0.1
+      tsx:
+        specifier: ^4.20.6
+        version: 4.21.0
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.3
+      vite-tsconfig-paths:
+        specifier: ^5.1.4
+        version: 5.1.4(typescript@5.9.3)(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2))
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@25.5.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2)
+
   apps/skillspp-cli:
     dependencies:
       commander:
@@ -93,6 +145,9 @@ importers:
         specifier: ^3.25.76
         version: 3.25.76
     devDependencies:
+      '@skillspp/cli-shared':
+        specifier: workspace:*
+        version: link:../../packages/cli-shared
       '@skillspp/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -151,6 +206,43 @@ importers:
       tsx:
         specifier: ^4.20.6
         version: 4.21.0
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.3
+      vite-tsconfig-paths:
+        specifier: ^5.1.4
+        version: 5.1.4(typescript@5.9.3)(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2))
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@25.5.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2)
+
+  packages/cli-shared:
+    dependencies:
+      '@skillspp/core':
+        specifier: workspace:*
+        version: link:../core
+      '@skillspp/platform-node':
+        specifier: workspace:*
+        version: link:../platform-node
+      commander:
+        specifier: ^14.0.3
+        version: 14.0.3
+      ink:
+        specifier: ^6.8.0
+        version: 6.8.0(@types/react@19.2.14)(react-devtools-core@7.0.1)(react@19.2.4)
+      react:
+        specifier: ^19.1.1
+        version: 19.2.4
+    devDependencies:
+      '@types/node':
+        specifier: ^25.4.0
+        version: 25.5.0
+      '@types/react':
+        specifier: ^19.1.13
+        version: 19.2.14
+      '@vitest/coverage-v8':
+        specifier: ^3.2.4
+        version: 3.2.4(vitest@3.2.4(@types/node@25.5.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2))
       typescript:
         specifier: ^5.9.2
         version: 5.9.3

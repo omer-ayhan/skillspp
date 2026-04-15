@@ -59,6 +59,18 @@ export type UpdateMigrateTaskResult = {
   skillName: string;
 };
 
+export type PluginUpdateAssessTaskResult = {
+  assessments: SerializableSkillAssessment[];
+};
+
+export type PluginUpdateApplyTaskResult = {
+  updatedPluginNames: string[];
+};
+
+export type PluginUpdateMigrateTaskResult = {
+  pluginName: string;
+};
+
 export type ListDetectAgentsTaskResult = {
   agents: AgentType[];
 };
@@ -73,6 +85,15 @@ export type AddFetchOrDiscoverTaskResult = {
 
 export type AddInstallTaskResult = {
   installedSkillNames: string[];
+  agentCount: number;
+};
+
+export type PluginAddFetchOrDiscoverTaskResult = {
+  plugins: AddSourceSkill[];
+};
+
+export type PluginAddInstallTaskResult = {
+  installedPluginNames: string[];
   agentCount: number;
 };
 
@@ -112,6 +133,23 @@ export type BackgroundTaskRequestMap = {
     sourceInput: string;
     lockFormat: LockfileFormat;
   };
+  "plugin.update.assess": {
+    cwd: string;
+    options: UpdateOptions;
+  };
+  "plugin.update.apply": {
+    cwd: string;
+    options: UpdateOptions;
+    selectedPluginNames: string[];
+    lockFormat: LockfileFormat;
+  };
+  "plugin.update.migrate": {
+    cwd: string;
+    options: UpdateOptions;
+    pluginName: string;
+    sourceInput: string;
+    lockFormat: LockfileFormat;
+  };
   "list.detectAgents": {
     cwd: string;
     options: ListOptions;
@@ -131,6 +169,18 @@ export type BackgroundTaskRequestMap = {
     sourceInput: string;
     options: AddOptions;
     selectedSkillNames: string[];
+    agents: AgentType[];
+  };
+  "plugin.add.fetchOrDiscover": {
+    cwd: string;
+    sourceInput: string;
+    options: AddOptions;
+  };
+  "plugin.add.install": {
+    cwd: string;
+    sourceInput: string;
+    options: AddOptions;
+    selectedPluginNames: string[];
     agents: AgentType[];
   };
   "find.fetchInventory": {
@@ -153,10 +203,15 @@ export type BackgroundTaskResultMap = {
   "update.assess": UpdateAssessTaskResult;
   "update.apply": UpdateApplyTaskResult;
   "update.migrate": UpdateMigrateTaskResult;
+  "plugin.update.assess": PluginUpdateAssessTaskResult;
+  "plugin.update.apply": PluginUpdateApplyTaskResult;
+  "plugin.update.migrate": PluginUpdateMigrateTaskResult;
   "list.detectAgents": ListDetectAgentsTaskResult;
   "list.scanInventory": ListScanInventoryTaskResult;
   "add.fetchOrDiscover": AddFetchOrDiscoverTaskResult;
   "add.install": AddInstallTaskResult;
+  "plugin.add.fetchOrDiscover": PluginAddFetchOrDiscoverTaskResult;
+  "plugin.add.install": PluginAddInstallTaskResult;
   "find.fetchInventory": FindInventoryTaskResult;
   "validate.run": ValidateRunTaskResult;
   "test.blocking": TestBlockingTaskResult;
