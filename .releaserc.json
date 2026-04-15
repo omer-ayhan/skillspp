@@ -21,6 +21,11 @@
         "pkgRoot": "apps/skillspp-cli"
       }
     ],
-    "@semantic-release/github"
+    [
+      "@semantic-release/github",
+      {
+        "failCommentCondition": false
+      }
+    ]
   ]
 }
