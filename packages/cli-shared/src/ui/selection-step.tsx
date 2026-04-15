@@ -1,4 +1,3 @@
-<<<<<<<< HEAD:packages/cli-shared/src/ui/selection-step.tsx
 import React from "react";
 import { useMemo, useState } from "react";
 import { Box, Text, useInput } from "ink";
@@ -606,6 +605,3 @@ export async function runOneSelectionStep(
   await renderStaticScreen([options.renderClosed(selectedId)]);
   return selectedId;
 }
-========
-export * from "@skillspp/cli-shared/ui/selection-step";
->>>>>>>> 23a2c2a (feat(cli): add shared ui package (#20)):apps/skillspp-cli/src/ui/selection-step.tsx
